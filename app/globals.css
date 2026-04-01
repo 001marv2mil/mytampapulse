@@ -1,0 +1,301 @@
+@import "tailwindcss";
+
+@theme {
+  --color-pulse-purple: #FF5A36;
+  --color-pulse-purple-hover: #E84E2B;
+  --color-pulse-orange: #FF5A36;
+  --color-pulse-orange-hover: #E84E2B;
+  --color-midnight: #1A2233;
+  --color-gold: #FFD700;
+  --color-charcoal: #222222;
+  --color-light-gray: #F7F8FA;
+  --color-dark-bg: #0A0A0A;
+  --color-dark-surface: #141414;
+  --color-dark-card: #1A1A1A;
+  --color-dark-border: #2A2A2A;
+  --color-muted: #888888;
+
+  --font-heading: "Montserrat", sans-serif;
+  --font-body: "Inter", sans-serif;
+}
+
+/* Base styles */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: #FFFBF7;
+  color: #111111;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-dark-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+
+/* Selection */
+::selection {
+  background: var(--color-pulse-purple);
+  color: white;
+}
+
+/* Glassmorphism card */
+.glass {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Fade-in animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s ease forwards;
+}
+
+.animate-delay-100 { animation-delay: 0.1s; }
+.animate-delay-200 { animation-delay: 0.2s; }
+.animate-delay-300 { animation-delay: 0.3s; }
+.animate-delay-400 { animation-delay: 0.4s; }
+.animate-delay-500 { animation-delay: 0.5s; }
+
+/* Hide scrollbar for horizontal scroll */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Intersection observer reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Weather emoji animations */
+@keyframes weatherSunSpin {
+  0% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(10deg) scale(1.3); }
+  50% { transform: rotate(0deg) scale(1); }
+  75% { transform: rotate(-10deg) scale(1.3); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+@keyframes weatherFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-6px) scale(1.1); }
+}
+@keyframes weatherRain {
+  0%, 100% { transform: translateY(0); }
+  20% { transform: translateY(-4px); }
+  40% { transform: translateY(3px); }
+  60% { transform: translateY(-2px); }
+  80% { transform: translateY(1px); }
+}
+@keyframes weatherSway {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(12deg) scale(1.15); }
+  75% { transform: rotate(-12deg) scale(1.15); }
+}
+
+.weather-emoji {
+  display: inline-block;
+  font-size: 1.3em;
+  line-height: 1;
+}
+.weather-sun { animation: weatherSunSpin 2.5s ease-in-out infinite; }
+.weather-cloud { animation: weatherFloat 2s ease-in-out infinite; }
+.weather-rain { animation: weatherRain 1.5s ease-in-out infinite; }
+.weather-partly { animation: weatherSway 2s ease-in-out infinite; }
+
+/* ==========================================
+   Parallax Component
+   ========================================== */
+
+.parallax {
+  position: relative;
+  overflow: hidden;
+}
+
+.parallax__header {
+  height: 250vh;
+  position: relative;
+}
+
+.parallax__visuals {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+.parallax__black-line-overflow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-dark-bg);
+  z-index: 20;
+}
+
+.parallax__layers {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.parallax__layer-img {
+  position: absolute;
+  top: -20%;
+  left: 0;
+  width: 100%;
+  height: 140%;
+  object-fit: cover;
+  will-change: transform;
+}
+
+.parallax__layer-img:nth-child(1) {
+  opacity: 0.5;
+  filter: brightness(0.4) saturate(1.2);
+}
+
+.parallax__layer-img:nth-child(2) {
+  opacity: 0.4;
+  filter: brightness(0.35) saturate(1.1);
+}
+
+.parallax__layer-img:nth-child(3) {
+  opacity: 0.6;
+  filter: brightness(0.4) saturate(1.3);
+}
+
+.parallax__layer-title {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  text-align: center;
+  will-change: transform;
+}
+
+.parallax__title {
+  font-family: var(--font-heading);
+  font-size: clamp(6rem, 22vw, 20rem);
+  font-weight: 900;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  mix-blend-mode: overlay;
+  user-select: none;
+}
+
+.parallax__fade {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 45%;
+  background: linear-gradient(to bottom, transparent, var(--color-dark-bg));
+  z-index: 15;
+}
+
+.parallax__content {
+  position: relative;
+  padding: 6rem 2rem;
+  background: var(--color-dark-bg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ==========================================
+   Text Reveal Animation
+   ========================================== */
+
+.text-reveal-h1 {
+  font-size: 2.5rem;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  overflow: hidden;
+  font-family: var(--font-heading);
+  color: white;
+  line-height: 1.1;
+}
+
+.text-reveal-h1 span {
+  display: inline-block;
+  opacity: 0;
+  animation: textReveal 0.5s ease-in-out forwards;
+  animation-delay: calc(0.03s * var(--index));
+}
+
+.text-reveal-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 24px;
+  height: 40px;
+  padding: 0 20px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 9999px;
+  color: white;
+  background-color: var(--color-pulse-purple);
+  transition: background-color 0.2s, transform 0.2s;
+  cursor: pointer;
+  border: none;
+}
+
+.text-reveal-button:hover {
+  background-color: var(--color-pulse-purple-hover);
+  transform: scale(1.03);
+}
+
+@keyframes textReveal {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0%);
+    opacity: 1;
+  }
+}
