@@ -2,48 +2,79 @@
 
 import { useState, useEffect } from "react";
 
-// Rotating giveaways — one active at a time, cycles every 5 weeks.
-// Each runs Thu → Tue (5 days, aligns with newsletter send day).
-// To add a new one, just push to this array.
+// Rotating giveaways — each prize runs for 2 weeks before switching.
+// 5 prizes × 2 weeks = 10-week full cycle before it repeats.
+// Add future prizes by pushing to this array.
 const giveaways = [
   {
     prize: "AirPods Pro",
     emoji: "🎧",
     description: "1 winner. Share your link once to enter. We ship anywhere in the US.",
-    urgencyLabel: "This week only",
+    urgencyLabel: "2 weeks only",
+  },
+  {
+    prize: "AirPods Pro",
+    emoji: "🎧",
+    description: "1 winner. Share your link once to enter. We ship anywhere in the US.",
+    urgencyLabel: "Last week to enter",
   },
   {
     prize: "$100 Tampa Restaurant Gift Card",
     emoji: "🍽️",
     description: "1 winner gets $100 to spend at any Tampa restaurant of their choice. Your call.",
-    urgencyLabel: "5 days left",
+    urgencyLabel: "2 weeks only",
   },
   {
-    prize: "30 Min with Marv",
-    emoji: "🗺️",
-    description: "1 winner. We meet anywhere in Tampa. I'll show you spots that never made the newsletter.",
-    urgencyLabel: "Limited spots",
-  },
-  {
-    prize: "Tampa Pulse Merch Pack",
-    emoji: "🧢",
-    description: "Hat + tote + sticker sheet. The full kit. 1 referral = 1 entry.",
-    urgencyLabel: "This week only",
+    prize: "$100 Tampa Restaurant Gift Card",
+    emoji: "🍽️",
+    description: "1 winner gets $100 to spend at any Tampa restaurant of their choice. Your call.",
+    urgencyLabel: "Last week to enter",
   },
   {
     prize: "$75 Ybor Bar Tab",
     emoji: "🍺",
-    description: "1 winner gets a $75 bar tab to use at a Tampa Pulse partner bar in Ybor City.",
-    urgencyLabel: "5 days left",
+    description: "1 winner gets a $75 bar tab at a Tampa Pulse partner spot in Ybor City. Walk in and order.",
+    urgencyLabel: "2 weeks only",
+  },
+  {
+    prize: "$75 Ybor Bar Tab",
+    emoji: "🍺",
+    description: "1 winner gets a $75 bar tab at a Tampa Pulse partner spot in Ybor City. Walk in and order.",
+    urgencyLabel: "Last week to enter",
+  },
+  {
+    prize: "2 Busch Gardens Tampa Day Passes",
+    emoji: "🎢",
+    description: "1 winner gets 2 day passes to Busch Gardens Tampa. Bring someone. No expiration.",
+    urgencyLabel: "2 weeks only",
+  },
+  {
+    prize: "2 Busch Gardens Tampa Day Passes",
+    emoji: "🎢",
+    description: "1 winner gets 2 day passes to Busch Gardens Tampa. Bring someone. No expiration.",
+    urgencyLabel: "Last week to enter",
+  },
+  {
+    prize: "Concert Tickets in Tampa — Your Pick",
+    emoji: "🎶",
+    description: "1 winner gets 2 tickets to any Tampa Bay concert of their choice. You pick the show.",
+    urgencyLabel: "2 weeks only",
+  },
+  {
+    prize: "Concert Tickets in Tampa — Your Pick",
+    emoji: "🎶",
+    description: "1 winner gets 2 tickets to any Tampa Bay concert of their choice. You pick the show.",
+    urgencyLabel: "Last week to enter",
   },
 ];
 
 function getActiveGiveaway() {
-  // Rotate based on week number — changes every Thursday
+  // Each prize runs for 2 weeks. Flips every other Thursday.
   const now = new Date();
-  // Week number since a fixed epoch (Jan 2, 2026 = issue #1 Thursday)
-  const epoch = new Date("2026-01-01").getTime();
+  const epoch = new Date("2026-01-02").getTime(); // Issue #1 Thursday
   const weeksSinceEpoch = Math.floor((now.getTime() - epoch) / (7 * 24 * 60 * 60 * 1000));
+  // Integer divide by 1 gives week index; each giveaway entry = 1 week,
+  // and we have pairs in the array so it naturally runs 2 weeks per prize.
   const index = ((weeksSinceEpoch % giveaways.length) + giveaways.length) % giveaways.length;
   return giveaways[index];
 }
