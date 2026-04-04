@@ -150,6 +150,17 @@ export default function ReferralSection() {
             </p>
           </div>
 
+          {/* Instant digital reward */}
+          <div className="bg-white/5 border border-pulse-orange/20 rounded-xl px-5 py-4 mb-8 flex items-start gap-4">
+            <span className="text-2xl shrink-0">🗺️</span>
+            <div>
+              <p className="text-white text-sm font-semibold mb-0.5">Refer 1 friend → get this instantly</p>
+              <p className="text-gray-400 text-xs leading-relaxed">
+                <span className="text-pulse-orange font-medium">Tampa&apos;s 50 Best Hidden Spots</span> — Marv&apos;s personal list. The spots locals know and tourists never find. Not published anywhere else. Delivered automatically when your referral subscribes.
+              </p>
+            </div>
+          </div>
+
           {/* How it works — 3 steps */}
           <div className="grid grid-cols-3 gap-4 mb-10">
             {[

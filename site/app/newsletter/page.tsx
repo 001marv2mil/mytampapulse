@@ -12,6 +12,30 @@ export default function NewsletterDashboard() {
     <div className="min-h-screen bg-[#FFFBF7] pt-28 pb-24 px-6">
       <div className="max-w-5xl mx-auto">
 
+        {/* Milestone Giveaway Banner */}
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="mb-10">
+          <div className="bg-gray-900 rounded-2xl px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4 border border-white/5">
+            <div className="flex items-center gap-4">
+              <span className="text-3xl">💻</span>
+              <div>
+                <p className="text-white font-heading font-bold text-base leading-tight">
+                  When we hit 5,000 subscribers — we&apos;re giving away a MacBook Air.
+                </p>
+                <p className="text-white/40 text-xs mt-0.5">
+                  Every subscriber is automatically entered. Share to get closer.
+                </p>
+              </div>
+            </div>
+            <div className="shrink-0 text-right">
+              <div className="text-pulse-orange font-heading font-bold text-2xl leading-none">1,000</div>
+              <div className="text-white/30 text-xs">of 5,000 subscribers</div>
+              <div className="mt-2 h-1.5 w-32 bg-white/10 rounded-full overflow-hidden">
+                <div className="h-full bg-pulse-orange rounded-full" style={{ width: "20%" }} />
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="mb-12">
           <div className="inline-flex items-center gap-2 bg-orange-50 border border-orange-200 rounded-full px-4 py-1.5 mb-4">

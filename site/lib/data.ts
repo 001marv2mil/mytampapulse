@@ -323,29 +323,17 @@ export const hiddenGems: HiddenGem[] = [
 
 export const archiveIssues: NewsletterIssue[] = [
   // #13: Cuban Sandwich Festival + Sugar Sand Festival
-  { id: "i0", number: 13, date: "Mar 27, 2026", title: "World Record Cubans & Sand Castles", image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&q=80", eventCount: 14 },
-  // #12: NCAA March Madness at Benchmark Arena + DroneArt
-  { id: "i1", number: 12, date: "Mar 20, 2026", title: "March Madness Comes to Tampa", image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&q=80", eventCount: 11 },
-  // #11: St. Patrick's Day, River O' Green, Reggae Rise Up
-  { id: "i2", number: 11, date: "Mar 13, 2026", title: "St. Patrick's Week Takeover", image: "https://images.unsplash.com/photo-1551918120-9739cb430c6d?w=800&q=80", eventCount: 13 },
-  // #10: Strawberry Festival + Spring Training baseball
-  { id: "i3", number: 10, date: "Mar 6, 2026", title: "Strawberry Fields & Spring Training", image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=800&q=80", eventCount: 12 },
-  // #9: Barry Manilow farewell, Gasparilla Arts, IndyCar Grand Prix
-  { id: "i4", number: 9, date: "Feb 27, 2026", title: "Barry's Last Bow & Art on the River", image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80", eventCount: 10 },
-  // #8: Cigar City Tattoo Fest, Gasparilla Distance Classic, Fiesta Day
-  { id: "i5", number: 8, date: "Feb 20, 2026", title: "Ink, Runs & Spring Training", image: "https://images.unsplash.com/photo-1598520106830-8c45c2035460?w=800&q=80", eventCount: 12 },
-  // #7: Valentine's Day, Knight Parade in Ybor, Lunar Lantern Fest
-  { id: "i6", number: 7, date: "Feb 13, 2026", title: "Valentine's in Ybor", image: "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=800&q=80", eventCount: 9 },
-  // #6: Super Bowl LX watch parties, Florida State Fair, MOSI
-  { id: "i7", number: 6, date: "Feb 6, 2026", title: "Super Bowl Snacks & State Fair Vibes", image: "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=800&q=80", eventCount: 11 },
-  // #5: Coldest Gasparilla, Kings of Leon, pirates in the cold
-  { id: "i8", number: 5, date: "Jan 30, 2026", title: "The Coldest Gasparilla Ever", image: "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=800&q=80", eventCount: 13 },
-  // #4: Children's Gasparilla, Bookends Fantasy Fair, pre-Gasparilla buzz
-  { id: "i9", number: 4, date: "Jan 23, 2026", title: "Gasparilla Season Begins", image: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&q=80", eventCount: 10 },
-  // #3: MLK Week, Bull Bash, cold snap, Village People at Busch Gardens
-  { id: "i10", number: 3, date: "Jan 16, 2026", title: "Bundle Up, Tampa", image: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&q=80", eventCount: 8 },
-  // #2: Winter Jam, cold snap 82 to 37, Renee Fleming at Straz
-  { id: "i11", number: 2, date: "Jan 9, 2026", title: "Cold Snap & Hot Takes", image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80", eventCount: 9 },
-  // #1: New Year, Ringling Bros, Crowbar final year, Winter Village
-  { id: "i12", number: 1, date: "Jan 2, 2026", title: "New Year, New Moves", image: "https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=800&q=80", eventCount: 7 },
+  { id: "i0", number: 13, date: "Mar 27, 2026", title: "They're attempting a 370-foot Cuban sandwich. This is real life", image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&q=80", eventCount: 14 },
+  { id: "i1", number: 12, date: "Mar 20, 2026", title: "March Madness is in Tampa. Here's what else is happening this week", image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&q=80", eventCount: 11 },
+  { id: "i2", number: 11, date: "Mar 13, 2026", title: "St. Patrick's week in Tampa is unhinged. Here's the full breakdown", image: "https://images.unsplash.com/photo-1551918120-9739cb430c6d?w=800&q=80", eventCount: 13 },
+  { id: "i3", number: 10, date: "Mar 6, 2026", title: "Strawberry season is here. Plus: spring training and why you should go", image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=800&q=80", eventCount: 12 },
+  { id: "i4", number: 9, date: "Feb 27, 2026", title: "Barry Manilow's last tour, IndyCar on the streets, and art you can actually afford", image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80", eventCount: 10 },
+  { id: "i5", number: 8, date: "Feb 20, 2026", title: "Tattoos, a 5K, and spring training — Tampa doing the most this weekend", image: "https://images.unsplash.com/photo-1598520106830-8c45c2035460?w=800&q=80", eventCount: 12 },
+  { id: "i6", number: 7, date: "Feb 13, 2026", title: "Valentine's in Ybor hits different. Here's your plan", image: "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=800&q=80", eventCount: 9 },
+  { id: "i7", number: 6, date: "Feb 6, 2026", title: "Super Bowl week in Tampa. Plus: State Fair things you'll actually want to eat", image: "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=800&q=80", eventCount: 11 },
+  { id: "i8", number: 5, date: "Jan 30, 2026", title: "Pirates in puffer jackets. The coldest Gasparilla on record", image: "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=800&q=80", eventCount: 13 },
+  { id: "i9", number: 4, date: "Jan 23, 2026", title: "Gasparilla is coming. Here's how to not be the tourist", image: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&q=80", eventCount: 10 },
+  { id: "i10", number: 3, date: "Jan 16, 2026", title: "It's cold. Tampa is not handling it. Here's where to go anyway", image: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&q=80", eventCount: 8 },
+  { id: "i11", number: 2, date: "Jan 9, 2026", title: "Tampa went from 82° to 37° in 4 days. Here's what's still worth going to", image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80", eventCount: 9 },
+  { id: "i12", number: 1, date: "Jan 2, 2026", title: "The bar nobody's talking about yet (and 6 other things to do this week)", image: "https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=800&q=80", eventCount: 7 },
 ];

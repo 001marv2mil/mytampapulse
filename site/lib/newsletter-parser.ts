@@ -341,19 +341,19 @@ function getIssueTitleFromData(issueNumber: number): string {
   // Import from the data file to get the title
   // Since this is a server-side function, we read the data file
   const titles: Record<number, string> = {
-    1: "New Year, New Moves",
-    2: "Cold Snap & Hot Takes",
-    3: "Bundle Up, Tampa",
-    4: "Gasparilla Season Begins",
-    5: "The Coldest Gasparilla Ever",
-    6: "Super Bowl Snacks & State Fair Vibes",
-    7: "Valentine's in Ybor",
-    8: "Ink, Runs & Spring Training",
-    9: "Barry's Last Bow & Art on the River",
-    10: "Strawberry Fields & Spring Training",
-    11: "St. Patrick's Week Takeover",
-    12: "March Madness Comes to Tampa",
-    13: "World Record Cubans & Sand Castles",
+    1:  "The bar nobody's talking about yet (and 6 other things to do this week)",
+    2:  "Tampa went from 82° to 37° in 4 days. Here's what's still worth going to",
+    3:  "It's cold. Tampa is not handling it. Here's where to go anyway",
+    4:  "Gasparilla is coming. Here's how to not be the tourist",
+    5:  "Pirates in puffer jackets. The coldest Gasparilla on record",
+    6:  "Super Bowl week in Tampa. Plus: State Fair things you'll actually want to eat",
+    7:  "Valentine's in Ybor hits different. Here's your plan",
+    8:  "Tattoos, a 5K, and spring training — Tampa doing the most this weekend",
+    9:  "Barry Manilow's last tour, IndyCar on the streets, and art you can actually afford",
+    10: "Strawberry season is here. Plus: spring training and why you should go",
+    11: "St. Patrick's week in Tampa is unhinged. Here's the full breakdown",
+    12: "March Madness is in Tampa. Here's what else is happening this week",
+    13: "They're attempting a 370-foot Cuban sandwich. This is real life",
   };
   return titles[issueNumber] || `Issue #${issueNumber}`;
 }
