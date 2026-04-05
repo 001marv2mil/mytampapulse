@@ -1,0 +1,9 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "next build",
+  "outputDirectory": ".next",
+  "crons": [{
+    "path": "/api/send-newsletter",
+    "schedule": "0 8 * * 4"
+  }]
+}
