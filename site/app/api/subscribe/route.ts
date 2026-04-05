@@ -9,7 +9,7 @@ const supabase = createClient(
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const LEAD_MAGNET_URL = "https://airtable.com/YOUR_HIDDEN_GEMS_LINK"; // replace after Airtable setup
+const LEAD_MAGNET_URL = "https://airtable.com/appcopVasMCFEy9tc/shrLEgV1I5DFXLwMD";
 
 export async function POST(req: NextRequest) {
   try {
