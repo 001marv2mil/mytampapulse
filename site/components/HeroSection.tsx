@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
@@ -9,8 +9,14 @@ const CATEGORIES = ["Events", "Food", "Nightlife", "Hidden Gems", "Rooftops", "B
 export default function HeroSection() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
-
   const [error, setError] = useState("");
+  const [ref, setRef] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const refParam = params.get("ref");
+    if (refParam) setRef(refParam);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,7 +26,7 @@ export default function HeroSection() {
       const res = await fetch("/api/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, ref }),
       });
       if (!res.ok) throw new Error();
       setSubmitted(true);

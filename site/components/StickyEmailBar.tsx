@@ -8,8 +8,13 @@ export default function StickyEmailBar() {
   const [dismissed, setDismissed] = useState(false);
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [ref, setRef] = useState<string | null>(null);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const refParam = params.get("ref");
+    if (refParam) setRef(refParam);
+
     const onScroll = () => {
       if (!dismissed && window.scrollY > window.innerHeight * 0.4) setVisible(true);
     };
@@ -24,7 +29,7 @@ export default function StickyEmailBar() {
       const res = await fetch("/api/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, ref }),
       });
       if (!res.ok) throw new Error();
       setSubmitted(true);
