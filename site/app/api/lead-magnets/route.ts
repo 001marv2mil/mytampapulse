@@ -1,0 +1,59 @@
+import { NextRequest, NextResponse } from "next/server";
+
+// Lead magnet metadata and generation
+export const leadMagnets = {
+  hidden_gems: {
+    id: "hidden_gems",
+    title: "Complete Tampa Hidden Gems Database",
+    description: "50+ verified hidden gems by neighborhood — bars, restaurants, spots nobody talks about",
+    format: "airtable",
+    shortUrl: "mytampapulse.com/gems",
+  },
+  event_calendar: {
+    id: "event_calendar",
+    title: "Complete Tampa Event Calendar — Next 60 Days",
+    description: "Every worth-your-time event in Tampa Bay, organized by date, neighborhood, and vibe",
+    format: "pdf",
+    shortUrl: "mytampapulse.com/events60",
+  },
+  neighborhood_guide: {
+    id: "neighborhood_guide",
+    title: "Tampa Neighborhoods Guide — Where to Actually Go",
+    description: "Ybor, SoHo, Channelside, Hyde Park + 15 more. What's there, where to eat, why it matters",
+    format: "pdf",
+    shortUrl: "mytampapulse.com/neighborhoods",
+  },
+  restaurant_db: {
+    id: "restaurant_db",
+    title: "Best Tampa Restaurants by Neighborhood & Vibe",
+    description: "75+ restaurants with photos, vibes, price range — organized by neighborhood and cuisine",
+    format: "airtable",
+    shortUrl: "mytampapulse.com/restaurants",
+  },
+  first_timer: {
+    id: "first_timer",
+    title: "Tampa First-Timer's Checklist — 50 Things Worth Your Time",
+    description: "New to Tampa? Here's everything locals actually do. Events, spots, neighborhoods, food",
+    format: "pdf",
+    shortUrl: "mytampapulse.com/first-timer",
+  },
+  date_night: {
+    id: "date_night",
+    title: "25 Best Date Night Spots in Tampa (By Neighborhood)",
+    description: "Rooftop bars, hidden restaurants, quiet cocktail spots. What actually works",
+    format: "airtable",
+    shortUrl: "mytampapulse.com/dates",
+  },
+};
+
+export async function GET(req: NextRequest) {
+  return NextResponse.json({
+    available: Object.values(leadMagnets).map((mg) => ({
+      id: mg.id,
+      title: mg.title,
+      description: mg.description,
+      format: mg.format,
+      shortUrl: mg.shortUrl,
+    })),
+  });
+}
