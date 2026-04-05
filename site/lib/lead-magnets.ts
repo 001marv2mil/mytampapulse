@@ -12,6 +12,7 @@ export const leadMagnets = {
     description: "Every worth-your-time event in Tampa Bay, organized by date, neighborhood, and vibe",
     format: "pdf",
     shortUrl: "mytampapulse.com/events60",
+    url: "/events-guide.pdf",
   },
   neighborhood_guide: {
     id: "neighborhood_guide",
@@ -19,6 +20,7 @@ export const leadMagnets = {
     description: "Ybor, SoHo, Channelside, Hyde Park + 15 more. What's there, where to eat, why it matters",
     format: "pdf",
     shortUrl: "mytampapulse.com/neighborhoods",
+    url: "/neighborhoods.pdf",
   },
   restaurant_db: {
     id: "restaurant_db",
@@ -33,6 +35,7 @@ export const leadMagnets = {
     description: "New to Tampa? Here's everything locals actually do. Events, spots, neighborhoods, food",
     format: "pdf",
     shortUrl: "mytampapulse.com/first-timer",
+    url: "/first-timer.pdf",
   },
   date_night: {
     id: "date_night",
