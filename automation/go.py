@@ -13,104 +13,173 @@ OUT = Path('CAROUSEL_READY_TO_POST')
 OUT.mkdir(exist_ok=True)
 for old in OUT.glob('*.png'): old.unlink()
 
-# Rotating content — picks one set per run
+# Each slide has its own photo query so images match the content
 POSTS = [
     {
-        'query':   'tampa waterfront skyline aerial',
         'slides': [
             {
-                'headline': 'TAMPA RIVERWALK IS ONE OF THE BEST IN THE U.S.',
+                'headline': 'TAMPA RIVERWALK IS ONE OF THE BEST RIVERWALKS IN THE U.S.',
                 'body':     'The Tampa Riverwalk stretches 3 miles of waterfront — bars, parks, and sunset views the whole way.',
+                'query':    'city waterfront riverwalk people walking sunset',
             },
             {
-                'headline': '3 MILES OF WATERFRONT MOST LOCALS HAVEN\'T FULLY EXPLORED',
-                'body':     'Free to walk. Packed with spots. Save this and go this weekend.',
+                'headline': '3 MILES OF WATERFRONT. BARS, PARKS, AND VIEWS THE WHOLE WAY.',
+                'body':     'Free to explore. Most locals still haven\'t seen all of it. Save this and go this weekend.',
+                'query':    'waterfront park outdoor people sunny city',
             },
             {
-                'headline': 'FOLLOW @THETAMPAPULSE FOR YOUR WEEKLY CHEAT CODE TO TAMPA',
-                'body':     'Every Thursday — events, food drops, hidden gems. Free.',
+                'headline': 'FOLLOW @THETAMPAPULSE — YOUR WEEKLY CHEAT CODE TO TAMPA',
+                'body':     'Every Thursday — events, food drops, hidden gems, and weekend plans. Free.',
+                'query':    'tampa bay florida waterfront skyline aerial',
             },
         ],
         'caption': "The Tampa Riverwalk is 3 miles of waterfront most locals still haven't fully explored.\n\nBars. Parks. Sunset views. All free.\n\nSave this and go this weekend.\n\nFollow @thetampapulse — your weekly cheat code to Tampa.\n\n#tampa #tampabay #riverwalk #tampaflorida #tampalife #TampaPulse #unlocktampabay",
     },
     {
-        'query':   'ybor city tampa night street historic',
         'slides': [
             {
                 'headline': 'YBOR CITY IS TAMPA\'S MOST UNDERRATED NEIGHBORHOOD',
-                'body':     'Historic bars, Cuban food, late nights, and rooftop views — all in one place.',
+                'body':     'Historic bars, Cuban food, late nights, and rooftop views — all in one square mile.',
+                'query':    'historic neighborhood night street bars neon lights',
             },
             {
-                'headline': 'HERE\'S WHAT MOST PEOPLE MISS WHEN THEY VISIT YBOR',
-                'body':     'Skip the tourist traps. These are the spots locals actually go to.',
+                'headline': 'CUBAN FOOD, CRAFT COCKTAILS, AND NIGHTLIFE — ALL IN ONE PLACE',
+                'body':     'This is the real Tampa experience most tourists completely miss.',
+                'query':    'cuban food restaurant colorful outdoor dining',
             },
             {
-                'headline': 'FOLLOW @THETAMPAPULSE FOR YOUR WEEKLY CHEAT CODE TO TAMPA',
-                'body':     'Every Thursday — events, food drops, hidden gems. Free.',
+                'headline': 'FOLLOW @THETAMPAPULSE — YOUR WEEKLY CHEAT CODE TO TAMPA',
+                'body':     'Every Thursday — events, food drops, hidden gems, and weekend plans. Free.',
+                'query':    'rooftop bar nightlife city skyline',
             },
         ],
-        'caption': "Ybor City isn't just a bar strip — it's Tampa's most historic neighborhood.\n\nCuban food. Craft cocktails. Rooftop bars. All in one square mile.\n\nSave this and plan your night.\n\nFollow @thetampapulse — your weekly cheat code to Tampa.\n\n#tampa #yborcity #tampabay #tampanightlife #tampalife #TampaPulse #tampaflorida",
+        'caption': "Ybor City isn't just a bar strip — it's Tampa's most historic neighborhood.\n\nCuban food. Craft cocktails. Rooftop bars. All in one place.\n\nSave this and plan your night.\n\nFollow @thetampapulse — your weekly cheat code to Tampa.\n\n#tampa #yborcity #tampabay #tampanightlife #tampalife #TampaPulse #tampaflorida",
     },
     {
-        'query':   'tampa bay waterfront restaurant outdoor dining sunset',
         'slides': [
             {
                 'headline': 'THE BEST WATERFRONT RESTAURANTS IN TAMPA BAY',
-                'body':     'Locals actually go to these. Views, food, and vibes — all in one.',
+                'body':     'Views, food, and vibes — all in one. These are the spots locals actually go to.',
+                'query':    'waterfront outdoor restaurant dining ocean view',
             },
             {
                 'headline': 'SAVE THIS FOR YOUR NEXT DATE NIGHT IN TAMPA',
-                'body':     'These spots book up fast. Now you know where to go.',
+                'body':     'These spots fill up fast on weekends. Now you know where to go.',
+                'query':    'romantic dinner restaurant couple candles outdoor',
             },
             {
-                'headline': 'FOLLOW @THETAMPAPULSE FOR YOUR WEEKLY CHEAT CODE TO TAMPA',
-                'body':     'Every Thursday — events, food drops, hidden gems. Free.',
+                'headline': 'FOLLOW @THETAMPAPULSE — YOUR WEEKLY CHEAT CODE TO TAMPA',
+                'body':     'Every Thursday — events, food drops, hidden gems, and weekend plans. Free.',
+                'query':    'sunset waterfront drinks cocktails outdoor bar',
             },
         ],
         'caption': "Tampa's best waterfront restaurants — views, food, and vibes all in one.\n\nSave this for your next date night or weekend plans.\n\nFollow @thetampapulse — your weekly cheat code to Tampa.\n\n#tampa #tampaeats #tampabay #tampafood #datenight #tamparestaurants #TampaPulse",
     },
     {
-        'query':   'hyde park tampa brunch outdoor people weekend',
         'slides': [
             {
                 'headline': 'HYDE PARK IS WHERE TAMPA LOCALS ACTUALLY SPEND THEIR WEEKENDS',
-                'body':     'Brunch spots, boutique shopping, tree-lined streets, great coffee.',
+                'body':     'Brunch spots, boutique shopping, tree-lined streets, and great coffee.',
+                'query':    'tree lined street outdoor brunch shopping boutique',
             },
             {
-                'headline': 'HERE\'S YOUR GAME PLAN FOR A PERFECT SATURDAY IN HYDE PARK',
-                'body':     'Morning coffee. Brunch. Shopping. Evening drinks. Save this.',
+                'headline': 'YOUR GAME PLAN FOR A PERFECT SATURDAY IN HYDE PARK',
+                'body':     'Morning coffee. Brunch. Shopping. Evening drinks. This is how locals do it.',
+                'query':    'outdoor brunch coffee morning people street cafe',
             },
             {
-                'headline': 'FOLLOW @THETAMPAPULSE FOR YOUR WEEKLY CHEAT CODE TO TAMPA',
-                'body':     'Every Thursday — events, food drops, hidden gems. Free.',
+                'headline': 'FOLLOW @THETAMPAPULSE — YOUR WEEKLY CHEAT CODE TO TAMPA',
+                'body':     'Every Thursday — events, food drops, hidden gems, and weekend plans. Free.',
+                'query':    'neighborhood park people weekend outdoor sunny',
             },
         ],
         'caption': "Hyde Park is where Tampa locals actually spend their weekends.\n\nBrunch spots. Boutique shopping. Tree-lined streets. Great coffee.\n\nSave this and go this Saturday.\n\nFollow @thetampapulse — your weekly cheat code to Tampa.\n\n#tampa #hydepark #tampabay #tampaflorida #brunch #tampalife #TampaPulse",
     },
     {
-        'query':   'clearwater beach florida sunset people sand',
         'slides': [
             {
                 'headline': 'CLEARWATER BEACH IS 30 MINUTES FROM TAMPA — AND IT\'S WORLD CLASS',
                 'body':     'Consistently ranked one of the best beaches in the United States.',
+                'query':    'white sand beach clear water tropical sunny people',
             },
             {
                 'headline': 'WHITE SAND. TURQUOISE WATER. SUNSETS THAT ACTUALLY HIT.',
-                'body':     'Plan your next weekend trip here. Save this post.',
+                'body':     'Plan your next weekend trip here. You won\'t regret it. Save this post.',
+                'query':    'beach sunset orange sky silhouette ocean waves',
             },
             {
-                'headline': 'FOLLOW @THETAMPAPULSE FOR YOUR WEEKLY CHEAT CODE TO TAMPA',
-                'body':     'Every Thursday — events, food drops, hidden gems. Free.',
+                'headline': 'FOLLOW @THETAMPAPULSE — YOUR WEEKLY CHEAT CODE TO TAMPA',
+                'body':     'Every Thursday — events, food drops, hidden gems, and weekend plans. Free.',
+                'query':    'florida gulf coast beach aerial turquoise water',
             },
         ],
         'caption': "Clearwater Beach is 30 minutes from Tampa and consistently ranked one of the best beaches in the U.S.\n\nWhite sand. Turquoise water. Sunsets that actually hit.\n\nSave this for your next weekend trip.\n\nFollow @thetampapulse — your weekly cheat code to Tampa Bay.\n\n#tampa #clearwaterbeach #tampabay #florida #beach #weekend #TampaPulse",
+    },
+    {
+        'slides': [
+            {
+                'headline': 'CHANNELSIDE IS TAMPA\'S FASTEST GROWING NEIGHBORHOOD',
+                'body':     'New restaurants, rooftop bars, waterfront views, and walkable streets.',
+                'query':    'modern urban neighborhood rooftop bar city waterfront',
+            },
+            {
+                'headline': 'NEW SPOTS OPENING EVERY MONTH — HERE\'S WHAT\'S WORTH YOUR TIME',
+                'body':     'The food scene here is moving fast. Save this before these spots get packed.',
+                'query':    'trendy restaurant bar city modern interior',
+            },
+            {
+                'headline': 'FOLLOW @THETAMPAPULSE — YOUR WEEKLY CHEAT CODE TO TAMPA',
+                'body':     'Every Thursday — events, food drops, hidden gems, and weekend plans. Free.',
+                'query':    'city skyline waterfront night lights urban',
+            },
+        ],
+        'caption': "Channelside is Tampa's fastest growing neighborhood — and it's moving fast.\n\nNew restaurants. Rooftop bars. Waterfront views.\n\nSave this before these spots get packed.\n\nFollow @thetampapulse — your weekly cheat code to Tampa.\n\n#tampa #channelside #tampabay #tampaflorida #tampalife #TampaPulse #newrestaurant",
+    },
+    {
+        'slides': [
+            {
+                'headline': 'THE BEST HAPPY HOURS IN TAMPA — RANKED BY LOCALS',
+                'body':     'Craft cocktails, oysters, and rooftop drinks. These are the spots worth your time.',
+                'query':    'happy hour cocktails bar friends outdoor rooftop',
+            },
+            {
+                'headline': '$5 DRINKS AND ROOFTOP VIEWS — THIS IS HOW TAMPA DOES HAPPY HOUR',
+                'body':     'Monday through Friday, 3-7PM. Save this for after work.',
+                'query':    'cocktail drinks bar sunset rooftop city view',
+            },
+            {
+                'headline': 'FOLLOW @THETAMPAPULSE — YOUR WEEKLY CHEAT CODE TO TAMPA',
+                'body':     'Every Thursday — events, food drops, hidden gems, and weekend plans. Free.',
+                'query':    'friends laughing drinks outdoor bar evening',
+            },
+        ],
+        'caption': "The best happy hours in Tampa — ranked by locals.\n\nCraft cocktails, oysters, and rooftop drinks.\n\nSave this for after work.\n\nFollow @thetampapulse — your weekly cheat code to Tampa.\n\n#tampa #happyhour #tampabay #tampanightlife #tampaeats #tampalife #TampaPulse",
+    },
+    {
+        'slides': [
+            {
+                'headline': 'SOHO IS TAMPA\'S MOST WALKABLE NEIGHBORHOOD — AND MOST LOCALS SLEEP ON IT',
+                'body':     'Restaurant row, brunch spots, late night bars, and boutique shops all on one street.',
+                'query':    'walkable city street restaurants bars night outdoor',
+            },
+            {
+                'headline': 'ONE STREET. 30+ RESTAURANTS. THIS IS SOUTH HOWARD AVE.',
+                'body':     'Locals call it SoHo. It\'s Tampa\'s best kept secret for eating and drinking.',
+                'query':    'outdoor patio restaurant friends dining evening',
+            },
+            {
+                'headline': 'FOLLOW @THETAMPAPULSE — YOUR WEEKLY CHEAT CODE TO TAMPA',
+                'body':     'Every Thursday — events, food drops, hidden gems, and weekend plans. Free.',
+                'query':    'neighborhood street night lights restaurants people',
+            },
+        ],
+        'caption': "SoHo is Tampa's most walkable neighborhood — and most locals sleep on it.\n\nRestaurant row, brunch spots, late night bars, and boutique shops all on one strip.\n\nSave this for your next night out.\n\nFollow @thetampapulse — your weekly cheat code to Tampa.\n\n#tampa #soho #tampabay #tampaflorida #tamparestaurants #tampalife #TampaPulse",
     },
 ]
 
 post = random.choice(POSTS)
 
 def ft(sz):
-    # Try bold/heavy fonts — Oswald Bold looks closest to Tampa Latest style
     for p in [
         '/usr/local/share/fonts/Oswald-Bold.ttf',
         '/usr/share/fonts/truetype/urw-base35/NimbusSans-Bold.otf',
@@ -160,7 +229,6 @@ def fitimg(img):
     return img.resize((W, H), Image.LANCZOS)
 
 def dark_overlay(img, start=0.48):
-    """Heavy black gradient bottom — matches Tampa Latest style."""
     ov = Image.new('RGBA', (W, H), (0,0,0,0))
     d = ImageDraw.Draw(ov)
     gt = int(H * start)
@@ -170,106 +238,99 @@ def dark_overlay(img, start=0.48):
         d.line([(0, y), (W, y)], fill=(0, 0, 0, a))
     return Image.alpha_composite(img, ov)
 
-def wrap_centered(text, font, max_width, draw):
-    """Wrap text to fit within max_width, return list of lines."""
-    words = text.split()
-    lines = []
-    current = ''
-    for word in words:
-        test = (current + ' ' + word).strip()
-        bb = font.getbbox(test)
-        if bb[2] - bb[0] <= max_width:
-            current = test
-        else:
-            if current:
-                lines.append(current)
-            current = word
-    if current:
-        lines.append(current)
-    return lines
-
 def draw_slide(photo, headline, body, slide_num):
     img = fitimg(photo.copy())
     img = dark_overlay(img)
     d = ImageDraw.Draw(img)
 
-    MARGIN = 48
-    MAX_W  = W - MARGIN * 2
-
-    # Small brand — top left
+    MARGIN  = 48
+    MAX_W   = W - MARGIN * 2
     f_brand = ft(30)
-    d.text((MARGIN, 48), 'TAMPA PULSE', font=f_brand, fill=(255, 255, 255, 190))
-
-    # Fonts
     f_head  = ft(100)
     f_body  = ft_regular(34)
     f_url   = ft(32)
 
-    # --- measure all elements bottom-up ---
-    head_lines  = wrap_centered(headline, f_head, MAX_W, d)
-    body_lines  = wrap_centered(body,     f_body, MAX_W, d)
+    d.text((MARGIN, 48), 'TAMPA PULSE', font=f_brand, fill=(255, 255, 255, 190))
+
+    head_lines = []
+    for part in headline.split('\n'):
+        words = part.split()
+        cur = ''
+        for w in words:
+            test = (cur + ' ' + w).strip()
+            if f_head.getbbox(test)[2] - f_head.getbbox(test)[0] <= MAX_W:
+                cur = test
+            else:
+                if cur: head_lines.append(cur)
+                cur = w
+        if cur: head_lines.append(cur)
+
+    body_lines = []
+    words = body.split()
+    cur = ''
+    for w in words:
+        test = (cur + ' ' + w).strip()
+        if f_body.getbbox(test)[2] - f_body.getbbox(test)[0] <= MAX_W:
+            cur = test
+        else:
+            if cur: body_lines.append(cur)
+            cur = w
+    if cur: body_lines.append(cur)
 
     LINE_H_HEAD = 108
     LINE_H_BODY = 44
     DIVIDER_H   = 6
-    GAP_DIV     = 18   # gap above/below divider
+    GAP         = 18
     URL_H       = 40
     BOTTOM_PAD  = 52
 
-    total_h = (
-        len(head_lines) * LINE_H_HEAD
-        + GAP_DIV + DIVIDER_H + GAP_DIV
-        + len(body_lines) * LINE_H_BODY
-        + 28
-        + URL_H
-        + BOTTOM_PAD
-    )
+    total_h = (len(head_lines) * LINE_H_HEAD + GAP + DIVIDER_H + GAP
+               + len(body_lines) * LINE_H_BODY + 28 + URL_H + BOTTOM_PAD)
 
     y = H - total_h
 
-    # Draw headline — centered
     for line in head_lines:
         bb = f_head.getbbox(line)
         tw = bb[2] - bb[0]
         d.text(((W - tw) // 2, y), line, font=f_head, fill=(255, 255, 255, 255))
         y += LINE_H_HEAD
 
-    # Orange divider line — Tampa Latest signature
-    y += GAP_DIV
+    y += GAP
     d.rectangle([(MARGIN, y), (W - MARGIN, y + DIVIDER_H)], fill=(255, 90, 54, 230))
-    y += DIVIDER_H + GAP_DIV
+    y += DIVIDER_H + GAP
 
-    # Body text — centered
     for line in body_lines:
         bb = f_body.getbbox(line)
         tw = bb[2] - bb[0]
         d.text(((W - tw) // 2, y), line, font=f_body, fill=(255, 255, 255, 200))
         y += LINE_H_BODY
 
-    # URL at bottom — centered, bold
-    y = H - BOTTOM_PAD - URL_H
     bb = f_url.getbbox('MYTAMPAPULSE.COM')
     tw = bb[2] - bb[0]
-    d.text(((W - tw) // 2, y), 'MYTAMPAPULSE.COM', font=f_url, fill=(255, 255, 255, 220))
+    d.text(((W - tw) // 2, H - BOTTOM_PAD - URL_H), 'MYTAMPAPULSE.COM', font=f_url, fill=(255, 255, 255, 220))
 
     out_path = OUT / f'slide_{slide_num}.png'
     img.convert('RGB').save(out_path, quality=95)
     print(f'  Saved {out_path.name}: {out_path.stat().st_size} bytes')
     return out_path
 
-print('=== FETCHING PHOTO ===')
-photo = get_photo(post['query'])
-if not photo:
-    photo = get_photo('tampa florida city people')
-if not photo:
-    print('FATAL: Could not get any photo!'); exit(1)
-print('Photo ready!\n')
+print('=== FETCHING PHOTOS ===')
+photos = []
+for i, s in enumerate(post['slides']):
+    print(f'Photo for slide {i+1}: {s["query"]}')
+    photo = get_photo(s['query'])
+    if not photo:
+        photo = get_photo('city people outdoor sunny lifestyle')
+    if not photo:
+        print('FATAL: Could not get photo for slide ' + str(i+1)); exit(1)
+    photos.append(photo)
+print('Photos ready!\n')
 
 print('=== GENERATING SLIDES ===')
 slide_paths = []
 for i, s in enumerate(post['slides'], 1):
     print(f'Slide {i}...')
-    slide_paths.append(draw_slide(photo, s['headline'], s['body'], i))
+    slide_paths.append(draw_slide(photos[i-1], s['headline'], s['body'], i))
 
 print('\n=== CHECKING FILES ===')
 for s in slide_paths:
