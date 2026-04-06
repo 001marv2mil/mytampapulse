@@ -1,11 +1,12 @@
 name: Post to Instagram
 
 on:
-  schedule:
-    - cron: '0 18 * * *'   # 2:00 PM EDT
-    - cron: '0 20 * * *'   # 4:00 PM EDT
-    - cron: '0 23 * * *'   # 7:00 PM EDT
-  workflow_dispatch:        # allows manual trigger from GitHub UI
+  # PAUSED — uncomment schedule lines to resume auto-posting
+  # schedule:
+  #   - cron: '0 18 * * *'   # 2:00 PM EDT
+  #   - cron: '0 20 * * *'   # 4:00 PM EDT
+  #   - cron: '0 23 * * *'   # 7:00 PM EDT
+  workflow_dispatch:        # manual trigger only for now
 
 permissions:
   contents: write
