@@ -632,16 +632,32 @@ for s in slide_paths:
 
 print('\n=== POSTING TO INSTAGRAM ===')
 IG = 'https://graph.facebook.com/v25.0/' + ACCT
+
+def upload_to_catbox(filepath, retries=3):
+    """Upload with retries — catbox can be flaky."""
+    for attempt in range(1, retries + 1):
+        try:
+            with open(filepath, 'rb') as f:
+                r = requests.post('https://catbox.moe/user/api.php',
+                    data={'reqtype': 'fileupload'}, files={'fileToUpload': f}, timeout=90)
+                if r.status_code == 200 and r.text.strip().startswith('https://'):
+                    return r.text.strip()
+            print(f'  Attempt {attempt} failed: {r.status_code} {r.text[:80]}')
+        except Exception as e:
+            print(f'  Attempt {attempt} error: {e}')
+        if attempt < retries:
+            print(f'  Retrying in 5s...')
+            time.sleep(5)
+    return None
+
 urls = []
 for s in slide_paths:
     print('Uploading ' + s.name + '...')
-    with open(s, 'rb') as f:
-        r = requests.post('https://catbox.moe/user/api.php',
-            data={'reqtype': 'fileupload'}, files={'fileToUpload': f}, timeout=60)
-        if r.status_code == 200 and r.text.startswith('https://'):
-            urls.append(r.text.strip()); print('  ' + r.text.strip())
-        else:
-            print('  UPLOAD FAILED: ' + r.text); exit(1)
+    url = upload_to_catbox(s)
+    if url:
+        urls.append(url); print('  ' + url)
+    else:
+        print('  UPLOAD FAILED after 3 attempts'); exit(1)
 
 children = []
 for u in urls:
