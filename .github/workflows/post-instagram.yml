@@ -7,14 +7,15 @@ on:
     - cron: '0 23 * * *'   # 7:00 PM EDT
   workflow_dispatch:        # allows manual trigger from GitHub UI
 
+permissions:
+  contents: write
+
 jobs:
   post:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
