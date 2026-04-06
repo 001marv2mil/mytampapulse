@@ -13,11 +13,17 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 function renderNewsletterHTML(
   parsed: ReturnType<typeof parseNewsletter>,
-  unsubscribeUrl: string
+  unsubscribeUrl: string,
+  issueNumber: number
 ): string {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mytampapulse.com";
+  const fullIssueUrl = `${siteUrl}/newsletter`;
+
   const renderBullets = (items: string[]) =>
     items.map((item) => `<li>${item}</li>`).join("");
 
+  // 70% PREVIEW — show greeting, week at a glance, digest, and pro tips
+  // Then CTA to read full issue on site (hidden gems, community pick, event roundup, etc.)
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -96,6 +102,36 @@ function renderNewsletterHTML(
       white-space: pre-line;
       margin-top: 24px;
     }
+    .cta-box {
+      margin: 32px 24px;
+      background: linear-gradient(135deg, #FFF5F0 0%, #FFF0EB 100%);
+      border: 2px solid #FF5A36;
+      border-radius: 16px;
+      padding: 28px 24px;
+      text-align: center;
+    }
+    .cta-box h3 {
+      margin: 0 0 8px 0;
+      font-size: 1.15em;
+      color: #1a1a1a;
+      font-weight: 800;
+    }
+    .cta-box p {
+      margin: 0 0 16px 0;
+      font-size: 0.9em;
+      color: #666;
+      line-height: 1.5;
+    }
+    .cta-btn {
+      display: inline-block;
+      background: #FF5A36;
+      color: #ffffff !important;
+      font-weight: 700;
+      font-size: 1em;
+      padding: 14px 32px;
+      border-radius: 10px;
+      text-decoration: none;
+    }
     .footer {
       margin: 28px 0 0 0;
       text-align: center;
@@ -112,6 +148,7 @@ function renderNewsletterHTML(
       .container { max-width: 98vw; }
       .section { padding: 0 16px; }
       .header { padding: 28px 16px 20px; }
+      .cta-box { margin: 32px 16px; }
     }
   </style>
 </head>
@@ -152,42 +189,12 @@ function renderNewsletterHTML(
         : ""
     }
 
-    ${
-      parsed?.hiddenGems && parsed.hiddenGems.length > 0
-        ? `
-    <div class="section">
-      <div class="section-title">Hidden Gems</div>
-      <ul>
-        ${renderBullets(parsed.hiddenGems)}
-      </ul>
+    <!-- 70% CUTOFF — Hidden Gems, Community Pick, Event Roundup, Pro Tips are on the website -->
+    <div class="cta-box">
+      <h3>There's more in the full issue.</h3>
+      <p>Hidden Gems, Community Pick, Event Roundup, Marv's Pro Tips, and the full Weather Forecast — all on the site.</p>
+      <a href="${fullIssueUrl}" class="cta-btn">Read the Full Issue →</a>
     </div>
-    `
-        : ""
-    }
-
-    ${
-      parsed?.eventRoundup && parsed.eventRoundup.length > 0
-        ? `
-    <div class="section">
-      <div class="section-title">Happenings</div>
-      <ul>
-        ${renderBullets(parsed.eventRoundup)}
-      </ul>
-    </div>
-    `
-        : ""
-    }
-
-    ${
-      parsed?.communityPickBody && parsed.communityPickBody.length > 0
-        ? `
-    <div class="section">
-      <div class="section-title">Community Pick</div>
-      <p style="font-size: 0.95em; line-height: 1.7; color: #444;">${parsed.communityPickBody[0]}</p>
-    </div>
-    `
-        : ""
-    }
 
     <div class="section">
       <p class="signoff">${parsed?.signoff || ""}</p>
@@ -196,7 +203,7 @@ function renderNewsletterHTML(
     <div class="footer">
       <p style="margin: 0 0 12px 0;">Tampa Pulse — The weekly rundown of what's actually happening in Tampa Bay.</p>
       <p style="margin: 0;">
-        <a href="${process.env.NEXT_PUBLIC_SITE_URL || "https://mytampapulse.com"}">Website</a>
+        <a href="${siteUrl}">Website</a>
         &nbsp;&middot;&nbsp;
         <a href="${unsubscribeUrl}">Unsubscribe</a>
       </p>
@@ -272,7 +279,7 @@ export async function POST(req: NextRequest) {
     for (const subscriber of subscribers) {
       try {
         const unsubscribeUrl = `${siteUrl}/unsubscribe?token=${subscriber.unsubscribe_token}`;
-        const html = renderNewsletterHTML(parsed, unsubscribeUrl);
+        const html = renderNewsletterHTML(parsed, unsubscribeUrl, issueNumber);
 
         await resend.emails.send({
           from: "Tampa Pulse <newsletter@mytampapulse.com>",

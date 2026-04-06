@@ -1,0 +1,41 @@
+name: Generate Weekly Newsletter
+
+on:
+  schedule:
+    - cron: '0 23 * * 3'   # Wednesday 7:00 PM EDT (23:00 UTC)
+  workflow_dispatch:        # manual trigger
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install requests python-dotenv beautifulsoup4
+
+      - name: Generate newsletter
+        env:
+          TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
+          EVENTBRITE_API_TOKEN: ${{ secrets.EVENTBRITE_API_TOKEN }}
+          OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
+        run: |
+          cd automation
+          python generate_newsletter.py
+
+      - name: Commit newsletter
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add content/newsletters/
+          git diff --staged --quiet || git commit -m "auto-generate newsletter issue [skip ci]"
+          git push
