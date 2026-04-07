@@ -802,8 +802,8 @@ if __name__ == '__main__':
 
     children = []
     for u in urls:
-        r = requests.post(IG + '/media', json={
-            'image_url': u, 'is_carousel_item': True, 'access_token': TOKEN
+        r = requests.post(IG + '/media', data={
+            'image_url': u, 'is_carousel_item': 'true', 'access_token': TOKEN
         }, timeout=30)
         print(f'  Container: {r.text[:120]}')
         r.raise_for_status()
@@ -811,7 +811,7 @@ if __name__ == '__main__':
 
     print('Waiting 15s...')
     time.sleep(15)
-    cr = requests.post(IG + '/media', json={
+    cr = requests.post(IG + '/media', data={
         'media_type': 'CAROUSEL',
         'children': ','.join(children),
         'caption': caption,
@@ -823,7 +823,7 @@ if __name__ == '__main__':
 
     print('Waiting 15s...')
     time.sleep(15)
-    pub = requests.post(IG + '/media_publish', json={
+    pub = requests.post(IG + '/media_publish', data={
         'creation_id': cid, 'access_token': TOKEN
     }, timeout=30)
     print(f'Publish: {pub.text[:120]}')
