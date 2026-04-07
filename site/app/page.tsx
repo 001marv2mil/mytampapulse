@@ -47,7 +47,7 @@ export default function Home() {
       {/* 11. FINAL CTA */}
       <FinalCTA />
 
-      {/* Mobile sticky bar */}
+      {/* 12. STICKY EMAIL BAR */}
       <StickyEmailBar />
     </>
   );

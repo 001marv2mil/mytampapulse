@@ -190,10 +190,10 @@ def filter_candidates(items: list[dict], log: list[dict]) -> list[dict]:
         if not video_url:
             continue
 
-        # Quality filter — skip low-res videos (want at least 720p portrait)
+        # Quality filter — only 1080p+ portrait reels
         vid_w = item.get("dimensionsWidth", 0) or 0
         vid_h = item.get("dimensionsHeight", 0) or 0
-        if vid_w > 0 and vid_h > 0 and (vid_w < 720 or vid_h < 1280):
+        if vid_w > 0 and vid_h > 0 and (vid_w < 1080 or vid_h < 1920):
             continue
 
         # Freshness check — skip reels older than MAX_AGE_HOURS
