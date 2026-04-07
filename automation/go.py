@@ -103,8 +103,14 @@ def is_excluded(text):
 def scrape_article_text(url):
     """Follow an article link and extract the main body text."""
     try:
+        time.sleep(3)  # respect rate limits between article fetches
         r = requests.get(url, headers=HEADERS, timeout=15)
+        if r.status_code == 429:
+            print(f'    Rate limited, waiting 10s...')
+            time.sleep(10)
+            r = requests.get(url, headers=HEADERS, timeout=15)
         if r.status_code != 200:
+            print(f'    HTTP {r.status_code}')
             return ''
         from bs4 import BeautifulSoup
         soup = BeautifulSoup(r.text, 'html.parser')
@@ -216,8 +222,32 @@ def scrape_stpete_catalyst():
         print(f'  [St Pete Catalyst] Error: {e}')
     return stories
 
+def find_article_on_site(domain, title_fragment):
+    """Visit a source's homepage and find the link matching a story title."""
+    try:
+        from bs4 import BeautifulSoup
+        r = requests.get(domain, headers=HEADERS, timeout=15)
+        if r.status_code != 200:
+            return None
+        soup = BeautifulSoup(r.text, 'html.parser')
+        # Match links whose text overlaps with the title
+        title_words = set(title_fragment.lower().split()[:6])
+        for a in soup.select('a[href]')[:80]:
+            link_text = clean(a.get_text()).lower()
+            link_words = set(link_text.split())
+            overlap = len(title_words & link_words)
+            if overlap >= 3 and len(link_text) > 15:
+                href = a.get('href', '')
+                if not href.startswith('http'):
+                    href = domain.rstrip('/') + '/' + href.lstrip('/')
+                if len(href) > len(domain) + 5:  # must be more than just the domain
+                    return href
+    except:
+        pass
+    return None
+
 def scrape_google_news_tampa():
-    """Get Tampa stories from Google News RSS — huge variety of sources."""
+    """Get Tampa stories from Google News RSS — resolves actual article URLs."""
     stories = []
     try:
         import xml.etree.ElementTree as ET
@@ -246,11 +276,15 @@ def scrape_google_news_tampa():
             # Skip paywalled sources we can't scrape
             if any(x in source_url for x in ['tampabay.com', 'nytimes.com', 'wsj.com']): continue
 
+            # Try to find the actual article URL on the source site
+            article_url = find_article_on_site(source_url, title)
+            if article_url:
+                print(f'    Resolved: {article_url[:80]}')
+
             stories.append({
                 'title': title,
-                'url': source_url,  # we'll try to find the article on the source site
+                'url': article_url or source_url,
                 'source': f'Google News ({source_name})',
-                'source_domain': source_url,
             })
             if len(stories) >= 12: break
 
@@ -277,7 +311,12 @@ def scrape_reddit_tampa():
             if d.get('stickied') or score < 50: continue
             if is_excluded(title) or is_excluded(selftext): continue
             skip = ['moving to','thinking of moving','is tampa safe','visiting tampa',
-                    'road rage','rant','unpopular opinion','does anyone','what do you think']
+                    'road rage','rant','unpopular opinion','does anyone','what do you think',
+                    'rehome','adopt','foster','lost cat','lost dog','found cat','found dog',
+                    'roommate','room for rent','sublease','anyone know','anyone have',
+                    'looking for','recommend','suggestion','where can i','help me',
+                    'selling','for sale','free to','giving away','ISO ','in search of',
+                    'saw this','spotted','TIL ','til ','today i learned']
             if any(x in title.lower() for x in skip): continue
 
             url = d.get('url', '')
