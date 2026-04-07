@@ -21,7 +21,7 @@ jobs:
       - name: Install Oswald font
         run: |
           sudo mkdir -p /usr/local/share/fonts
-          curl -L -o /usr/local/share/fonts/Oswald-Bold.ttf \
+          sudo curl -L -o /usr/local/share/fonts/Oswald-Bold.ttf \
             "https://github.com/googlefonts/OswaldFont/raw/main/fonts/ttf/Oswald-Bold.ttf"
           sudo fc-cache -f -v
 
