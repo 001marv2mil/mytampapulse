@@ -1,12 +1,11 @@
 name: Post to Instagram
 
 on:
-  # PAUSED — uncomment schedule lines to resume auto-posting
-  # schedule:
-  #   - cron: '0 18 * * *'   # 2:00 PM EDT
-  #   - cron: '0 20 * * *'   # 4:00 PM EDT
-  #   - cron: '0 23 * * *'   # 7:00 PM EDT
-  workflow_dispatch:        # manual trigger only for now
+  schedule:
+    - cron: '0 19 * * *'   # 2:00 PM EST
+    - cron: '0 21 * * *'   # 4:00 PM EST
+    - cron: '0 0 * * *'    # 7:00 PM EST
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -31,7 +30,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pillow requests python-dotenv
+          pip install pillow requests python-dotenv beautifulsoup4 lxml
 
       - name: Run post script
         env:
@@ -47,6 +46,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add automation/posted_log.json
+          git add automation/posted_log.json automation/used_photos.json
           git diff --staged --quiet || git commit -m "update post log [skip ci]"
           git push
