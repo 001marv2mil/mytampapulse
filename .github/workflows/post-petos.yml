@@ -2,10 +2,10 @@ name: Post @petoshealth Fun Facts
 
 on:
   schedule:
-    # 3x daily: 10AM, 2PM, 7PM EDT (UTC-4)
-    - cron: '0 14 * * *'    # 10:00 AM EDT
-    - cron: '0 18 * * *'    # 2:00 PM EDT
-    - cron: '0 23 * * *'    # 7:00 PM EDT
+    # 3x daily: 10AM, 2PM, 7PM ET (Eastern Time)
+    - cron: '0 14 * * *'    # 10:00 AM ET
+    - cron: '0 18 * * *'    # 2:00 PM ET
+    - cron: '0 23 * * *'    # 7:00 PM ET
   workflow_dispatch:          # manual trigger
 
 jobs:

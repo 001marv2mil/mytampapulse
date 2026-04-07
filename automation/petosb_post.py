@@ -190,6 +190,12 @@ def filter_candidates(items: list[dict], log: list[dict]) -> list[dict]:
         if not video_url:
             continue
 
+        # Quality filter — skip low-res videos (want at least 720p portrait)
+        vid_w = item.get("dimensionsWidth", 0) or 0
+        vid_h = item.get("dimensionsHeight", 0) or 0
+        if vid_w > 0 and vid_h > 0 and (vid_w < 720 or vid_h < 1280):
+            continue
+
         # Freshness check — skip reels older than MAX_AGE_HOURS
         posted_at = item.get("timestamp") or item.get("postedAt") or ""
         if posted_at:
@@ -238,6 +244,7 @@ def filter_candidates(items: list[dict], log: list[dict]) -> list[dict]:
             "age_hours":  round(age_hours, 1),
             "likes":      likes,
             "comments":   comments,
+            "resolution": f"{vid_w}x{vid_h}" if vid_w and vid_h else "unknown",
             "caption":    (item.get("caption") or "")[:100],
         })
 
