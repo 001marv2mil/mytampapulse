@@ -800,34 +800,42 @@ if __name__ == '__main__':
             else:
                 print(f'  UPLOAD FAILED: {r.text}'); exit(1)
 
+    def ig_post_with_retry(url, payload, label, max_retries=3):
+        for attempt in range(1, max_retries + 1):
+            r = requests.post(url, data=payload, timeout=30)
+            print(f'  {label}: {r.text[:120]}')
+            if r.ok:
+                return r
+            if r.status_code == 500 and attempt < max_retries:
+                wait = 10 * attempt
+                print(f'  Retry {attempt}/{max_retries} in {wait}s...')
+                time.sleep(wait)
+                continue
+            r.raise_for_status()
+        return r
+
     children = []
     for u in urls:
-        r = requests.post(IG + '/media', data={
+        r = ig_post_with_retry(IG + '/media', {
             'image_url': u, 'is_carousel_item': 'true', 'access_token': TOKEN
-        }, timeout=30)
-        print(f'  Container: {r.text[:120]}')
-        r.raise_for_status()
+        }, 'Container')
         children.append(r.json()['id'])
 
     print('Waiting 15s...')
     time.sleep(15)
-    cr = requests.post(IG + '/media', data={
+    cr = ig_post_with_retry(IG + '/media', {
         'media_type': 'CAROUSEL',
         'children': ','.join(children),
         'caption': caption,
         'access_token': TOKEN
-    }, timeout=30)
-    print(f'Carousel: {cr.text[:120]}')
-    cr.raise_for_status()
+    }, 'Carousel')
     cid = cr.json()['id']
 
     print('Waiting 15s...')
     time.sleep(15)
-    pub = requests.post(IG + '/media_publish', data={
+    pub = ig_post_with_retry(IG + '/media_publish', {
         'creation_id': cid, 'access_token': TOKEN
-    }, timeout=30)
-    print(f'Publish: {pub.text[:120]}')
-    pub.raise_for_status()
+    }, 'Publish')
     ig_id = pub.json()['id']
     print(f'\nPOSTED! ID: {ig_id}')
 
