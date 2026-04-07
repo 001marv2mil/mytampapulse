@@ -222,7 +222,7 @@ def scrape_google_news_tampa():
     try:
         import xml.etree.ElementTree as ET
         r = requests.get(
-            'https://news.google.com/rss/search?q=Tampa+Bay+Florida+development+OR+opening+OR+new+OR+project&hl=en-US&gl=US&ceid=US:en',
+            'https://news.google.com/rss/search?q=Tampa+Florida+development+OR+opening+OR+new+OR+project+OR+downtown+OR+restaurant&hl=en-US&gl=US&ceid=US:en',
             headers=HEADERS, timeout=15)
         if r.status_code != 200:
             return stories
@@ -651,8 +651,27 @@ def upload_to_catbox(filepath, retries=3):
 # MAIN
 # ═══════════════════════════════════════════════════════════════════
 
+# Stories must be about TAMPA — not Clearwater, Sarasota, Bradenton, etc.
+NOT_TAMPA = ['clearwater', 'sarasota', 'bradenton', 'lakeland', 'naples',
+             'fort myers', 'ocala', 'orlando', 'gainesville', 'daytona',
+             'key west', 'miami', 'jacksonville', 'tallahassee', 'pensacola']
+
+def is_tampa_relevant(title, article_text=''):
+    """Return True only if the story is about Tampa (not other FL cities)."""
+    combined = (title + ' ' + article_text[:500]).lower()
+    # Must mention tampa somewhere
+    if 'tampa' not in combined and 'hillsborough' not in combined and 'ybor' not in combined and 'seminole heights' not in combined and 'channelside' not in combined and 'soho tampa' not in combined and 'hyde park' not in combined and 'westshore' not in combined:
+        # Allow Tampa Bay-wide stories if they mention Tampa Bay explicitly
+        if 'tampa bay' not in combined:
+            return False
+    # Reject if primarily about another city
+    for city in NOT_TAMPA:
+        if city in title.lower():
+            return False
+    return True
+
 def scrape_and_select():
-    """Scrape sources, find a good story, build a post. Returns (post, log) or (None, log)."""
+    """Scrape sources, find a good TAMPA story, build a post. Returns (post, log) or (None, log)."""
     log = load_log()
     recent = recently_posted(log)
     print(f'Recently posted ({REPOST_DAYS}d): {len(recent)} topics')
@@ -669,11 +688,22 @@ def scrape_and_select():
 
     for story in fresh:
         print(f'\nTrying: {story["title"][:60]}...')
+
+        # Quick title check — skip obviously non-Tampa stories
+        if not is_tampa_relevant(story['title'], story.get('desc', '')):
+            print(f'  Skipping — not Tampa-relevant')
+            continue
+
         article_text = story.get('desc', '')
         if story.get('url') and len(article_text) < 100:
             time.sleep(2)  # be polite to sources
             print(f'  Scraping article: {story["url"][:60]}...')
             article_text = scrape_article_text(story['url'])
+
+        # Verify Tampa relevance with full article text
+        if not is_tampa_relevant(story['title'], article_text):
+            print(f'  Skipping — article not about Tampa')
+            continue
 
         facts = extract_facts(article_text)
         print(f'  Facts extracted: {len(facts)}')
