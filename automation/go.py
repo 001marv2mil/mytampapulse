@@ -252,7 +252,7 @@ def scrape_google_news_tampa():
     try:
         import xml.etree.ElementTree as ET
         r = requests.get(
-            'https://news.google.com/rss/search?q=Tampa+Florida+development+OR+opening+OR+new+OR+project+OR+downtown+OR+restaurant&hl=en-US&gl=US&ceid=US:en',
+            'https://news.google.com/rss/search?q=Tampa+Florida+development+OR+opening+OR+restaurant+OR+project+OR+million+OR+rezoning+OR+permit+OR+construction&hl=en-US&gl=US&ceid=US:en',
             headers=HEADERS, timeout=15)
         if r.status_code != 200:
             return stories
@@ -393,10 +393,29 @@ def extract_facts(text, n=8):
 
     return [s for _, s in scored[:n]]
 
-def wrap_text(text, max_words=18):
-    """Wrap text into 2-3 lines for slide headline. Keeps full sentences up to max_words."""
+def shorten_fact(text):
+    """Turn a full article sentence into a punchy slide headline (max ~12 words).
+    Keeps the most important part — numbers, names, addresses."""
+    # Already short enough
     words = text.split()
-    # Cap at max_words but never mid-word — keep the sentence intact up to that point
+    if len(words) <= 12:
+        return text
+
+    # Try to find a natural break point (comma, dash, period)
+    for sep in [', ', ' — ', ' - ', '; ']:
+        if sep in text:
+            parts = text.split(sep)
+            # Take the part with the most numbers/specifics
+            best = max(parts, key=lambda p: len(re.findall(r'\d', p)) + len(p.split()) * 0.1)
+            if 4 <= len(best.split()) <= 14:
+                return best.strip().rstrip('.,;')
+
+    # Fallback: just take first 12 words
+    return ' '.join(words[:12]).rstrip('.,;')
+
+def wrap_text(text, max_words=14):
+    """Wrap text into 2-3 lines for slide headline."""
+    words = text.split()
     if len(words) > max_words:
         words = words[:max_words]
     if len(words) <= 4:
@@ -404,7 +423,6 @@ def wrap_text(text, max_words=18):
     if len(words) <= 8:
         h = len(words) // 2
         return ' '.join(words[:h]) + '\n' + ' '.join(words[h:])
-    # 3 lines for longer text
     t = len(words) // 3
     t2 = t * 2
     return ' '.join(words[:t]) + '\n' + ' '.join(words[t:t2]) + '\n' + ' '.join(words[t2:])
@@ -506,49 +524,87 @@ def photo_query_for(text, slide_num=0):
     ]
     return fallback[idx % len(fallback)]
 
+def detect_neighborhood(text):
+    """Detect Tampa neighborhood from article text."""
+    neighborhoods = {
+        'downtown tampa': 'Downtown Tampa', 'downtown': 'Downtown Tampa',
+        'ybor city': 'Ybor City', 'ybor': 'Ybor City',
+        'south tampa': 'South Tampa', 'soho': 'South Tampa',
+        'hyde park': 'Hyde Park', 'bayshore': 'Bayshore',
+        'channelside': 'Channelside', 'harbour island': 'Harbour Island',
+        'westshore': 'Westshore', 'dale mabry': 'Dale Mabry',
+        'seminole heights': 'Seminole Heights', 'tampa heights': 'Tampa Heights',
+        'water street': 'Water Street', 'riverwalk': 'Riverwalk',
+        'west tampa': 'West Tampa', 'palma ceia': 'Palma Ceia',
+        'davis islands': 'Davis Islands', 'brandon': 'Brandon',
+        'temple terrace': 'Temple Terrace', 'town n country': 'Town N Country',
+        'carrollwood': 'Carrollwood', 'new tampa': 'New Tampa',
+        'lutz': 'Lutz', 'usf': 'USF Area', 'busch gardens': 'Busch Gardens Area',
+        'gasworx': 'Gasworx District', 'armature works': 'Armature Works',
+        'north tampa': 'North Tampa', 'east tampa': 'East Tampa',
+        'n ashley': 'Downtown Tampa', 'kennedy': 'Downtown Tampa',
+    }
+    t = text.lower()
+    for key, name in neighborhoods.items():
+        if key in t:
+            return name
+    return 'Tampa'
+
 def build_post_from_article(story, article_text):
-    """Build a 3-6 slide post from a scraped article with real facts.
-    Slide count varies based on how many strong facts exist. No padding."""
+    """Build a 3-6 slide post in Tampa Tomorrow style.
+    Format: | Name - Neighborhood | with escalating facts."""
     title = story['title']
     facts = extract_facts(article_text, n=8)
+    neighborhood = detect_neighborhood(title + ' ' + article_text[:500])
 
     slides = []
 
-    # Slide 1: Main headline (the story title)
+    # Slide 1: Hook headline — Tampa Tomorrow style "| Name - Neighborhood |"
     slides.append({
         'headline': wrap_text(title),
         'photo_query': photo_query_for(title, 0),
         'is_last': False,
     })
 
-    # Add as many fact slides as we have good facts (up to 5 more = 6 total)
-    max_fact_slides = min(len(facts), 5)
-    for i, fact in enumerate(facts[:max_fact_slides]):
+    # Sort facts so they ESCALATE: smaller details first, big numbers last
+    def fact_weight(f):
+        w = 0
+        if re.search(r'\$[\d,.]+\s*(million|billion)', f, re.I): w += 10
+        elif re.search(r'\$[\d,.]+', f): w += 5
+        if re.search(r'(million|billion)', f, re.I): w += 8
+        if re.search(r'\d{4,}', f): w += 3  # big numbers
+        if re.search(r'(acre|square.?f)', f, re.I): w += 4
+        return w
+    facts_sorted = sorted(facts, key=fact_weight)
+
+    # Add fact slides — shorten to punchy headlines, escalate to big reveal
+    max_fact_slides = min(len(facts_sorted), 5)
+    for i, fact in enumerate(facts_sorted[:max_fact_slides]):
+        headline = shorten_fact(fact)
         slides.append({
-            'headline': wrap_text(fact),
+            'headline': wrap_text(headline),
             'photo_query': photo_query_for(fact, i + 1),
             'is_last': False,
         })
 
-    # Cap at 6 slides, floor at 3 (title + 2 facts minimum)
+    # Cap at 6, floor at 3
     slides = slides[:6]
-
-    # Mark the last slide so we can add a small CTA overlay
     slides[-1]['is_last'] = True
 
     # Topic key for dedup
     topic = f'news:{title[:60]}'
 
-    # Caption — factual, no fluff
-    caption = f"| {title[:60]} |\n\n"
-    for f in facts[:max_fact_slides]:
+    # Caption — Tampa Tomorrow style: storytelling with bullet points
+    caption = f"| {title[:60]} - {neighborhood} |\n\n"
+    for f in facts_sorted[:max_fact_slides]:
         caption += f"\u2022 {f}\n"
-    caption += "\nSave this. Share it with someone in Tampa.\n\n"
-    caption += "Follow @thetampapulse \u2014 your weekly cheat code to Tampa.\n\n"
-    caption += "#tampa #tampabay #tampalife #TampaPulse #tampaflorida"
+    caption += "\nThis is what's happening in Tampa right now.\n"
+    caption += "Save this. Tag someone who needs to see it.\n\n"
+    caption += "Follow @thetampapulse for more.\n\n"
+    caption += "#tampa #tampabay #tampalife #TampaPulse #tampaflorida #tampadevelopment"
 
     return {
-        'location': 'Tampa Bay',
+        'location': neighborhood,
         'slides': slides,
         'caption': caption,
         'topic': topic,
@@ -695,8 +751,11 @@ NOT_TAMPA = ['clearwater', 'sarasota', 'bradenton', 'lakeland', 'naples',
              'fort myers', 'ocala', 'orlando', 'gainesville', 'daytona',
              'key west', 'miami', 'jacksonville', 'tallahassee', 'pensacola']
 
-def is_tampa_relevant(title, article_text=''):
+def is_tampa_relevant(title, article_text='', url=''):
     """Return True only if the story is about Tampa (not other FL cities)."""
+    # tampa.gov stories are always Tampa-relevant
+    if 'tampa.gov' in url:
+        return True
     combined = (title + ' ' + article_text[:500]).lower()
     # Must mention tampa somewhere
     if 'tampa' not in combined and 'hillsborough' not in combined and 'ybor' not in combined and 'seminole heights' not in combined and 'channelside' not in combined and 'soho tampa' not in combined and 'hyde park' not in combined and 'westshore' not in combined:
@@ -729,7 +788,7 @@ def scrape_and_select():
         print(f'\nTrying: {story["title"][:60]}...')
 
         # Quick title check — skip obviously non-Tampa stories
-        if not is_tampa_relevant(story['title'], story.get('desc', '')):
+        if not is_tampa_relevant(story['title'], story.get('desc', ''), story.get('url', '')):
             print(f'  Skipping — not Tampa-relevant')
             continue
 
@@ -740,7 +799,7 @@ def scrape_and_select():
             article_text = scrape_article_text(story['url'])
 
         # Verify Tampa relevance with full article text
-        if not is_tampa_relevant(story['title'], article_text):
+        if not is_tampa_relevant(story['title'], article_text, story.get('url', '')):
             print(f'  Skipping — article not about Tampa')
             continue
 
