@@ -172,7 +172,7 @@ def scrape_reels(accounts: list[str]) -> list[dict]:
 # FILTER & RANK CANDIDATES
 # ═══════════════════════════════════════════════════════════════════
 
-MAX_AGE_HOURS = 72   # only repost reels from the last ~3 days
+MAX_AGE_HOURS = 168  # repost reels from the last ~7 days (velocity scoring still favors freshest)
 MIN_LIKES = 10       # skip reels with less than this — no dead content
 
 def filter_candidates(items: list[dict], log: list[dict]) -> list[dict]:
@@ -377,8 +377,8 @@ def main():
         print("Missing PETOSB_PAGE_ACCESS_TOKEN or APIFY_API_TOKEN in env.")
         exit(1)
 
-    # Pick 8 random accounts per run — aggregators post daily so we always get hits
-    sample = random.sample(TARGET_ACCOUNTS, min(8, len(TARGET_ACCOUNTS)))
+    # Pick 12 random accounts per run for reliable coverage
+    sample = random.sample(TARGET_ACCOUNTS, min(12, len(TARGET_ACCOUNTS)))
     print(f"=== PETOSHEALTHYB REEL REPOSTER ===")
     print(f"Selected accounts: {', '.join('@'+a for a in sample)}")
 
