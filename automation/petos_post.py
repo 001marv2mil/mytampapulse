@@ -800,14 +800,14 @@ if __name__ == '__main__':
             else:
                 print(f'  UPLOAD FAILED: {r.text}'); exit(1)
 
-    def ig_post_with_retry(url, payload, label, max_retries=3):
+    def ig_post_with_retry(url, payload, label, max_retries=5):
         for attempt in range(1, max_retries + 1):
             r = requests.post(url, data=payload, timeout=30)
             print(f'  {label}: {r.text[:120]}')
             if r.ok:
                 return r
-            if r.status_code == 500 and attempt < max_retries:
-                wait = 10 * attempt
+            if r.status_code >= 500 and attempt < max_retries:
+                wait = 15 * attempt
                 print(f'  Retry {attempt}/{max_retries} in {wait}s...')
                 time.sleep(wait)
                 continue
