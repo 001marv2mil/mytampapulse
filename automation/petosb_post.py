@@ -26,10 +26,12 @@ ACCT       = os.getenv("PETOSB_IG_ACCOUNT_ID", "17841452172388421")
 APIFY_TOKEN = os.getenv("APIFY_API_TOKEN")
 
 GRAPH      = "https://graph.facebook.com/v25.0"
-APIFY_ACTOR = "apify~instagram-scraper"
+APIFY_ACTOR = "apify~instagram-reel-scraper"   # FREE actor (~0.003 CU vs $1/run)
 APIFY_BASE  = "https://api.apify.com/v2"
 
 LOG_FILE          = Path(__file__).parent / "petosb_posted_log.json"
+CACHE_FILE        = Path(__file__).parent / "petosb_reel_cache.json"
+CACHE_MAX_AGE_H   = 24   # scrape fresh only if cache is older than this
 RETENTION_DAYS    = 90
 REPOST_WINDOW_DAYS = 30
 
@@ -109,18 +111,48 @@ def already_posted(log: list[dict], post_key: str) -> bool:
 # APIFY SCRAPING
 # ═══════════════════════════════════════════════════════════════════
 
-def scrape_reels(accounts: list[str]) -> list[dict]:
-    """Run the Apify Instagram Scraper on account reels pages."""
-    direct_urls = [f"https://www.instagram.com/{a}/reels/" for a in accounts]
+def load_cache() -> tuple[list[dict], bool]:
+    """Load cached reels. Returns (items, is_fresh)."""
+    if CACHE_FILE.exists():
+        try:
+            data = json.loads(CACHE_FILE.read_text(encoding="utf-8"))
+            cached_at = data.get("cached_at", "")
+            items = data.get("items", [])
+            if cached_at:
+                age_h = (datetime.now(timezone.utc) - datetime.fromisoformat(cached_at)).total_seconds() / 3600
+                if age_h < CACHE_MAX_AGE_H:
+                    print(f"Using cached reels ({len(items)} items, {age_h:.1f}h old)")
+                    return items, True
+                print(f"Cache is {age_h:.1f}h old (limit {CACHE_MAX_AGE_H}h) — will scrape fresh")
+            return items, False
+        except (json.JSONDecodeError, OSError):
+            pass
+    return [], False
 
+
+def save_cache(items: list[dict]):
+    CACHE_FILE.write_text(json.dumps({
+        "cached_at": datetime.now(timezone.utc).isoformat(),
+        "items": items,
+    }, ensure_ascii=False), encoding="utf-8")
+    print(f"Cached {len(items)} reels to {CACHE_FILE.name}")
+
+
+def scrape_reels(accounts: list[str]) -> list[dict]:
+    """Scrape reels using free apify/instagram-reel-scraper. Uses cache if fresh."""
+    cached_items, is_fresh = load_cache()
+    if is_fresh:
+        return cached_items
+
+    all_items = []
+    # Free actor takes one username array — scrape all at once
     run_url = (
         f"{APIFY_BASE}/acts/{APIFY_ACTOR}/runs"
         f"?token={APIFY_TOKEN}&waitForFinish=300"
     )
     payload = {
-        "directUrls": direct_urls,
-        "resultsType": "posts",
-        "resultsLimit": 100,
+        "username": accounts,
+        "resultsLimit": 15,  # per account
     }
 
     print(f"Starting Apify run for {len(accounts)} accounts: {', '.join(accounts)}...")
@@ -133,13 +165,12 @@ def scrape_reels(accounts: list[str]) -> list[dict]:
     dataset_id = run_data.get("defaultDatasetId")
     if not dataset_id:
         print("No dataset ID returned from Apify run.")
-        return []
+        return cached_items  # fallback to stale cache
 
     status = run_data.get("status")
     run_id = run_data.get("id")
     print(f"Apify run status: {status} | dataset: {dataset_id}")
 
-    # If the run hasn't finished yet within waitForFinish, poll until it does
     if status not in ("SUCCEEDED", "FINISHED") and run_id:
         for _ in range(60):
             time.sleep(10)
@@ -154,18 +185,20 @@ def scrape_reels(accounts: list[str]) -> list[dict]:
                 break
             if status in ("FAILED", "ABORTED", "TIMED-OUT"):
                 print(f"Apify run ended with status: {status}")
-                return []
+                return cached_items
 
-    # Fetch dataset items
     items_url = (
         f"{APIFY_BASE}/datasets/{dataset_id}/items"
         f"?token={APIFY_TOKEN}&format=json"
     )
     items_resp = requests.get(items_url, timeout=60)
     items_resp.raise_for_status()
-    items = items_resp.json()
-    print(f"Fetched {len(items)} items from Apify dataset.")
-    return items
+    all_items = items_resp.json()
+    print(f"Fetched {len(all_items)} items from Apify dataset.")
+
+    if all_items:
+        save_cache(all_items)
+    return all_items
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -190,11 +223,10 @@ def filter_candidates(items: list[dict], log: list[dict]) -> list[dict]:
         if not video_url:
             continue
 
-        # Quality filter — only 1080p+ portrait reels
+        # Note: dimensionsWidth/Height are thumbnail sizes, not video resolution.
+        # Actual reel videos are typically 1080x1920 at the CDN URL.
         vid_w = item.get("dimensionsWidth", 0) or 0
         vid_h = item.get("dimensionsHeight", 0) or 0
-        if vid_w > 0 and vid_h > 0 and (vid_w < 1080 or vid_h < 1920):
-            continue
 
         # Freshness check — skip reels older than MAX_AGE_HOURS
         posted_at = item.get("timestamp") or item.get("postedAt") or ""
