@@ -106,6 +106,12 @@ export async function POST(req: NextRequest) {
                   <p style="font-size: 13px; color: #FF5A36; margin: 0;"><a href="${referralLink}" style="color: #FF5A36;">${referralLink}</a></p>
                 </div>
 
+                <div style="background: #1a1a1a; border-radius: 12px; padding: 20px; margin: 0 0 28px; text-align: center;">
+                  <p style="font-size: 13px; font-weight: 700; color: #fff; margin: 0 0 6px;">Follow us on Instagram for daily updates</p>
+                  <p style="font-size: 12px; color: #999; margin: 0 0 12px;">We post 3x/day — the stuff that can't wait until Thursday.</p>
+                  <a href="https://instagram.com/thetampapulse" style="display: inline-block; background: #FF5A36; color: white; font-weight: 700; font-size: 13px; padding: 10px 22px; border-radius: 8px; text-decoration: none;">@thetampapulse</a>
+                </div>
+
                 <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0 16px;" />
                 <p style="font-size: 11px; color: #999; text-align: center;">
                   <a href="${unsubscribeUrl}" style="color: #999; text-decoration: underline;">Unsubscribe</a>
@@ -157,6 +163,12 @@ export async function POST(req: NextRequest) {
 
                 <p style="font-size: 14px; color: #999; margin-top: 8px;">Your referral link: <a href="${referralLink}" style="color: #FF5A36;">${referralLink}</a></p>
 
+                <div style="background: #1a1a1a; border-radius: 12px; padding: 20px; margin: 28px 0 0; text-align: center;">
+                  <p style="font-size: 13px; font-weight: 700; color: #fff; margin: 0 0 6px;">Follow us on Instagram for daily updates</p>
+                  <p style="font-size: 12px; color: #999; margin: 0 0 12px;">We post 3x/day — the stuff that can't wait until Thursday.</p>
+                  <a href="https://instagram.com/thetampapulse" style="display: inline-block; background: #FF5A36; color: white; font-weight: 700; font-size: 13px; padding: 10px 22px; border-radius: 8px; text-decoration: none;">@thetampapulse</a>
+                </div>
+
                 <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0 16px;" />
                 <p style="font-size: 11px; color: #999; text-align: center;">
                   <a href="${unsubscribeUrl}" style="color: #999; text-decoration: underline;">Unsubscribe</a>
@@ -191,6 +203,16 @@ export async function POST(req: NextRequest) {
             <a href="${siteUrl}/newsletter" style="display: inline-block; background: #FF5A36; color: white; font-weight: 700; font-size: 14px; padding: 12px 24px; border-radius: 8px; text-decoration: none; margin-top: 4px;">
               Read the Latest Issue →
             </a>
+          </div>
+
+          <div style="background: linear-gradient(135deg, #405DE6, #833AB4, #E1306C, #F77737); border-radius: 12px; padding: 3px; margin: 24px 0;">
+            <div style="background: #ffffff; border-radius: 10px; padding: 20px; text-align: center;">
+              <p style="font-size: 14px; font-weight: 700; color: #1a1a1a; margin: 0 0 6px;">Get daily Tampa updates between newsletters</p>
+              <p style="font-size: 13px; color: #666; margin: 0 0 14px;">We post 3x/day — new openings, development, events. The stuff that can't wait until Thursday.</p>
+              <a href="https://instagram.com/thetampapulse" style="display: inline-block; background: #1a1a1a; color: white; font-weight: 700; font-size: 14px; padding: 12px 28px; border-radius: 8px; text-decoration: none;">
+                Follow @thetampapulse on Instagram →
+              </a>
+            </div>
           </div>
 
           <div style="border: 1px solid #eee; border-radius: 12px; padding: 20px; margin: 24px 0;">

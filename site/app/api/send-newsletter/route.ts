@@ -200,10 +200,18 @@ function renderNewsletterHTML(
       <p class="signoff">${parsed?.signoff || ""}</p>
     </div>
 
+    <div style="background: #1a1a1a; border-radius: 12px; padding: 24px; margin: 0 24px 24px; text-align: center;">
+      <p style="font-size: 14px; font-weight: 700; color: #fff; margin: 0 0 6px;">Can't wait until next Thursday?</p>
+      <p style="font-size: 13px; color: #aaa; margin: 0 0 14px;">We post daily Tampa updates on Instagram — new openings, development drops, events.</p>
+      <a href="https://instagram.com/thetampapulse" style="display: inline-block; background: #FF5A36; color: white; font-weight: 700; font-size: 14px; padding: 10px 24px; border-radius: 8px; text-decoration: none;">Follow @thetampapulse →</a>
+    </div>
+
     <div class="footer">
       <p style="margin: 0 0 12px 0;">Tampa Pulse — The weekly rundown of what's actually happening in Tampa Bay.</p>
       <p style="margin: 0;">
         <a href="${siteUrl}">Website</a>
+        &nbsp;&middot;&nbsp;
+        <a href="https://instagram.com/thetampapulse">Instagram</a>
         &nbsp;&middot;&nbsp;
         <a href="${unsubscribeUrl}">Unsubscribe</a>
       </p>
@@ -284,7 +292,7 @@ export async function POST(req: NextRequest) {
         await resend.emails.send({
           from: "Tampa Pulse <newsletter@mytampapulse.com>",
           to: subscriber.email,
-          subject: `Tampa Pulse #${issueNumber} · ${parsed.title}`,
+          subject: parsed.title,
           html,
         });
 

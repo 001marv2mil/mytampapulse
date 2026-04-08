@@ -5,20 +5,54 @@ Posts 3x/day via GitHub Actions.
 APPROACH: Scrape real Tampa news articles. Follow the link. Pull the actual
 article text. Break it into 5 slides of real facts. Always fresh content.
 
-Sources scraped:
-  - Creative Loafing Tampa (cltampa.com)
-  - Patch Tampa (patch.com/florida/tampa)
-  - Tampa Bay Business Journal headlines
-  - Reddit r/tampa (high-engagement local posts)
+Sources scraped (interleaved for variety):
+  1. Tampa Magazines (tampamagazines.com) — restaurants, openings, food, events
+  2. Tampa Bay Business & Wealth (tbbwmag.com) — development, real estate, biz
+  3. Tampa.gov official news — city development announcements
+  4. St Pete Catalyst — local business content
+  5. Creative Loafing Tampa (cltampa.com) — unreliable (rate limits)
+  6. Reddit r/tampa — high-engagement local posts
+  7. Google News Tampa RSS — backup source
 """
 
-import os, json, re, random, time, requests
+import os, json, re, random, time, requests, sys
 from io import BytesIO
 from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from PIL import Image, ImageDraw, ImageFont
 from dotenv import load_dotenv
 load_dotenv(Path(__file__).parent / '.env')
+
+# ── Timezone gate: only post at 2 PM, 4 PM, 7 PM Tampa time ──
+# GitHub Actions fires at both EST and EDT cron times. This check
+# ensures we only run when it's actually the right hour in Tampa,
+# so posting stays at 2/4/7 PM year-round with no manual adjustment.
+POST_HOURS = {14, 16, 19}  # 2 PM, 4 PM, 7 PM
+
+def _tampa_hour():
+    """Get current hour in America/New_York (Tampa) without pytz."""
+    utc_now = datetime.now(timezone.utc)
+    # US Eastern: UTC-5 standard, UTC-4 daylight
+    # DST: 2nd Sunday Mar → 1st Sunday Nov
+    year = utc_now.year
+    # 2nd Sunday of March
+    mar1 = datetime(year, 3, 1, tzinfo=timezone.utc)
+    dst_start = mar1 + timedelta(days=(6 - mar1.weekday()) % 7 + 7)
+    dst_start = dst_start.replace(hour=7)  # 2 AM EST = 7 AM UTC
+    # 1st Sunday of November
+    nov1 = datetime(year, 11, 1, tzinfo=timezone.utc)
+    dst_end = nov1 + timedelta(days=(6 - nov1.weekday()) % 7)
+    dst_end = dst_end.replace(hour=6)  # 2 AM EDT = 6 AM UTC
+    is_dst = dst_start <= utc_now < dst_end
+    offset = timedelta(hours=-4 if is_dst else -5)
+    return (utc_now + offset).hour
+
+if os.environ.get('GITHUB_ACTIONS') == 'true':
+    h = _tampa_hour()
+    if h not in POST_HOURS:
+        print(f"Tampa hour is {h}, not a post hour {POST_HOURS}. Skipping.")
+        sys.exit(0)
+    print(f"Tampa hour is {h} — posting.")
 
 W, H = 1080, 1350
 PX    = os.environ['PEXELS_API_KEY']
@@ -50,6 +84,14 @@ SKIP_TITLES = [
     'best tampa bay events','best live music','happening april','happening march',
     'happening may','happening june','save & get','tickets now','meet the chefs',
     'all the best','hunky jesus','foxy mary','sponsored','advertisement',
+    # Skip roundups/listicles — they mix topics and don't work as single-story carousels
+    "what's new in tampa","whats new in tampa",'new openings to start',
+    'front desk','interview:','interview :',
+    'finest','best restaurants','top steakhouse','top restaurant',
+    'best brunch','best bar','best coffee','best pizza','best burger',
+    'best taco','best sushi','best seafood','best food','best place',
+    'things to do','where to eat','guide to','must-try','must try',
+    'you need to try','top 10','top 5','top 20',
 ]
 
 # ═══════════════════════════════════════════════════════════════════
@@ -98,6 +140,8 @@ def clean(t):
 
 def is_excluded(text):
     t = text.lower()
+    # Normalize smart quotes so SKIP_TITLES matches both "what's" and "what\u2019s"
+    t = t.replace('\u2018', "'").replace('\u2019', "'").replace('\u201c', '"').replace('\u201d', '"')
     return any(x in t for x in EXCLUDED_WORDS) or any(x in t for x in SKIP_TITLES)
 
 def scrape_article_text(url):
@@ -119,17 +163,29 @@ def scrape_article_text(url):
         for tag in soup.select('nav, header, footer, aside, script, style, .ad, .sidebar, .comment'):
             tag.decompose()
 
-        # Try common article body selectors
+        # Try common article body selectors (containers first, then direct p tags)
+        container_sels = ['.article-body', '.entry-content', '.post-content', '.story-body',
+                          'article .content', '.field-body', '[itemprop="articleBody"]', '.post-body']
+        direct_sels = ['article p', '.article p']
+
         body = None
-        for sel in ['.article-body', '.entry-content', '.post-content', '.story-body',
-                    'article .content', '.field-body', '[itemprop="articleBody"]',
-                    '.post-body', 'article p', '.article p']:
-            body = soup.select(sel)
-            if body:
-                break
+        for sel in container_sels:
+            containers = soup.select(sel)
+            if containers:
+                # Extract <p> tags from within the container
+                body = []
+                for c in containers:
+                    body.extend(c.select('p'))
+                if body:
+                    break
 
         if not body:
-            # Fallback: grab all paragraphs
+            for sel in direct_sels:
+                body = soup.select(sel)
+                if body:
+                    break
+
+        if not body:
             body = soup.select('p')
 
         paragraphs = []
@@ -138,7 +194,7 @@ def scrape_article_text(url):
             if len(text) > 40 and not is_excluded(text):
                 paragraphs.append(text)
 
-        return ' '.join(paragraphs[:10])  # first 10 paragraphs
+        return ' '.join(paragraphs[:12])  # first 12 paragraphs
     except Exception as e:
         print(f'    Article scrape error: {e}')
         return ''
@@ -293,6 +349,111 @@ def scrape_google_news_tampa():
         print(f'  [Google News] Error: {e}')
     return stories
 
+def scrape_tampa_magazines():
+    """Scrape Tampa Magazines — restaurant openings, new spots, food/drink, events."""
+    stories = []
+    try:
+        from bs4 import BeautifulSoup
+        seen = set()
+        # Scrape multiple sections for variety
+        urls = [
+            'https://tampamagazines.com/food-and-drink-2/',
+            'https://tampamagazines.com/local-knowledge/',
+            'https://tampamagazines.com/moving-tampa/',
+        ]
+        for page_url in urls:
+            try:
+                r = requests.get(page_url, headers=HEADERS, timeout=15)
+                if r.status_code != 200: continue
+                soup = BeautifulSoup(r.text, 'html.parser')
+
+                for a in soup.select('a[href*="tampamagazines.com/"]')[:30]:
+                    href = a.get('href', '')
+                    title = clean(a.get_text())
+                    if href in seen or not title or len(title) < 20 or len(title) > 120:
+                        continue
+                    if any(x in href for x in ['/tag/', '/category/', '/author/', '/advertis',
+                                                '/subscribe', '/about', '/contact', '/shop',
+                                                '/purchase', '/digital-issue', '/email-newsletter',
+                                                '/register/', '/wp-content/']): continue
+                    if is_excluded(title): continue
+                    seen.add(href)
+                    stories.append({'title': title, 'url': href, 'source': 'Tampa Magazines'})
+                if len(stories) >= 10: break
+            except: continue
+
+        print(f'  [Tampa Mag] {len(stories)} article links found')
+    except Exception as e:
+        print(f'  [Tampa Mag] Error: {e}')
+    return stories
+
+
+def scrape_tbbwmag():
+    """Scrape Tampa Bay Business & Wealth — best daily Tampa dev/biz articles."""
+    stories = []
+    try:
+        from bs4 import BeautifulSoup
+        r = requests.get('https://tbbwmag.com/', headers=HEADERS, timeout=15)
+        if r.status_code != 200:
+            print(f'  [TBBW] HTTP {r.status_code}')
+            return stories
+        soup = BeautifulSoup(r.text, 'html.parser')
+        seen = set()
+
+        for a in soup.select('a[href*="tbbwmag.com/20"]')[:60]:
+            href = a.get('href', '')
+            title = clean(a.get_text())
+
+            if href in seen or not title or len(title) < 20 or len(title) > 120:
+                continue
+            # Only article URLs (YYYY/MM/DD/slug pattern)
+            if not re.search(r'tbbwmag\.com/\d{4}/\d{2}/\d{2}/', href):
+                continue
+            if is_excluded(title):
+                continue
+            seen.add(href)
+            stories.append({'title': title, 'url': href, 'source': 'TBBW'})
+            if len(stories) >= 12:
+                break
+
+        print(f'  [TBBW] {len(stories)} article links found')
+    except Exception as e:
+        print(f'  [TBBW] Error: {e}')
+    return stories
+
+
+def scrape_tampa_gov_news():
+    """Scrape tampa.gov news for official city development announcements."""
+    stories = []
+    try:
+        from bs4 import BeautifulSoup
+        r = requests.get('https://www.tampa.gov/news', headers=HEADERS, timeout=15)
+        if r.status_code != 200:
+            print(f'  [Tampa.gov] HTTP {r.status_code}')
+            return stories
+        soup = BeautifulSoup(r.text, 'html.parser')
+        seen = set()
+
+        for a in soup.select('a[href*="/news/"]')[:30]:
+            href = a.get('href', '')
+            title = clean(a.get_text())
+            if href in seen or not title or len(title) < 20 or len(title) > 120:
+                continue
+            if is_excluded(title):
+                continue
+            if not href.startswith('http'):
+                href = 'https://www.tampa.gov' + href
+            seen.add(href)
+            stories.append({'title': title, 'url': href, 'source': 'Tampa.gov'})
+            if len(stories) >= 8:
+                break
+
+        print(f'  [Tampa.gov] {len(stories)} article links found')
+    except Exception as e:
+        print(f'  [Tampa.gov] Error: {e}')
+    return stories
+
+
 def scrape_reddit_tampa():
     """Get high-engagement r/tampa posts with actual content."""
     stories = []
@@ -347,19 +508,32 @@ def extract_facts(text, n=8):
                  'Inc.', 'Corp.', 'Ltd.', 'Co.', 'vs.', 'U.S.', 'a.m.', 'p.m.', 'No.', 'approx.']:
         protected = protected.replace(abbr, abbr.replace('.', '\x00'))
     sentences = [s.replace('\x00', '.').strip() for s in re.split(r'(?<=[.!?])\s+', protected) if len(s.strip()) > 30]
-    # Filter out generic/boilerplate/fragment sentences
+    # Filter out generic/boilerplate/fragment/quote sentences
     skip = ['subscribe','sign up','click here','read more','advertisement',
             'cookie','privacy','terms','copyright','follow us','share this',
             'related:','also read','share on','tweet this','email this',
-            'however,','but ','although ','meanwhile','nonetheless']
-    frag_starts = [',', ';', 'and ', 'or ', 'but ', 'so ', 'yet ']
+            'however,','but ','although ','meanwhile','nonetheless',
+            'stay informed','stay up to date']
+    frag_starts = [',', ';', 'and ', 'or ', 'but ', 'so ', 'yet ',
+                   '\u201c', '\u2018', '"', "'",
+                   'who ', 'which ', 'that ', 'where ', 'when ']  # skip fragments + quotes
     good = []
     for s in sentences:
         sl = s.lower().strip()
         if any(x in sl for x in skip): continue
         if is_excluded(s): continue
-        if any(sl.startswith(x) for x in frag_starts): continue  # skip fragments
+        if any(sl.startswith(x) for x in frag_starts): continue  # skip fragments/quotes
         if len(s) < 35: continue  # too short to be a real fact
+        # Skip quote-heavy sentences (people saying things, not facts)
+        if ' said ' in sl[:80] or sl.startswith('according to'): continue
+        # Skip phone/address blocks (e.g. "(813) 223-7746 | Located at...")
+        if re.search(r'\(\d{3}\)\s*\d{3}', s): continue
+        # Skip past-year facts — we want what's NEW, not history
+        current_year = datetime.utcnow().year
+        past_years = [str(y) for y in range(current_year - 5, current_year)]
+        if any(f'in {y}' in sl or f'opened {y}' in sl or f'delivered {y}' in sl
+               or f'completed {y}' in sl or f'built {y}' in sl for y in past_years):
+            continue
         good.append(s)
 
     # Deduplicate: skip sentences that share >50% of words with one already picked
@@ -394,24 +568,35 @@ def extract_facts(text, n=8):
     return [s for _, s in scored[:n]]
 
 def shorten_fact(text):
-    """Turn a full article sentence into a punchy slide headline (max ~12 words).
+    """Turn a full article sentence into a punchy slide headline (max ~14 words).
     Keeps the most important part — numbers, names, addresses."""
     # Already short enough
     words = text.split()
-    if len(words) <= 12:
-        return text
+    if len(words) <= 14:
+        result = text
+    else:
+        result = None
+        # Try to find a natural break point (comma, dash, period)
+        for sep in [', ', ' — ', ' - ', '; ']:
+            if sep in text:
+                parts = text.split(sep)
+                # Take the part with the most numbers/specifics
+                best = max(parts, key=lambda p: len(re.findall(r'\d', p)) + len(p.split()) * 0.1)
+                if 4 <= len(best.split()) <= 14:
+                    result = best.strip().rstrip('.,;')
+                    break
+                # If best part is still too long, try joining first 2 parts
+                first_two = sep.join(parts[:2]).strip()
+                if 4 <= len(first_two.split()) <= 14:
+                    result = first_two.rstrip('.,;')
+                    break
+        if not result:
+            result = ' '.join(words[:14]).rstrip('.,;')
 
-    # Try to find a natural break point (comma, dash, period)
-    for sep in [', ', ' — ', ' - ', '; ']:
-        if sep in text:
-            parts = text.split(sep)
-            # Take the part with the most numbers/specifics
-            best = max(parts, key=lambda p: len(re.findall(r'\d', p)) + len(p.split()) * 0.1)
-            if 4 <= len(best.split()) <= 14:
-                return best.strip().rstrip('.,;')
-
-    # Fallback: just take first 12 words
-    return ' '.join(words[:12]).rstrip('.,;')
+    # Always capitalize first letter
+    if result and result[0].islower():
+        result = result[0].upper() + result[1:]
+    return result
 
 def wrap_text(text, max_words=14):
     """Wrap text into 2-3 lines for slide headline."""
@@ -474,6 +659,11 @@ def photo_query_for(text, slide_num=0):
         'baseball stadium field game crowd',
         'football stadium aerial view urban sports',
     ]
+    racing_queries = [
+        'racetrack motorsport speed car track aerial',
+        'race car track lights night speed competition',
+        'automotive event supercar luxury sports car',
+    ]
     realestate_queries = [
         'modern luxury condo building exterior architecture',
         'residential neighborhood houses aerial view',
@@ -492,22 +682,25 @@ def photo_query_for(text, slide_num=0):
 
     idx = slide_num % 5  # rotate through options
 
+    # Check most specific categories FIRST (e.g. "Hard Rock Hotel" shouldn't trigger hotel for a racetrack story)
+    if any(w in t for w in ['race','track','speedway','motor enclave','car show','automotive','racetrack']):
+        return racing_queries[idx % len(racing_queries)]
+    if any(w in t for w in ['concert','music','festival','band','dj','live nation','venue']):
+        return music_queries[idx % len(music_queries)]
     if any(w in t for w in ['restaurant','food','chef','menu','bakery','bread','brunch','taco','pizza','sushi','deli','cuban']):
         return food_queries[idx % len(food_queries)]
-    if any(w in t for w in ['hotel','resort','hospitality','lodging']):
-        return hotel_queries[idx % len(hotel_queries)]
-    if any(w in t for w in ['beach','sand','pier','coast','gulf','clearwater']):
-        return beach_queries[idx % len(beach_queries)]
-    if any(w in t for w in ['construction','build','develop','million','billion','project','approved']):
-        return construction_queries[idx % len(construction_queries)]
     if any(w in t for w in ['bar','cocktail','brewery','beer','drink','nightlife','club']):
         return bar_queries[idx % len(bar_queries)]
     if any(w in t for w in ['art','gallery','museum','exhibit','mural','paint']):
         return art_queries[idx % len(art_queries)]
-    if any(w in t for w in ['concert','music','festival','band','dj','live']):
-        return music_queries[idx % len(music_queries)]
     if any(w in t for w in ['sport','stadium','rays','lightning','bucs','game','arena']):
         return sports_queries[idx % len(sports_queries)]
+    if any(w in t for w in ['construction','build','develop','million','billion','project','approved']):
+        return construction_queries[idx % len(construction_queries)]
+    if any(w in t for w in ['hotel','resort','hospitality','lodging']):
+        return hotel_queries[idx % len(hotel_queries)]
+    if any(w in t for w in ['beach','sand','pier','coast','gulf','clearwater']):
+        return beach_queries[idx % len(beach_queries)]
     if any(w in t for w in ['home','house','real estate','market','property','condo']):
         return realestate_queries[idx % len(realestate_queries)]
     if any(w in t for w in ['park','garden','trail','outdoor','nature','tree']):
@@ -575,7 +768,9 @@ def build_post_from_article(story, article_text):
         if re.search(r'\d{4,}', f): w += 3  # big numbers
         if re.search(r'(acre|square.?f)', f, re.I): w += 4
         return w
-    facts_sorted = sorted(facts, key=fact_weight)
+    # Pick the 5 most interesting facts, then sort ascending for escalation
+    top_facts = sorted(facts, key=fact_weight, reverse=True)[:5]
+    facts_sorted = sorted(top_facts, key=fact_weight)
 
     # Add fact slides — shorten to punchy headlines, escalate to big reveal
     max_fact_slides = min(len(facts_sorted), 5)
@@ -594,13 +789,17 @@ def build_post_from_article(story, article_text):
     # Topic key for dedup
     topic = f'news:{title[:60]}'
 
-    # Caption — Tampa Tomorrow style: storytelling with bullet points
+    # Caption — short context that DOESN'T repeat slide content
+    # Use the first 1-2 sentences of the article as a summary hook
+    summary_sents = [s.strip() for s in re.split(r'(?<=[.!?])\s+', article_text[:500]) if len(s.strip()) > 30]
+    summary = summary_sents[0] if summary_sents else title
+    if len(summary) > 200:
+        summary = summary[:200].rsplit(' ', 1)[0] + '...'
+
     caption = f"| {title[:60]} - {neighborhood} |\n\n"
-    for f in facts_sorted[:max_fact_slides]:
-        caption += f"\u2022 {f}\n"
-    caption += "\nThis is what's happening in Tampa right now.\n"
-    caption += "Save this. Tag someone who needs to see it.\n\n"
-    caption += "Follow @thetampapulse for more.\n\n"
+    caption += f"{summary}\n\n"
+    caption += "Swipe for the full breakdown >>\n\n"
+    caption += "Follow @thetampapulse for daily Tampa updates.\n\n"
     caption += "#tampa #tampabay #tampalife #TampaPulse #tampaflorida #tampadevelopment"
 
     return {
@@ -727,19 +926,44 @@ def draw_slide(photo, headline, location, slide_num, is_last=False):
     print(f'  {path.name}: {path.stat().st_size} bytes')
     return path
 
-def upload_to_catbox(filepath, retries=3):
-    for attempt in range(1, retries+1):
-        try:
-            with open(filepath, 'rb') as f:
-                r = requests.post('https://catbox.moe/user/api.php',
-                    data={'reqtype':'fileupload'}, files={'fileToUpload':f}, timeout=90)
-                if r.status_code == 200 and r.text.strip().startswith('https://'):
-                    return r.text.strip()
-            print(f'  Attempt {attempt} failed: {r.status_code} {r.text[:80]}')
-        except Exception as e:
-            print(f'  Attempt {attempt} error: {e}')
-        if attempt < retries:
-            time.sleep(5)
+def upload_image(filepath, retries=3):
+    """Upload image to a public host. Tries catbox first, then 0x0.st as fallback."""
+    hosts = [
+        ('catbox', lambda f: requests.post('https://catbox.moe/user/api.php',
+            data={'reqtype': 'fileupload'}, files={'fileToUpload': f}, timeout=90)),
+        ('uguu.se', lambda f: requests.post('https://uguu.se/upload',
+            files={'files[]': f}, timeout=90)),
+    ]
+    for host_name, upload_fn in hosts:
+        for attempt in range(1, retries + 1):
+            try:
+                with open(filepath, 'rb') as f:
+                    r = upload_fn(f)
+                    # Catbox returns URL as plain text, uguu returns JSON
+                    if host_name == 'uguu.se':
+                        data = r.json()
+                        if data.get('success') and data.get('files'):
+                            url = data['files'][0]['url']
+                        else:
+                            print(f'  [{host_name}] Attempt {attempt}: {r.text[:80]}')
+                            continue
+                    else:
+                        url = r.text.strip()
+                    if r.status_code == 200 and url.startswith('https://'):
+                        # Verify the upload is a real image
+                        check = requests.head(url, timeout=15, allow_redirects=True)
+                        ctype = check.headers.get('Content-Type', '')
+                        if 'image' in ctype:
+                            print(f'  [{host_name}] {url}')
+                            return url
+                        print(f'  [{host_name}] Attempt {attempt}: bad content-type {ctype}')
+                    else:
+                        print(f'  [{host_name}] Attempt {attempt}: {r.status_code} {r.text[:80]}')
+            except Exception as e:
+                print(f'  [{host_name}] Attempt {attempt}: {e}')
+            if attempt < retries:
+                time.sleep(5)
+        print(f'  [{host_name}] All attempts failed, trying next host...')
     return None
 
 # ═══════════════════════════════════════════════════════════════════
@@ -756,10 +980,15 @@ def is_tampa_relevant(title, article_text='', url=''):
     # tampa.gov stories are always Tampa-relevant
     if 'tampa.gov' in url:
         return True
-    combined = (title + ' ' + article_text[:500]).lower()
-    # Must mention tampa somewhere
-    if 'tampa' not in combined and 'hillsborough' not in combined and 'ybor' not in combined and 'seminole heights' not in combined and 'channelside' not in combined and 'soho tampa' not in combined and 'hyde park' not in combined and 'westshore' not in combined:
-        # Allow Tampa Bay-wide stories if they mention Tampa Bay explicitly
+    combined = (title + ' ' + article_text[:500] + ' ' + url).lower()
+    # Must mention tampa or a Tampa neighborhood/landmark
+    tampa_signals = ['tampa', 'hillsborough', 'ybor', 'seminole heights', 'channelside',
+                     'soho tampa', 'hyde park', 'westshore', 'gasworx', 'water street',
+                     'rome yard', 'armature works', 'bayshore', 'north downtown',
+                     'davis islands', 'palma ceia', 'dale mabry', 'nebraska ave',
+                     'kennedy blvd', 'harbour island', 'tampa heights', 'west tampa',
+                     'south tampa', 'new tampa', 'carrollwood', 'brandon']
+    if not any(sig in combined for sig in tampa_signals):
         if 'tampa bay' not in combined:
             return False
     # Reject if primarily about another city
@@ -776,6 +1005,9 @@ def scrape_and_select():
 
     print('\n=== SCRAPING NEWS SOURCES ===')
     all_stories = []
+    # TBBW is the best source — covers dev, events, food, tech, all Tampa-specific
+    all_stories.extend(scrape_tbbwmag())
+    all_stories.extend(scrape_tampa_gov_news())
     all_stories.extend(scrape_stpete_catalyst())
     all_stories.extend(scrape_creative_loafing())
     all_stories.extend(scrape_reddit_tampa())
@@ -855,7 +1087,7 @@ if __name__ == '__main__':
     urls = []
     for s in slide_paths:
         print(f'Uploading {s.name}...')
-        url = upload_to_catbox(s)
+        url = upload_image(s)
         if url: urls.append(url); print(f'  {url}')
         else: print('UPLOAD FAILED after 3 attempts'); exit(1)
 

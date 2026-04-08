@@ -35,7 +35,7 @@ HEADERS = {
 }
 
 # ── Timezone gate ────────────────────────────────────────────────────
-STORY_HOUR = 12  # noon Tampa time
+STORY_HOURS = {11, 18}  # 11 AM and 6 PM Tampa time
 
 def _tampa_hour():
     utc_now = datetime.now(timezone.utc)
@@ -52,8 +52,8 @@ def _tampa_hour():
 
 if os.environ.get('GITHUB_ACTIONS') == 'true':
     h = _tampa_hour()
-    if h != STORY_HOUR:
-        print(f"Tampa hour is {h}, story posts at {STORY_HOUR}. Skipping.")
+    if h not in STORY_HOURS:
+        print(f"Tampa hour is {h}, story posts at {STORY_HOURS}. Skipping.")
         sys.exit(0)
     print(f"Tampa hour is {h} — posting story.")
 
@@ -348,21 +348,39 @@ def draw_story(photo, headline, neighborhood, fact=None):
     return out_path
 
 def upload_image(filepath):
-    """Upload to catbox.moe for a public URL."""
-    for attempt in range(3):
-        try:
-            with open(filepath, 'rb') as f:
-                r = requests.post('https://catbox.moe/user/api.php',
-                    data={'reqtype': 'fileupload'},
-                    files={'fileToUpload': f}, timeout=90)
-            if r.status_code == 200 and r.text.strip().startswith('https://'):
-                url = r.text.strip()
-                check = requests.head(url, timeout=15, allow_redirects=True)
-                if 'image' in check.headers.get('Content-Type', ''):
-                    return url
-        except Exception as e:
-            print(f'  Upload attempt {attempt+1}: {e}')
-        time.sleep(5)
+    """Upload to a public host. Tries catbox first, then uguu.se."""
+    hosts = [
+        ('catbox', lambda f: requests.post('https://catbox.moe/user/api.php',
+            data={'reqtype': 'fileupload'}, files={'fileToUpload': f}, timeout=90)),
+        ('uguu.se', lambda f: requests.post('https://uguu.se/upload',
+            files={'files[]': f}, timeout=90)),
+    ]
+    for host_name, upload_fn in hosts:
+        for attempt in range(3):
+            try:
+                with open(filepath, 'rb') as f:
+                    r = upload_fn(f)
+                if host_name == 'uguu.se':
+                    data = r.json()
+                    if data.get('success') and data.get('files'):
+                        url = data['files'][0]['url']
+                    else:
+                        print(f'  [{host_name}] Attempt {attempt+1}: {r.text[:80]}')
+                        continue
+                else:
+                    url = r.text.strip()
+                if r.status_code == 200 and url.startswith('https://'):
+                    check = requests.head(url, timeout=15, allow_redirects=True)
+                    if 'image' in check.headers.get('Content-Type', ''):
+                        print(f'  [{host_name}] {url}')
+                        return url
+                    print(f'  [{host_name}] Attempt {attempt+1}: bad content-type')
+                else:
+                    print(f'  [{host_name}] Attempt {attempt+1}: {r.status_code} {r.text[:80]}')
+            except Exception as e:
+                print(f'  [{host_name}] Attempt {attempt+1}: {e}')
+            time.sleep(5)
+        print(f'  [{host_name}] All attempts failed, trying next...')
     return None
 
 

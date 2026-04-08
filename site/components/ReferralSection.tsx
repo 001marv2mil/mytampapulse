@@ -194,9 +194,43 @@ export default function ReferralSection() {
             </button>
           </div>
 
-          <p className="text-gray-600 text-xs text-center">
+          <p className="text-gray-600 text-xs text-center mb-8">
             New giveaway every week. Your unique link is in every email we send you.
           </p>
+
+          {/* Instagram follow + share bonus */}
+          <div className="border-t border-white/10 pt-8">
+            <div className="text-center mb-6">
+              <p className="text-white text-sm font-semibold mb-1">Want daily Tampa updates?</p>
+              <p className="text-gray-500 text-xs">We post 3x/day on Instagram — the stuff that can&apos;t wait until Thursday.</p>
+            </div>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <a
+                href="https://instagram.com/thetampapulse"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-[#833AB4] via-[#E1306C] to-[#F77737] text-white font-semibold text-sm px-6 py-3 rounded-full hover:scale-105 transition-transform"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                Follow @thetampapulse
+              </a>
+              <button
+                onClick={() => {
+                  navigator.share?.({
+                    title: "Tampa Pulse on Instagram",
+                    text: "Follow @thetampapulse for daily Tampa updates — new openings, development, events",
+                    url: "https://instagram.com/thetampapulse",
+                  }).catch(() => {
+                    window.open("https://instagram.com/thetampapulse", "_blank");
+                  });
+                }}
+                className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white font-semibold text-sm px-6 py-3 rounded-full hover:bg-white/20 transition-colors"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                Share with a friend
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </section>

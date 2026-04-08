@@ -2,8 +2,11 @@ name: Post Tampa Story
 
 on:
   schedule:
-    - cron: '0 16 * * *'   # 12 PM EDT (summer)
-    - cron: '0 17 * * *'   # 12 PM EST (winter)
+    - cron: '0 15 * * *'   # 11 AM EDT (summer)
+    - cron: '0 16 * * *'   # 11 AM EST (winter) / 12 PM EDT (summer)
+    - cron: '0 17 * * *'   # 12 PM EST (winter) / 1 PM EDT (summer)
+    - cron: '0 22 * * *'   # 6 PM EDT (summer)
+    - cron: '0 23 * * *'   # 6 PM EST (winter)
   workflow_dispatch:
 
 permissions:
