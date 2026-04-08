@@ -1,11 +1,12 @@
 """
 repost_reel.py — Curate and repost viral Tampa reels to @thetampapulse.
 
-Scrapes recent reels from 100+ Tampa IG accounts via Apify, picks the
-highest-engagement reel not yet posted, rehosts the video, and publishes
-it as a Reel on our feed with creator credit.
+Two modes:
+  --scrape   Run Apify once (10 AM), cache results to tampa_reel_cache.json
+  (default)  Read cache, pick top unused reel, post it (2 PM, 4 PM, 7 PM)
 
-Runs 3x/day via GitHub Actions (2 PM, 4 PM, 7 PM Tampa time).
+One Apify scrape per day (~$0.25) instead of three (~$1.50). Cache is
+read 3x to pick a fresh reel each time.
 """
 
 import argparse
@@ -34,12 +35,14 @@ APIFY_ACTOR = "apify~instagram-scraper"
 APIFY_BASE  = "https://api.apify.com/v2"
 
 LOG_FILE          = Path(__file__).parent / "tampa_repost_log.json"
+CACHE_FILE        = Path(__file__).parent / "tampa_reel_cache.json"
 ACCOUNTS_FILE     = Path(__file__).parent / "tampa_ig_accounts.json"
 RETENTION_DAYS    = 90
 REPOST_WINDOW_DAYS = 30
 
-# ── Timezone gate: only post at 2 PM, 4 PM, 7 PM Tampa time ─────────
-POST_HOURS = {14, 16, 19}
+# ── Timezone gate ────────────────────────────────────────────────────
+SCRAPE_HOUR = 10       # 10 AM Tampa time — Apify scrape
+POST_HOURS  = {14, 16, 19}  # 2/4/7 PM — post from cache
 
 def _tampa_hour():
     utc_now = datetime.now(timezone.utc)
@@ -54,12 +57,7 @@ def _tampa_hour():
     offset = timedelta(hours=-4 if is_dst else -5)
     return (utc_now + offset).hour
 
-if os.environ.get('GITHUB_ACTIONS') == 'true':
-    h = _tampa_hour()
-    if h not in POST_HOURS:
-        print(f"Tampa hour is {h}, not a post hour {POST_HOURS}. Skipping.")
-        sys.exit(0)
-    print(f"Tampa hour is {h} — posting.")
+# Timezone gate is checked inside main() based on --scrape flag
 
 # ── Load Tampa accounts from JSON ────────────────────────────────────
 def load_accounts() -> list[str]:
@@ -395,52 +393,52 @@ def publish_reel(container_id: str) -> str | None:
 # MAIN
 # ═══════════════════════════════════════════════════════════════════
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Repost trending Tampa reels to @thetampapulse"
-    )
-    parser.add_argument(
-        "--preview", action="store_true",
-        help="Print what would be posted without publishing",
-    )
-    parser.add_argument(
-        "--max-age", type=int, default=None,
-        help="Override MAX_AGE_HOURS (e.g. --max-age 168 for 7 days)",
-    )
-    parser.add_argument(
-        "--sample-size", type=int, default=20,
-        help="Number of accounts to sample per run (default 20)",
-    )
-    args = parser.parse_args()
-
-    if args.max_age:
-        global MAX_AGE_HOURS
-        MAX_AGE_HOURS = args.max_age
-        print(f"[override] MAX_AGE_HOURS = {MAX_AGE_HOURS}")
-
-    if not TOKEN or not APIFY_TOKEN:
-        print("Missing INSTAGRAM_ACCESS_TOKEN or APIFY_API_TOKEN in env.")
+def do_scrape(args):
+    """Mode 1: Scrape Apify, cache ranked candidates to JSON."""
+    if not APIFY_TOKEN:
+        print("Missing APIFY_API_TOKEN in env.")
         sys.exit(1)
 
-    # Pick random sample from the full pool each run
     sample = random.sample(TARGET_ACCOUNTS, min(args.sample_size, len(TARGET_ACCOUNTS)))
-    print(f"\n=== TAMPA PULSE REEL REPOSTER ===")
+    print(f"\n=== SCRAPE MODE ===")
     print(f"Sampling {len(sample)} of {len(TARGET_ACCOUNTS)} accounts")
 
-    # Scrape reels via Apify
     items = scrape_reels(sample)
     if not items:
         print("No items returned from Apify — skipping")
         sys.exit(0)
 
-    # Filter and rank
     log = prune_log(load_log())
     candidates = filter_candidates(items, log)
-    if not candidates:
-        print("No fresh reels found — skipping")
+    print(f"Caching {len(candidates)} candidates to {CACHE_FILE.name}")
+    CACHE_FILE.write_text(json.dumps(candidates, indent=2))
+    print("Scrape done.")
+
+
+def do_post(args):
+    """Mode 2: Read cache, pick top unused reel, publish."""
+    if not TOKEN:
+        print("Missing INSTAGRAM_ACCESS_TOKEN in env.")
+        sys.exit(1)
+
+    if not CACHE_FILE.exists():
+        print(f"No cache file ({CACHE_FILE.name}) — run with --scrape first.")
         sys.exit(0)
 
-    pick = candidates[0]
+    candidates = json.loads(CACHE_FILE.read_text())
+    if not candidates:
+        print("Cache is empty — no reels to post.")
+        sys.exit(0)
+
+    # Re-filter against the log so we don't repost something posted earlier today
+    log = prune_log(load_log())
+    posted_keys = {e["topic"] for e in log}
+    fresh = [c for c in candidates if c["post_key"] not in posted_keys]
+    if not fresh:
+        print("All cached reels already posted — skipping.")
+        sys.exit(0)
+
+    pick = fresh[0]
     caption = random.choice(CAPTION_TEMPLATES).format(username=pick["username"])
 
     print(f"\n--- Selected reel ---")
@@ -454,10 +452,6 @@ def main():
 
     if args.preview:
         print("\n[preview mode] Would publish the reel above. Exiting.")
-        print(f"\nTop 5 candidates:")
-        for i, c in enumerate(candidates[:5], 1):
-            print(f"  {i}. @{c['username']} — {c['velocity']} eng/hr, "
-                  f"{c['likes']} likes, {c['age_hours']}h old")
         sys.exit(0)
 
     # Rehost and publish
@@ -476,7 +470,6 @@ def main():
         print("Failed to publish reel.")
         sys.exit(1)
 
-    # Log the post
     log.append({
         "topic":     pick["post_key"],
         "username":  pick["username"],
@@ -485,6 +478,53 @@ def main():
     })
     save_log(log)
     print(f"\nDone. Reel from @{pick['username']} published and logged.")
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Repost trending Tampa reels to @thetampapulse"
+    )
+    parser.add_argument(
+        "--scrape", action="store_true",
+        help="Scrape mode: run Apify and cache results (no posting)",
+    )
+    parser.add_argument(
+        "--preview", action="store_true",
+        help="Print what would be posted without publishing",
+    )
+    parser.add_argument(
+        "--max-age", type=int, default=None,
+        help="Override MAX_AGE_HOURS (e.g. --max-age 168 for 7 days)",
+    )
+    parser.add_argument(
+        "--sample-size", type=int, default=10,
+        help="Number of accounts to sample per scrape (default 10)",
+    )
+    args = parser.parse_args()
+
+    if args.max_age:
+        global MAX_AGE_HOURS
+        MAX_AGE_HOURS = args.max_age
+        print(f"[override] MAX_AGE_HOURS = {MAX_AGE_HOURS}")
+
+    # Timezone gate on GitHub Actions
+    if os.environ.get('GITHUB_ACTIONS') == 'true':
+        h = _tampa_hour()
+        if args.scrape:
+            if h != SCRAPE_HOUR:
+                print(f"Tampa hour is {h}, scrape runs at {SCRAPE_HOUR}. Skipping.")
+                sys.exit(0)
+            print(f"Tampa hour is {h} — scraping.")
+        else:
+            if h not in POST_HOURS:
+                print(f"Tampa hour is {h}, not a post hour {POST_HOURS}. Skipping.")
+                sys.exit(0)
+            print(f"Tampa hour is {h} — posting.")
+
+    if args.scrape:
+        do_scrape(args)
+    else:
+        do_post(args)
 
 
 if __name__ == "__main__":

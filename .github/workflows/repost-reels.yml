@@ -2,6 +2,10 @@ name: Repost Tampa Reels
 
 on:
   schedule:
+    # Scrape once at 10 AM Tampa time
+    - cron: '0 14 * * *'   # 10 AM EDT (summer)
+    - cron: '0 15 * * *'   # 10 AM EST (winter)
+    # Post 3x/day from cache
     - cron: '0 18 * * *'   # 2 PM EDT (summer)
     - cron: '0 19 * * *'   # 2 PM EST (winter)
     - cron: '0 20 * * *'   # 4 PM EDT (summer)
@@ -28,19 +32,27 @@ jobs:
       - name: Install dependencies
         run: pip install requests python-dotenv
 
-      - name: Repost reel
+      - name: Scrape reels (10 AM only)
+        env:
+          APIFY_API_TOKEN: ${{ secrets.APIFY_API_TOKEN }}
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          INSTAGRAM_BUSINESS_ACCOUNT_ID: ${{ secrets.INSTAGRAM_BUSINESS_ACCOUNT_ID }}
+        run: |
+          cd automation
+          python repost_reel.py --scrape
+
+      - name: Post reel (2/4/7 PM only)
         env:
           INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
           INSTAGRAM_BUSINESS_ACCOUNT_ID: ${{ secrets.INSTAGRAM_BUSINESS_ACCOUNT_ID }}
-          APIFY_API_TOKEN: ${{ secrets.APIFY_API_TOKEN }}
         run: |
           cd automation
           python repost_reel.py
 
-      - name: Commit repost log
+      - name: Commit logs and cache
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add automation/tampa_repost_log.json
+          git add automation/tampa_repost_log.json automation/tampa_reel_cache.json
           git diff --staged --quiet || git commit -m "update tampa repost log [skip ci]"
           git push
