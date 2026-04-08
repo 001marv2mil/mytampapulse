@@ -35,31 +35,30 @@ CACHE_MAX_AGE_H   = 24   # scrape fresh only if cache is older than this
 RETENTION_DAYS    = 90
 REPOST_WINDOW_DAYS = 30
 
-# ── Target accounts — big rotating pool so content never repeats ────
-# Mix of HIGH-VOLUME aggregators (post 3-10x/day, always have fresh reels)
-# and active personality accounts. Each run picks 5 random.
+# ── Target accounts — original creators with CLEAN aesthetic pet videos ────
+# NO aggregators/meme pages (text overlays). Only cute, overlay-free content.
+# Style reference: @jelenavoegeli — pure cuteness, no text on video.
 TARGET_ACCOUNTS = list(set([
-    # ── Aggregators / theme pages (post multiple reels daily) ──
-    "dogsofinstagram", "puppies", "dogs",
-    "goldenretrievers", "doglovers", "puppiesofinstagram",
-    "dogsbeingbasic", "barked", "weratedogs",
-    "catsofinstagram", "cats_of_instagram", "catloversclub",
-    "kittens", "cats_of_world", "bestmeow", "meowed",
-    "animalsdoingthings", "cute", "dailyfluff",
-    "petsofinstagram", "cutepetclub", "cuteemergency",
-    "fluffyoverload", "animals_video", "9gag.cute",
-    "funnyanimals", "animalsco", "bestanimalvideos",
-    # ── Dogs — active personality accounts ──
-    "tuckerbudzyn", "reagandoodle", "crusoe_dachshund",
-    "itsdougthepug", "mayapolarbear", "huskyx4",
-    "bfrenchieworld", "goldenmalkiesmile", "samoyedbart",
-    "coconutricebear", "mikithefrenchie",
-    # ── Cats — active personality accounts ──
+    # ── Dogs — original content creators ──
+    "jelenavoegeli", "tuckerbudzyn", "reagandoodle",
+    "mayapolarbear", "huskyx4", "bfrenchieworld",
+    "goldenmalkiesmile", "samoyedbart", "coconutricebear",
+    "mikithefrenchie", "crusoe_dachshund", "itsdougthepug",
+    "louboutinanyc", "corgnelius", "mensweardog",
+    "henrythecoloradodog", "goldenbearollie",
+    "tuna_the_dog", "harlowandsage", "maboroshi_shiba",
+    "sterlingd.archer", "winstonthewhitedog",
+    "dalmatiantrail", "norbert", "oakleythedachshund",
+    # ── Cats — original content creators ──
     "smoothiethecat", "cobythecat", "sukiicat",
-    "pumpkinthecoon", "hosaborthecat",
-    # ── Exotic / Wildlife / Mixed ──
+    "pumpkinthecoon", "hosaborthecat", "naborthecat",
+    "hosico_cat", "albertbabycat", "nala_cat",
+    "venmengwong", "juniperfoxx",
+    # ── Exotic / Small animals / Mixed cute ──
     "juniper.foxx", "loki_the_wolfdog", "mr.pokee",
-    "marutaro", "whatabirb", "bobaandco",
+    "marutaro", "bobaandco", "hedgehog_azuki",
+    "jill.dill", "whatabirb", "the_blueboys",
+    "peachycomet22", "trioverse_tales",
 ]))
 
 # ── Caption templates (use \U escapes to avoid surrogate-pair bugs) ──
