@@ -1,24 +1,16 @@
-name: "[DISABLED] Old Carousel Poster"
+name: Post Tampa Story
 
-# DISABLED — replaced by repost-reels.yml (reels) + post-story.yml (stories)
-# Keeping file for reference. Remove the 'if: false' to re-enable.
 on:
+  schedule:
+    - cron: '0 16 * * *'   # 12 PM EDT (summer)
+    - cron: '0 17 * * *'   # 12 PM EST (winter)
   workflow_dispatch:
-
-# on:
-#   schedule:
-#     - cron: '0 18 * * *'
-#     - cron: '0 19 * * *'
-#     - cron: '0 20 * * *'
-#     - cron: '0 21 * * *'
-#     - cron: '0 23 * * *'
-#     - cron: '0 0 * * *'
 
 permissions:
   contents: write
 
 jobs:
-  post:
+  story:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -36,23 +28,21 @@ jobs:
           fc-cache -f -v || true
 
       - name: Install dependencies
-        run: |
-          pip install pillow requests python-dotenv beautifulsoup4 lxml
+        run: pip install pillow requests python-dotenv beautifulsoup4 lxml
 
-      - name: Run post script
+      - name: Post story
         env:
           INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
           INSTAGRAM_BUSINESS_ACCOUNT_ID: ${{ secrets.INSTAGRAM_BUSINESS_ACCOUNT_ID }}
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
-          TICKETMASTER_API_KEY: ${{ secrets.TICKETMASTER_API_KEY }}
         run: |
           cd automation
-          python go.py
+          python post_story.py
 
-      - name: Commit post log
+      - name: Commit story log
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add automation/posted_log.json automation/used_photos.json
-          git diff --staged --quiet || git commit -m "update post log [skip ci]"
+          git add automation/story_posted_log.json
+          git diff --staged --quiet || git commit -m "update story log [skip ci]"
           git push
