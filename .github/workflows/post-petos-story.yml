@@ -1,0 +1,46 @@
+name: Post @petoshealth Fun Fact Story
+
+on:
+  schedule:
+    # 1x daily: 1PM ET (Eastern Time)
+    - cron: '0 17 * * *'    # 1:00 PM ET
+  workflow_dispatch:          # manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Oswald font
+        run: |
+          sudo mkdir -p /usr/local/share/fonts
+          sudo curl -L -o /usr/local/share/fonts/Oswald-Bold.ttf \
+            "https://github.com/googlefonts/OswaldFont/raw/main/fonts/ttf/Oswald-Bold.ttf"
+          sudo fc-cache -f -v
+
+      - name: Install dependencies
+        run: pip install pillow requests python-dotenv
+
+      - name: Run petos_story.py
+        env:
+          PETOS_PAGE_ACCESS_TOKEN: ${{ secrets.PETOS_PAGE_ACCESS_TOKEN }}
+          PETOS_IG_ACCOUNT_ID: ${{ secrets.PETOS_IG_ACCOUNT_ID }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+        working-directory: automation
+        run: python petos_story.py
+
+      - name: Update story log
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add automation/petos_story_log.json || true
+          git diff --cached --quiet || git commit -m "petos: update story log [skip ci]"
+          git push || true
