@@ -2,13 +2,9 @@ name: Repost Tampa Reels
 
 on:
   schedule:
-    # Dual EDT/EST crons — script gates on local Tampa hour, skips wrong-season runs
+    # 2 reels/day: 10 AM + 7 PM EST (dual crons for EDT/EST)
     - cron: '0 14 * * *'   # 10 AM EDT
     - cron: '0 15 * * *'   # 10 AM EST
-    - cron: '0 18 * * *'   # 2 PM EDT
-    - cron: '0 19 * * *'   # 2 PM EST
-    - cron: '0 20 * * *'   # 4 PM EDT
-    - cron: '0 21 * * *'   # 4 PM EST
     - cron: '0 23 * * *'   # 7 PM EDT
     - cron: '0 0 * * *'    # 7 PM EST
   workflow_dispatch:

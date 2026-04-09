@@ -42,7 +42,7 @@ REPOST_WINDOW_DAYS = 30
 
 # ── Timezone gate ────────────────────────────────────────────────────
 SCRAPE_HOUR = 10       # 10 AM Tampa time — Apify scrape
-POST_HOURS  = {14, 16, 19}  # 2/4/7 PM — post from cache
+POST_HOURS  = {10, 19}  # 10 AM, 7 PM — post from cache
 
 def _tampa_hour():
     utc_now = datetime.now(timezone.utc)

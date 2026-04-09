@@ -35,7 +35,7 @@ HEADERS = {
 }
 
 # ── Timezone gate ────────────────────────────────────────────────────
-STORY_HOURS = {11, 18}  # 11 AM and 6 PM Tampa time
+STORY_HOURS = {13}  # 1 PM Tampa time
 
 def _tampa_hour():
     utc_now = datetime.now(timezone.utc)

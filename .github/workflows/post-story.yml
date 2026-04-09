@@ -2,11 +2,9 @@ name: Post Tampa Story
 
 on:
   schedule:
-    # Dual EDT/EST crons — script gates on local Tampa hour, skips wrong-season runs
-    - cron: '0 15 * * *'   # 11 AM EDT
-    - cron: '0 16 * * *'   # 11 AM EST
-    - cron: '0 22 * * *'   # 6 PM EDT
-    - cron: '0 23 * * *'   # 6 PM EST
+    # 1 story/day: 1 PM EST (dual crons for EDT/EST)
+    - cron: '0 17 * * *'   # 1 PM EDT
+    - cron: '0 18 * * *'   # 1 PM EST
   workflow_dispatch:
 
 permissions:
