@@ -41,8 +41,7 @@ RETENTION_DAYS    = 90
 REPOST_WINDOW_DAYS = 30
 
 # ── Timezone gate ────────────────────────────────────────────────────
-SCRAPE_HOUR = 10       # 10 AM Tampa time — Apify scrape
-POST_HOURS  = {10, 19}  # 10 AM, 7 PM — post from cache
+POST_HOURS  = {10, 19}  # 10 AM, 7 PM EST — scrape + post each run
 
 def _tampa_hour():
     utc_now = datetime.now(timezone.utc)
@@ -510,16 +509,10 @@ def main():
     # Timezone gate on GitHub Actions
     if os.environ.get('GITHUB_ACTIONS') == 'true':
         h = _tampa_hour()
-        if args.scrape:
-            if h != SCRAPE_HOUR:
-                print(f"Tampa hour is {h}, scrape runs at {SCRAPE_HOUR}. Skipping.")
-                sys.exit(0)
-            print(f"Tampa hour is {h} — scraping.")
-        else:
-            if h not in POST_HOURS:
-                print(f"Tampa hour is {h}, not a post hour {POST_HOURS}. Skipping.")
-                sys.exit(0)
-            print(f"Tampa hour is {h} — posting.")
+        if h not in POST_HOURS:
+            print(f"Tampa hour is {h}, not a post hour {POST_HOURS}. Skipping.")
+            sys.exit(0)
+        print(f"Tampa hour is {h} — running {'scrape' if args.scrape else 'post'}.")
 
     if args.scrape:
         do_scrape(args)
