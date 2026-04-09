@@ -2,11 +2,11 @@ name: Post Tampa Story
 
 on:
   schedule:
-    - cron: '0 15 * * *'   # 11 AM EDT (summer)
-    - cron: '0 16 * * *'   # 11 AM EST (winter) / 12 PM EDT (summer)
-    - cron: '0 17 * * *'   # 12 PM EST (winter) / 1 PM EDT (summer)
-    - cron: '0 22 * * *'   # 6 PM EDT (summer)
-    - cron: '0 23 * * *'   # 6 PM EST (winter)
+    # Dual EDT/EST crons — script gates on local Tampa hour, skips wrong-season runs
+    - cron: '0 15 * * *'   # 11 AM EDT
+    - cron: '0 16 * * *'   # 11 AM EST
+    - cron: '0 22 * * *'   # 6 PM EDT
+    - cron: '0 23 * * *'   # 6 PM EST
   workflow_dispatch:
 
 permissions:
@@ -46,6 +46,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add automation/story_posted_log.json
+          git add automation/story_posted_log.json 2>/dev/null || true
           git diff --staged --quiet || git commit -m "update story log [skip ci]"
           git push
