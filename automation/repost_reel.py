@@ -70,12 +70,29 @@ def load_accounts() -> list[str]:
 TARGET_ACCOUNTS = load_accounts()
 print(f"Loaded {len(TARGET_ACCOUNTS)} Tampa accounts")
 
-# ── Content filters — no politics, crime, etc. ───────────────────────
+# ── Content filters — keep content on-brand for Tampa Pulse ───────────
+# Tampa Pulse is a local lifestyle/discovery brand. We only repost reels
+# that showcase Tampa places, food, events, scenery, activities, etc.
+# Filter out: politics, crime, personal drama, rants, gossip, talking-head
+# commentary, relationship content, and anything not about Tampa itself.
 EXCLUDED_WORDS = [
+    # politics / crime
     'crime','politics','police','arrest','shooting','trump','biden','desantis',
     'republican','democrat','murder','killed','lawsuit','sued','robbery',
     'congressional','candidate','election','immigration','gun ',
     'missing person','dead body','indicted','convicted','abortion',
+    # drama / gossip / rants / personal
+    'drama','tea','rant','gossip','expose','toxic','cheating','situationship',
+    'narcissist','red flag','storytime','story time','caught him','caught her',
+    'he said','she said','no cap','fr fr','real talk','unpopular opinion',
+    'hot take','controversial','receipts','spill','ick','delulu',
+    'baby mama','baby daddy','side chick','side piece',
+    # relationship / dating content
+    'boyfriend','girlfriend','dating','breakup','broke up','my ex',
+    'talking stage','roster','body count',
+    # off-topic formats
+    'grwm','get ready with me','outfit of the day','ootd','haul',
+    'unboxing','asmr','mukbang','pov:',
 ]
 
 def is_excluded(text: str) -> bool:
@@ -84,18 +101,19 @@ def is_excluded(text: str) -> bool:
 
 # ── Caption templates — casual Tampa vibe with creator credit ────────
 CAPTION_TEMPLATES = [
-    "Tampa stays undefeated \U0001F334\n\U0001F3A5 @{username}\n\n#tampa #tampabay #tampaflorida #tampalife #thingstodointampa #TampaPulse",
-    "This is why we live here \u2600\ufe0f\n\U0001F3A5 @{username}\n\n#tampa #tampabay #tampaflorida #tampalife #thingstodointampa #TampaPulse",
-    "POV: another perfect day in Tampa \U0001F30A\n\U0001F3A5 @{username}\n\n#tampa #tampabay #tampaflorida #tampalife #thingstodointampa #TampaPulse",
-    "If you know, you know \U0001F440\n\U0001F3A5 @{username}\n\n#tampa #tampabay #tampaflorida #tampalife #thingstodointampa #TampaPulse",
-    "This just made our whole feed \U0001F525\n\U0001F3A5 @{username}\n\n#tampa #tampabay #tampaflorida #tampalife #thingstodointampa #TampaPulse",
-    "Tag someone who needs to see this \U0001F447\n\U0001F3A5 @{username}\n\n#tampa #tampabay #tampaflorida #tampalife #thingstodointampa #TampaPulse",
-    "We never get tired of this city \U0001F4AF\n\U0001F3A5 @{username}\n\n#tampa #tampabay #tampaflorida #tampalife #thingstodointampa #TampaPulse",
-    "Straight vibes \u2728\n\U0001F3A5 @{username}\n\n#tampa #tampabay #tampaflorida #tampalife #thingstodointampa #TampaPulse",
-    "Tampa really does it different \U0001F60E\n\U0001F3A5 @{username}\n\n#tampa #tampabay #tampaflorida #tampalife #thingstodointampa #TampaPulse",
-    "Main character city \U0001F451\n\U0001F3A5 @{username}\n\n#tampa #tampabay #tampaflorida #tampalife #thingstodointampa #TampaPulse",
-    "Saving this for later \U0001F4CC\n\U0001F3A5 @{username}\n\n#tampa #tampabay #tampaflorida #tampalife #thingstodointampa #TampaPulse",
-    "Need this energy today \U0001F64C\n\U0001F3A5 @{username}\n\n#tampa #tampabay #tampaflorida #tampalife #thingstodointampa #TampaPulse",
+    # Clean & informational
+    "Tampa Bay never disappoints.\n\U0001F3A5 @{username}\n\n#tampa #tampabay #tampaflorida #tampalife #thingstodointampa #TampaPulse",
+    "Another reason to love this city.\n\U0001F3A5 @{username}\n\n#tampa #tampabay #tampaflorida #tampalife #thingstodointampa #TampaPulse",
+    "This is what Tampa is all about.\n\U0001F3A5 @{username}\n\n#tampa #tampabay #tampaflorida #tampalife #thingstodointampa #TampaPulse",
+    "Tampa, through and through.\n\U0001F3A5 @{username}\n\n#tampa #tampabay #tampaflorida #tampalife #thingstodointampa #TampaPulse",
+    # Warm & conversational
+    "Love seeing Tampa through local eyes.\n\U0001F3A5 @{username}\n\n#tampa #tampabay #tampaflorida #tampalife #thingstodointampa #TampaPulse",
+    "Moments like this are why we're here.\n\U0001F3A5 @{username}\n\n#tampa #tampabay #tampaflorida #tampalife #thingstodointampa #TampaPulse",
+    "The Bay Area at its finest.\n\U0001F3A5 @{username}\n\n#tampa #tampabay #tampaflorida #tampalife #thingstodointampa #TampaPulse",
+    "Hard to beat this city.\n\U0001F3A5 @{username}\n\n#tampa #tampabay #tampaflorida #tampalife #thingstodointampa #TampaPulse",
+    # Minimal — just credit + tags
+    "\U0001F3A5 @{username}\n\n#tampa #tampabay #tampaflorida #tampalife #thingstodointampa #TampaPulse",
+    "\U0001F3A5 @{username}\n\n#tampa #tampabay #tampaflorida #tampalife #thingstodointampa #TampaPulse",
 ]
 
 
