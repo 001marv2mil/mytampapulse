@@ -291,22 +291,40 @@ def rehost_video(video_url: str) -> str:
     size_mb = Path(tmp_path).stat().st_size / (1024 * 1024)
     print(f"  Downloaded {size_mb:.1f} MB -> {tmp_path}")
 
-    print("Uploading to catbox.moe...")
-    with open(tmp_path, "rb") as f:
-        r = requests.post(
-            "https://catbox.moe/user/api.php",
+    hosts = [
+        ("catbox", lambda f: requests.post("https://catbox.moe/user/api.php",
             data={"reqtype": "fileupload"},
-            files={"fileToUpload": ("reel.mp4", f, "video/mp4")},
-            timeout=120,
-        )
+            files={"fileToUpload": ("reel.mp4", f, "video/mp4")}, timeout=120)),
+        ("uguu.se", lambda f: requests.post("https://uguu.se/upload",
+            files={"files[]": ("reel.mp4", f, "video/mp4")}, timeout=120)),
+    ]
+
+    for host_name, upload_fn in hosts:
+        try:
+            print(f"Uploading to {host_name}...")
+            with open(tmp_path, "rb") as f:
+                r = upload_fn(f)
+            if host_name == "uguu.se":
+                data = r.json()
+                if data.get("success") and data.get("files"):
+                    url = data["files"][0]["url"]
+                    if url.startswith("https://"):
+                        print(f"  Rehosted: {url}")
+                        Path(tmp_path).unlink(missing_ok=True)
+                        return url
+                print(f"  [{host_name}] failed: {r.text[:120]}")
+            else:
+                if r.status_code == 200 and r.text.startswith("https://"):
+                    url = r.text.strip()
+                    print(f"  Rehosted: {url}")
+                    Path(tmp_path).unlink(missing_ok=True)
+                    return url
+                print(f"  [{host_name}] failed: {r.status_code} {r.text[:120]}")
+        except Exception as e:
+            print(f"  [{host_name}] error: {e}")
+
     Path(tmp_path).unlink(missing_ok=True)
-
-    if r.status_code == 200 and r.text.startswith("https://"):
-        public_url = r.text.strip()
-        print(f"  Rehosted: {public_url}")
-        return public_url
-
-    print(f"  Catbox upload failed: {r.status_code} {r.text[:200]}")
+    print("  All upload hosts failed, using original CDN URL")
     return video_url
 
 
