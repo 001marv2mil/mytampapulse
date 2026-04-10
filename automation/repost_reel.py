@@ -562,8 +562,9 @@ def main():
         MAX_AGE_HOURS = args.max_age
         print(f"[override] MAX_AGE_HOURS = {MAX_AGE_HOURS}")
 
-    # Timezone gate on GitHub Actions
-    if os.environ.get('GITHUB_ACTIONS') == 'true':
+    # Timezone gate on GitHub Actions (skip gate on manual dispatch)
+    is_manual = os.environ.get('GITHUB_EVENT_NAME') == 'workflow_dispatch'
+    if os.environ.get('GITHUB_ACTIONS') == 'true' and not is_manual:
         h = _tampa_hour()
         if h not in POST_HOURS:
             print(f"Tampa hour is {h}, not a post hour {POST_HOURS}. Skipping.")
