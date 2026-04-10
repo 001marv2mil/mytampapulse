@@ -99,25 +99,38 @@ def is_excluded(text: str) -> bool:
     t = text.lower()
     return any(x in t for x in EXCLUDED_WORDS)
 
-# ── Positive filter — reel must be about Tampa / Tampa Bay area ───────
-TAMPA_KEYWORDS = [
-    'tampa','ybor','seminole heights','hyde park','south tampa','channelside',
-    'water street','riverwalk','bayshore','westshore','soho','palma ceia',
-    'davis island','harbour island','armature works','sparkman wharf',
-    'international plaza','oxford exchange','gasparilla','raymond james',
-    'amalie arena','busch gardens','adventure island','lowry park',
-    'curtis hixon','st pete','clearwater','dunedin','safety harbor',
-    'indian rocks','treasure island','madeira beach','brandon','wesley chapel',
-    'lutz','land o lakes','new tampa','temple terrace','town n country',
-    'westchase','carrollwood','citrus park','oldsmar','palm harbor',
+# ── Positive filter — reel caption must reference a Tampa PLACE ────────
+# We check CAPTION TEXT ONLY (not hashtags — every Tampa account tags
+# #tampa on everything, even off-topic posts). Generic "tampa" alone
+# doesn't count; the caption must mention a specific neighborhood,
+# venue, landmark, or area to prove the video is actually about Tampa.
+TAMPA_PLACE_KEYWORDS = [
+    # neighborhoods / districts
+    'ybor','ybor city','seminole heights','hyde park','south tampa',
+    'channelside','water street','soho','palma ceia','davis island',
+    'harbour island','new tampa','temple terrace','town n country',
+    'westchase','carrollwood','citrus park','westshore','downtown tampa',
+    'east tampa','west tampa','north tampa',
+    # venues / landmarks
+    'armature works','sparkman wharf','international plaza','oxford exchange',
+    'raymond james','amalie arena','busch gardens','adventure island',
+    'lowry park','curtis hixon','riverwalk','bayshore','gasparilla',
+    'florida aquarium','mosi','tampa theatre','columbia restaurant',
+    'berns steak','ulele','datz','jotoro','heights public market',
+    'salt shack','whiskey joe','ricks on the river',
+    # greater tampa bay area
+    'st pete','st. pete','saint pete','clearwater','dunedin',
+    'safety harbor','indian rocks','treasure island','madeira beach',
+    'wesley chapel','lutz','land o lakes','oldsmar','palm harbor',
     'tarpon springs','apollo beach','ruskin','riverview','valrico',
-    'plant city','lakeland','tampa bay','tampabay','813','the bay area',
-    'hillsborough','pinellas','pasco','hernando',
+    'plant city','lakeland','brandon','tampa bay','tampa fl',
+    'hillsborough county','pinellas county','pasco county',
 ]
 
-def is_tampa_related(text: str) -> bool:
-    t = text.lower()
-    return any(kw in t for kw in TAMPA_KEYWORDS)
+def is_tampa_related(caption_text: str) -> bool:
+    """Check caption text only (NOT hashtags) for Tampa place references."""
+    t = caption_text.lower()
+    return any(kw in t for kw in TAMPA_PLACE_KEYWORDS)
 
 # ── Caption templates — casual Tampa vibe with creator credit ────────
 CAPTION_TEMPLATES = [
@@ -265,10 +278,9 @@ def filter_candidates(items: list[dict], log: list[dict]) -> list[dict]:
         if is_excluded(caption):
             continue
 
-        # Positive filter — caption must mention Tampa area
-        hashtags = " ".join(item.get("hashtags") or [])
-        full_text = f"{caption} {hashtags}"
-        if not is_tampa_related(full_text):
+        # Positive filter — caption text must mention a Tampa place
+        # (hashtags excluded — every Tampa account tags #tampa on everything)
+        if not is_tampa_related(caption):
             continue
 
         # Freshness check
