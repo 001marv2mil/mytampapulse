@@ -104,5 +104,7 @@
   {"handle": "@cityoftampa", "category": "community", "description": "City of Tampa official"},
   {"handle": "@tampabaytimesfood", "category": "community", "description": "Food by Tampa Bay Times"},
   {"handle": "@dalimuseum", "category": "community", "description": "The Dali Museum, St Pete. Art and culture"},
-  {"handle": "@zaybotorrence", "category": "personality", "description": "Tampa personality, low-key themed content"}
+  {"handle": "@zaybotorrence", "category": "personality", "description": "Tampa personality, low-key themed content"},
+  {"handle": "@tampaterrance", "category": "lifestyle", "description": "Tampa lifestyle and city content"},
+  {"handle": "@tampaweekly", "category": "lifestyle", "description": "Weekly Tampa highlights and lifestyle"}
 ]
