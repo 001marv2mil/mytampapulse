@@ -251,8 +251,8 @@ def scrape_reels(accounts: list[str]) -> list[dict]:
 # FILTER & RANK CANDIDATES
 # ═══════════════════════════════════════════════════════════════════
 
-MAX_AGE_HOURS = 48   # prefer reels from last 2 days
-MIN_LIKES     = 50   # higher bar than pet content — skip low-engagement stuff
+MAX_AGE_HOURS = 72   # reels from last 3 days
+MIN_LIKES     = 20   # lower bar — curated list has smaller lifestyle accounts
 
 def filter_candidates(items: list[dict], log: list[dict]) -> list[dict]:
     """Keep only fresh, high-engagement video reels not yet posted."""
@@ -548,7 +548,7 @@ def main():
         help="Override MAX_AGE_HOURS (e.g. --max-age 168 for 7 days)",
     )
     parser.add_argument(
-        "--sample-size", type=int, default=10,
+        "--sample-size", type=int, default=20,
         help="Number of accounts to sample per scrape (default 10)",
     )
     args = parser.parse_args()
