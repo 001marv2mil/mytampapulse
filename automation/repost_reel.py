@@ -99,6 +99,26 @@ def is_excluded(text: str) -> bool:
     t = text.lower()
     return any(x in t for x in EXCLUDED_WORDS)
 
+# ── Positive filter — reel must be about Tampa / Tampa Bay area ───────
+TAMPA_KEYWORDS = [
+    'tampa','ybor','seminole heights','hyde park','south tampa','channelside',
+    'water street','riverwalk','bayshore','westshore','soho','palma ceia',
+    'davis island','harbour island','armature works','sparkman wharf',
+    'international plaza','oxford exchange','gasparilla','raymond james',
+    'amalie arena','busch gardens','adventure island','lowry park',
+    'curtis hixon','st pete','clearwater','dunedin','safety harbor',
+    'indian rocks','treasure island','madeira beach','brandon','wesley chapel',
+    'lutz','land o lakes','new tampa','temple terrace','town n country',
+    'westchase','carrollwood','citrus park','oldsmar','palm harbor',
+    'tarpon springs','apollo beach','ruskin','riverview','valrico',
+    'plant city','lakeland','tampa bay','tampabay','813','the bay area',
+    'hillsborough','pinellas','pasco','hernando',
+]
+
+def is_tampa_related(text: str) -> bool:
+    t = text.lower()
+    return any(kw in t for kw in TAMPA_KEYWORDS)
+
 # ── Caption templates — casual Tampa vibe with creator credit ────────
 CAPTION_TEMPLATES = [
     # Clean & informational
@@ -240,9 +260,15 @@ def filter_candidates(items: list[dict], log: list[dict]) -> list[dict]:
         if not video_url:
             continue
 
-        # Caption content filter — skip politics, crime, etc.
+        # Caption content filter — skip politics, crime, drama, etc.
         caption = item.get("caption") or ""
         if is_excluded(caption):
+            continue
+
+        # Positive filter — caption must mention Tampa area
+        hashtags = " ".join(item.get("hashtags") or [])
+        full_text = f"{caption} {hashtags}"
+        if not is_tampa_related(full_text):
             continue
 
         # Freshness check
