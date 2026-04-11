@@ -1,0 +1,6 @@
+{
+  "buildCommand": "npm install && npm run build",
+  "outputDirectory": ".next",
+  "rootDirectory": "site",
+  "installCommand": "npm install"
+}
