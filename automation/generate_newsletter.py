@@ -29,7 +29,7 @@ TM_KEY    = os.environ.get('TICKETMASTER_API_KEY', '')
 EB_TOKEN  = os.environ.get('EVENTBRITE_API_TOKEN', '')
 WEATHER_KEY = os.environ.get('OPENWEATHER_API_KEY', '')
 
-NEWSLETTERS_DIR = Path(__file__).parent.parent / 'content' / 'newsletters'
+NEWSLETTERS_DIR = Path(__file__).parent.parent / 'site' / 'content' / 'newsletters'
 NEWSLETTERS_DIR.mkdir(parents=True, exist_ok=True)
 
 HEADERS = {

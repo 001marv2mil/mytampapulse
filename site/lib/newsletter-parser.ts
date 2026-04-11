@@ -354,6 +354,8 @@ function getIssueTitleFromData(issueNumber: number): string {
     11: "St. Patrick's week in Tampa is unhinged. Here's the full breakdown",
     12: "March Madness is in Tampa. Here's what else is happening this week",
     13: "They're attempting a 370-foot Cuban sandwich. This is real life",
+    14: "Billy Strings sold out the arena. Here's what else is happening",
+    15: "Donovan Frankenreiter's at Zodiac Live. Here's what else Tampa's got this week",
   };
   return titles[issueNumber] || `Issue #${issueNumber}`;
 }
@@ -366,4 +368,92 @@ export function getAllIssueNumbers(): number[] {
     if (m) numbers.push(parseInt(m[1], 10));
   }
   return numbers.sort((a, b) => a - b);
+}
+
+// ── Dynamic archive builder ──────────────────────────────────────────
+// Reads all newsletter markdown files and builds the archive list
+// so new issues show up automatically without editing data.ts.
+
+const TAMPA_IMAGES = [
+  "https://images.unsplash.com/photo-1605723517503-3cadb5818a0c?w=800&q=80",
+  "https://images.unsplash.com/photo-1564357645071-9726b526a8f2?w=800&q=80",
+  "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=800&q=80",
+  "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&q=80",
+  "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80",
+  "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80",
+  "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&q=80",
+  "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=800&q=80",
+  "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=800&q=80",
+  "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&q=80",
+  "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&q=80",
+  "https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=800&q=80",
+  "https://images.unsplash.com/photo-1598520106830-8c45c2035460?w=800&q=80",
+  "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=800&q=80",
+  "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=800&q=80",
+];
+
+export interface ArchiveIssue {
+  id: string;
+  number: number;
+  date: string;
+  title: string;
+  image: string;
+  eventCount: number;
+}
+
+function formatDateFromFilename(filename: string): string {
+  const m = filename.match(/issue-\d+-(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return "";
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const month = months[parseInt(m[2], 10) - 1];
+  const day = parseInt(m[3], 10);
+  return `${month} ${day}, ${m[1]}`;
+}
+
+function countEvents(issueNumber: number): number {
+  const parsed = parseNewsletter(issueNumber);
+  if (!parsed) return 0;
+  return parsed.eventRoundup.length || parsed.weekAtAGlance.length || 0;
+}
+
+function generateTitle(issueNumber: number): string {
+  // Use hardcoded title if available, otherwise extract from content
+  const title = getIssueTitleFromData(issueNumber);
+  if (title !== `Issue #${issueNumber}`) return title;
+
+  // Fallback: use first event from "at a glance" as a hook
+  const parsed = parseNewsletter(issueNumber);
+  if (parsed && parsed.weekAtAGlance.length > 0) {
+    const first = parsed.weekAtAGlance[0];
+    // Extract just the event name (before "at" venue)
+    const eventName = first.split(" at ")[0].replace(/\*\*/g, "").trim();
+    if (eventName.length > 10) {
+      return `${eventName}. Here's what else Tampa's got this week`;
+    }
+  }
+  return `Tampa Pulse Issue #${issueNumber}`;
+}
+
+export function getArchiveIssues(): ArchiveIssue[] {
+  const files = getNewsletterFiles();
+  const issues: ArchiveIssue[] = [];
+
+  for (const f of files) {
+    const m = f.match(/^issue-(\d+)-/);
+    if (!m) continue;
+    const num = parseInt(m[1], 10);
+
+    issues.push({
+      id: `i-${num}`,
+      number: num,
+      date: formatDateFromFilename(f),
+      title: generateTitle(num),
+      image: TAMPA_IMAGES[(num - 1) % TAMPA_IMAGES.length],
+      eventCount: countEvents(num),
+    });
+  }
+
+  // Sort newest first
+  issues.sort((a, b) => b.number - a.number);
+  return issues;
 }

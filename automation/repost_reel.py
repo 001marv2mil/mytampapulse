@@ -454,10 +454,18 @@ def do_scrape(args):
     print(f"\n=== SCRAPE MODE ===")
     print(f"Sampling {len(sample)} of {len(TARGET_ACCOUNTS)} accounts")
 
-    items = scrape_reels(sample)
+    try:
+        items = scrape_reels(sample)
+    except requests.exceptions.HTTPError as e:
+        # Apify budget exceeded (403) or other API error — don't crash the
+        # workflow so the post step can still use the existing cache.
+        print(f"Apify scrape failed: {e}")
+        print("Will rely on existing cache for posting.")
+        return
+
     if not items:
         print("No items returned from Apify — skipping")
-        sys.exit(0)
+        return
 
     log = prune_log(load_log())
     candidates = filter_candidates(items, log)

@@ -37,6 +37,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add content/newsletters/
-          git diff --staged --quiet || git commit -m "auto-generate newsletter issue [skip ci]"
+          git add site/content/newsletters/
+          git diff --staged --quiet || git commit -m "auto-generate newsletter issue"
           git push

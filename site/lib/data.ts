@@ -322,6 +322,10 @@ export const hiddenGems: HiddenGem[] = [
 ];
 
 export const archiveIssues: NewsletterIssue[] = [
+  // #15: Donovan Frankenreiter, SPoT Concrete Jam, Tigers Jaw
+  { id: "i-15", number: 15, date: "Apr 10, 2026", title: "Donovan Frankenreiter's at Zodiac Live. Here's what else Tampa's got this week", image: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=800&q=80", eventCount: 8 },
+  // #14: Billy Strings, Tampa Tarpons, dolphins at Philippe Park
+  { id: "i-14", number: 14, date: "Apr 10, 2026", title: "Billy Strings sold out the arena. Here's what else is happening", image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80", eventCount: 7 },
   // #13: Cuban Sandwich Festival + Sugar Sand Festival
   { id: "i0", number: 13, date: "Mar 27, 2026", title: "They're attempting a 370-foot Cuban sandwich. This is real life", image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&q=80", eventCount: 14 },
   { id: "i1", number: 12, date: "Mar 20, 2026", title: "March Madness is in Tampa. Here's what else is happening this week", image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&q=80", eventCount: 11 },

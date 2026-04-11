@@ -3,12 +3,11 @@ import Link from "next/link";
 import {
   parseNewsletter,
   getAllIssueNumbers,
+  getArchiveIssues,
+  getLatestIssueNumber,
 } from "@/lib/newsletter-parser";
-import { archiveIssues } from "@/lib/data";
 import ReferralSection from "@/components/ReferralSection";
 import ScrollGate from "@/components/ScrollGate";
-
-const LATEST_ISSUE_NUMBER = Math.max(...archiveIssues.map((i) => i.number));
 
 interface PageProps {
   params: Promise<{ issue: string }>;
@@ -22,7 +21,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps) {
   const { issue: issueParam } = await params;
   const issueNumber = parseInt(issueParam, 10);
-  const archiveEntry = archiveIssues.find((i) => i.number === issueNumber);
+  const archiveEntry = getArchiveIssues().find((i) => i.number === issueNumber);
 
   return {
     title: archiveEntry
@@ -70,12 +69,12 @@ export default async function NewsletterIssuePage({ params }: PageProps) {
   const newsletter = parseNewsletter(issueNumber);
   if (!newsletter) notFound();
 
-  const archiveEntry = archiveIssues.find((i) => i.number === issueNumber);
+  const archiveEntry = getArchiveIssues().find((i) => i.number === issueNumber);
   const allNumbers = getAllIssueNumbers();
   const currentIndex = allNumbers.indexOf(issueNumber);
   const prevIssue = currentIndex > 0 ? allNumbers[currentIndex - 1] : null;
   const nextIssue = currentIndex < allNumbers.length - 1 ? allNumbers[currentIndex + 1] : null;
-  const isLatest = issueNumber === LATEST_ISSUE_NUMBER;
+  const isLatest = issueNumber === getLatestIssueNumber();
 
   // Older issues: show title + blurred content + subscribe wall
   if (!isLatest) {
@@ -139,7 +138,7 @@ export default async function NewsletterIssuePage({ params }: PageProps) {
                 Subscribe Free →
               </Link>
               <div className="mt-6 pt-6 border-t border-gray-100">
-                <Link href={`/newsletter/${LATEST_ISSUE_NUMBER}`} className="text-pulse-orange text-sm hover:underline">
+                <Link href={`/newsletter/${getLatestIssueNumber()}`} className="text-pulse-orange text-sm hover:underline">
                   Read the latest issue →
                 </Link>
               </div>

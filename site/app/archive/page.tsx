@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { archiveIssues } from "@/lib/data";
+import { getArchiveIssues } from "@/lib/newsletter-parser";
 
 export const metadata = {
   title: "Archive | Tampa Pulse",
@@ -7,6 +7,7 @@ export const metadata = {
 };
 
 export default function ArchivePage() {
+  const archiveIssues = getArchiveIssues();
   return (
     <div className="pt-24 pb-20">
       {/* Header */}
