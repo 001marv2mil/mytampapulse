@@ -215,11 +215,28 @@ def extract_key_fact(text):
         return w
 
     good.sort(key=score, reverse=True)
+    # Pick the best fact that fits. Prefer complete sentences under 18 words.
+    # Never cut mid-sentence — pick a shorter fact instead.
+    for fact in good:
+        words = fact.split()
+        if len(words) <= 18:
+            return fact.rstrip('.')  + '.'
+    # All facts too long — find one that ends at a natural break
+    for fact in good:
+        sentences = re.split(r'(?<=[.!?])\s+', fact)
+        if sentences and len(sentences[0].split()) <= 18:
+            return sentences[0]
+    # Last resort: use shortest fact, trim to complete clause
     fact = good[0]
-    # Shorten to ~14 words max
     words = fact.split()
-    if len(words) > 14:
-        fact = ' '.join(words[:14]).rstrip('.,;') + '...'
+    if len(words) > 18:
+        # Trim back to last period/comma in first 18 words
+        trimmed = ' '.join(words[:18])
+        for sep in ['. ', ', ', ' — ', ' - ']:
+            idx = trimmed.rfind(sep)
+            if idx > 20:
+                return trimmed[:idx + 1].strip()
+        return trimmed.rstrip('.,;:') + '.'
     return fact
 
 

@@ -10,12 +10,14 @@ import ExploreNeighborhoods from "@/components/ExploreNeighborhoods";
 import BrowseByCategory from "@/components/BrowseByCategory";
 import FinalCTA from "@/components/FinalCTA";
 import StickyEmailBar from "@/components/StickyEmailBar";
+import { getArchiveIssues } from "@/lib/newsletter-parser";
 
 export default function Home() {
+  const latest = getArchiveIssues()[0];
   return (
     <>
       {/* 1. HERO — email capture above fold, issue preview, proof */}
-      <HeroSection />
+      <HeroSection latestIssue={latest ? { number: latest.number, date: latest.date } : undefined} />
 
       {/* 2. TICKER — category signal, energy */}
       <TextTicker />
@@ -24,7 +26,7 @@ export default function Home() {
       <WhatYouGet />
 
       {/* 4. SAMPLE ISSUE — see it before you subscribe */}
-      <SampleIssue />
+      <SampleIssue latestIssueNumber={latest?.number} />
 
       {/* 5. SOCIAL PROOF */}
       <TestimonialsSection />

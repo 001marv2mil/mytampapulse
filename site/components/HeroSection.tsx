@@ -6,7 +6,9 @@ import Link from "next/link";
 
 const CATEGORIES = ["Events", "Food", "Nightlife", "Hidden Gems", "Rooftops", "Brunch", "Live Music", "Date Nights"];
 
-export default function HeroSection() {
+export default function HeroSection({ latestIssue }: { latestIssue?: { number: number; date: string } }) {
+  const issueNum = latestIssue?.number ?? 13;
+  const issueDate = latestIssue?.date ?? "Mar 27, 2026";
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
@@ -57,7 +59,7 @@ export default function HeroSection() {
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
               className="inline-flex items-center gap-2 bg-white border border-orange-200 rounded-full px-4 py-2 mb-7 shadow-sm">
               <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-gray-600 text-xs font-semibold">Issue #13 is live · Mar 27, 2026</span>
+              <span className="text-gray-600 text-xs font-semibold">{`Issue #${issueNum} is live · ${issueDate}`}</span>
             </motion.div>
 
             {/* Headline */}
@@ -152,7 +154,7 @@ export default function HeroSection() {
                 <div className="bg-pulse-orange px-6 py-4 flex items-center justify-between">
                   <div>
                     <p className="text-white/70 text-xs font-semibold tracking-wider uppercase">mytampapulse</p>
-                    <p className="text-white font-black text-sm mt-0.5">Issue #13 · Mar 27, 2026</p>
+                    <p className="text-white font-black text-sm mt-0.5">{`Issue #${issueNum} · ${issueDate}`}</p>
                   </div>
                   <span className="text-2xl">🌴</span>
                 </div>
