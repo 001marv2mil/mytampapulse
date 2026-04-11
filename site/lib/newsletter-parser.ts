@@ -68,7 +68,8 @@ export function getLatestIssueNumber(): number {
 
 function splitBySections(content: string): string[] {
   // Split on --- (horizontal rules) that are on their own line
-  return content.split(/\n---\n/).map((s) => s.trim());
+  // Handle both Unix (LF) and Windows (CRLF) line endings
+  return content.split(/\r?\n---\r?\n/).map((s) => s.trim());
 }
 
 function parseWeatherTable(text: string): WeatherRow[] {
