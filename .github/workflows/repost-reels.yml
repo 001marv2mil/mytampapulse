@@ -2,11 +2,9 @@ name: Repost Tampa Reels
 
 on:
   schedule:
-    # 2 reels/day: 10 AM + 7 PM EST (dual crons for EDT/EST)
-    - cron: '0 14 * * *'   # 10 AM EDT
-    - cron: '0 15 * * *'   # 10 AM EST
-    - cron: '0 23 * * *'   # 7 PM EDT
-    - cron: '0 0 * * *'    # 7 PM EST
+    # 2 reels/day: 10 AM + 7 PM ET
+    - cron: '0 14 * * *'   # 10 AM ET
+    - cron: '0 23 * * *'   # 7 PM ET
   workflow_dispatch:
 
 permissions:

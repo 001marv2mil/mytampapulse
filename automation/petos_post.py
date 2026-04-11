@@ -155,7 +155,7 @@ def scrape_reels(accounts: list[str]) -> list[dict]:
     resp = requests.post(run_url, json=payload, timeout=330)
     if not resp.ok:
         print(f"Apify error {resp.status_code}: {resp.text[:500]}")
-    resp.raise_for_status()
+        return cached_items  # fall back to stale cache
     run_data = resp.json().get("data", {})
 
     dataset_id = run_data.get("defaultDatasetId")
