@@ -27,6 +27,14 @@ LOG_FILE       = Path(__file__).parent / 'petos_story_log.json'
 REPOST_DAYS    = 30
 RETENTION_DAYS = 90
 
+# Cross check all logs to prevent duplicates across accounts and post types
+ALL_LOG_FILES = [
+    Path(__file__).parent / 'petos_story_log.json',
+    Path(__file__).parent / 'petos_posted_log.json',
+    Path(__file__).parent / 'petosb_story_log.json',
+    Path(__file__).parent / 'petosb_posted_log.json',
+]
+
 # Brand colors
 DARK_TEAL = (15, 60, 50)
 TEAL      = (41, 182, 151)
@@ -52,7 +60,22 @@ def save_log(log, topic, ig_id):
 
 def recently_posted(log):
     cutoff = (datetime.now(timezone.utc) - timedelta(days=REPOST_DAYS)).isoformat()
-    return {e['topic'] for e in log if e.get('timestamp', '') > cutoff}
+    topics = set()
+    # Check all log files across both accounts to prevent any duplicates
+    for log_path in ALL_LOG_FILES:
+        if log_path.exists():
+            try:
+                entries = json.loads(log_path.read_text())
+                for e in entries:
+                    if e.get('timestamp', '') > cutoff:
+                        # Strip prefixes like "reel:" to match raw topic names
+                        t = e.get('topic', '')
+                        topics.add(t)
+                        if ':' in t:
+                            topics.add(t.split(':', 1)[-1])
+            except (json.JSONDecodeError, OSError):
+                pass
+    return topics
 
 # ═══════════════════════════════════════════════════════════════════
 # CAPTION SYSTEM — random intros/closers keep captions fresh
