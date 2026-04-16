@@ -26,6 +26,9 @@ export default function NewsletterCTA() {
       if (!res.ok) throw new Error();
       setSubmitted(true);
       setEmail("");
+      if (typeof window !== "undefined" && (window as any).fbq) {
+        (window as any).fbq("track", "CompleteRegistration");
+      }
       setTimeout(() => setSubmitted(false), 5000);
     } catch {
       setSubmitted(false);

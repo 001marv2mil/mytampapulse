@@ -33,6 +33,9 @@ export default function StickyEmailBar() {
       });
       if (!res.ok) throw new Error();
       setSubmitted(true);
+      if (typeof window !== "undefined" && (window as any).fbq) {
+        (window as any).fbq("track", "CompleteRegistration");
+      }
       setTimeout(() => setDismissed(true), 2500);
     } catch {
       // silent fail — sticky bar is supplementary

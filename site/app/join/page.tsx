@@ -26,6 +26,9 @@ export default function JoinPage() {
       });
       if (!res.ok) throw new Error();
       setSubmitted(true);
+      if (typeof window !== "undefined" && (window as any).fbq) {
+        (window as any).fbq("track", "CompleteRegistration");
+      }
     } catch {
       setError("Something went wrong. Try again.");
     }

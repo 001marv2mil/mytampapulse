@@ -33,6 +33,9 @@ export default function HeroSection({ latestIssue }: { latestIssue?: { number: n
       if (!res.ok) throw new Error();
       setSubmitted(true);
       setEmail("");
+      if (typeof window !== "undefined" && (window as any).fbq) {
+        (window as any).fbq("track", "CompleteRegistration");
+      }
     } catch {
       setError("Something went wrong. Try again.");
     }

@@ -35,6 +35,9 @@ export default function EmailSignup({
       if (!res.ok) throw new Error();
       setSubmitted(true);
       setEmail("");
+      if (typeof window !== "undefined" && (window as any).fbq) {
+        (window as any).fbq("track", "CompleteRegistration");
+      }
       setTimeout(() => setSubmitted(false), 3000);
     } catch {
       setError("Something went wrong. Try again.");
