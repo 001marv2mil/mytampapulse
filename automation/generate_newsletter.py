@@ -37,19 +37,159 @@ HEADERS = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
 }
 
-# Topics we never cover
-EXCLUDED = ['crime', 'politics', 'police', 'arrest', 'shooting', 'trump', 'biden',
-            'desantis', 'republican', 'democrat', 'governor', 'senator', 'AG ',
-            'attorney general', 'charter school', 'missing woman', 'missing person',
-            'missing man', 'murder', 'killed', 'dead body', 'accident', 'crash',
-            'lawsuit', 'sued', 'indicted', 'convicted', 'religious', 'church',
-            'immigration', 'border', 'gun ', 'shooting', 'robbery',
-            'congressional', 'running for', 'candidate', 'election', 'vote',
-            'rnc', 'dnc', 'legislature', 'bill passes', 'bill signed',
-            'canopy mitigation', 'tree canopy', 'news', 'newsletter']
+# ────────────────────────────────────────────────────────────────
+# TOPIC BLOCKLIST — things we never cover (crime / politics / news)
+# Per memory/feedback_marv_voice.md: "Never cover crime or politics — EVER"
+#
+# Two-tier matching:
+#   1. EXCLUDED_SUBSTRINGS: case-insensitive substring match. Safe for
+#      long/distinctive terms ("epstein", "desantis", "councilman").
+#   2. EXCLUDED_WORD_REGEX: word-boundary match for short/ambiguous
+#      tokens that would over-match as substrings — e.g. "ice" matches
+#      "pr-ice", "serv-ice"; "elect" matches "Tampa Electric", "select".
+#
+# Real headlines that slipped past the previous list and drove this
+# expansion (Issue 16, hand-cleaned):
+#   • Jeffrey Epstein …
+#   • Tampa City Councilman Carlson mayoral run
+#   • Mayor Chopper Davis reelection
+#   • Graham Nash ICE song
+# ────────────────────────────────────────────────────────────────
+
+EXCLUDED_SUBSTRINGS = [
+    # People
+    'trump', 'biden', 'obama', 'desantis', 'epstein',
+    # Political roles
+    'governor', 'senator', 'congressional', 'congressman', 'congresswoman',
+    'councilman', 'councilwoman', 'councilmember', 'council member',
+    'mayoral', 'attorney general', 'sheriff', 'deputy',
+    # Political topics
+    'politics', 'political', 'republican', 'democrat', 'rnc', 'dnc',
+    'reelection', 'reelect', 're-elect', 'reelected', 're-election',
+    'incumbent', 'campaign trail',
+    'bill passes', 'bill signed', 'legislature', 'legislative',
+    # Hot-button issues
+    'immigration', 'abortion', 'religious', 'church',
+    'charter school', 'canopy mitigation', 'tree canopy',
+    # Crime & legal
+    'crime', 'criminal', 'police', 'arrest',
+    'shooting', 'shot dead', 'murder', 'murdered',
+    'killed', 'dead body', 'homicide',
+    'lawsuit', 'sued', 'indicted', 'convicted',
+    'charged with', 'testify', 'testified', 'subpoena',
+    'robbery', 'robbed', 'burglary', 'assault',
+    'missing woman', 'missing person', 'missing man', 'missing child',
+    # Disasters
+    'fatal', 'accident', 'crash',
+    # Meta
+    'newsletter',
+]
+
+# Short/ambiguous tokens — substring match would over-fire, so use \b
+EXCLUDED_WORD_REGEX = re.compile(
+    r'\b(?:'
+    r'ice|'                                          # ICE (agency); skips price/service
+    r'(?:re-?)?elect(?:s|ed|ing|ion|ions)?|'         # elect/election/reelect; skips electric/select
+    r'vote(?:s|d|r|rs)?|voting|'                     # vote/voting; skips devote
+    r'candidates?|'
+    r'running for|'                                  # phrase
+    r'mayor(?:s)?|'                                  # standalone Mayor/Mayors
+    r'gun(?:s|fire|man|men|shot)?|'                  # gun/gunfire; skips begun
+    r'gop|'
+    r'news\w*|'                                      # news/newscast/newsroom; skips renews
+    r'deport(?:ed|ation|ations|ing)?|'
+    r'border patrol'
+    r')\b',
+    re.IGNORECASE,
+)
+
+# Backwards-compat alias in case anything else imports it
+EXCLUDED = EXCLUDED_SUBSTRINGS
+
+def is_excluded(text):
+    """True if ``text`` contains any blocklisted crime/politics/news term.
+
+    Used as a single chokepoint at every source filter (events, Reddit,
+    scraped pages) AND defensively when assembling the Digest, Hidden
+    Gems, and Pro Tips sections — belt-and-suspenders against leaks.
+    """
+    if not text:
+        return False
+    low = text.lower()
+    if any(term in low for term in EXCLUDED_SUBSTRINGS):
+        return True
+    if EXCLUDED_WORD_REGEX.search(text):
+        return True
+    return False
 
 def clean(text):
     return re.sub(r'\s+', ' ', text).strip()
+
+# ────────────────────────────────────────────────────────────────
+# EVERGREEN TAMPA FALLBACK POOL
+# Used when source filters strip a section under its target count
+# (e.g. a politics-heavy news week guts the Digest). Rotates
+# neighborhoods per memory/feedback_newsletter_variety.md so each
+# issue still feels fresh — sampled randomly, not picked top-down.
+# These are curated and trusted; they bypass is_excluded().
+# ────────────────────────────────────────────────────────────────
+
+EVERGREEN_FALLBACKS = [
+    {'title': 'Bayshore Boulevard sunrise walk',
+     'description': "Longest continuous sidewalk in the world. Get out before 7AM and you'll see why it's the city's favorite morning ritual."},
+    {'title': 'Tampa Riverwalk by bike',
+     'description': 'Rent a Coast Bike from any station and loop the 2.6 miles. Curtis Hixon to Water Works and back. Free parking at Curtis Hixon garage after 5PM.'},
+    {'title': 'Seminole Heights food crawl',
+     'description': "Hair of the Dog, Ella's, Rooster & The Till, The Independent. Three blocks, four food vibes, zero tourists."},
+    {'title': 'Davis Islands village afternoon',
+     'description': "1920s Mediterranean architecture, low-key cafés, the seaplane basin. One of Tampa's most overlooked neighborhoods."},
+    {'title': 'Ybor City coffee tuck at Brew Bus',
+     'description': 'Tucked into the brewery space — old Tampa charm with espresso that actually hits. Quietest morning spot in Ybor.'},
+    {'title': 'Westshore Saturday farmers market',
+     'description': 'Smaller and more local than Hyde Park — actual Tampa farmers, no tourist scene. 9AM to 1PM on Himes.'},
+    {'title': 'Channelside public skate session',
+     'description': "Tampa Bay Lightning's practice rink opens for public skate most afternoons. Yes, ice in Tampa. Weirdly fun."},
+    {'title': 'Dunedin downtown weekend',
+     'description': 'Easiest day trip from Tampa. Walkable downtown, three breweries within blocks, the Pinellas Trail running right through.'},
+    {'title': 'St. Pete Pier at golden hour',
+     'description': "Walk the pier, drink at Doc Ford's on the second floor, watch the sun drop behind downtown St. Pete."},
+    {'title': 'Tarpon Springs sponge docks',
+     'description': 'Real Greek food, real working boats, zero kitsch once you go two streets back from the water. Worth the drive.'},
+    {'title': 'West Tampa Sandwich Shop',
+     'description': 'The Cuban sandwich Tampa natives swear by. West Columbus Dr. Order it pressed and plain — nothing fancy.'},
+    {'title': 'Carrollwood Village Park boardwalk',
+     'description': 'Hidden boardwalk through the wetlands, playground the kids actually like. Under-the-radar weekend move for North Tampa.'},
+    {'title': 'Howard Avenue restaurant block',
+     'description': 'Old Meridian, Datz, On Swann, Ocean Prime. Four spots that define South Tampa dining, one walkable block.'},
+    {'title': 'Hyde Park Village patio night',
+     'description': "Timpano's patio, Buddy Brew espresso, Goody Goody for late-night burgers. Village vibe without the Wharf crowd."},
+    {'title': 'Oldsmar Sunday flea market',
+     'description': "The real one — not the tourist trap. Tampa old-timers shop here for plants, produce, weird vintage finds."},
+    {'title': 'Safety Harbor pier at sunset',
+     'description': 'Quiet little waterfront town a hop from Tampa. The pier, Bar Fly for cocktails, then back across the causeway as it gets dark.'},
+]
+
+def pad_with_evergreen(items, target, used_titles, formatter, source_label='evergreen'):
+    """Top up an under-populated section with curated Tampa fallbacks.
+
+    ``items`` is the in-progress list (already populated from real sources).
+    ``formatter(item)`` shapes each evergreen dict into the section's line.
+    ``used_titles`` tracks dedupe across the whole newsletter so the same
+    fallback never appears twice in one issue.
+    Picks randomly so two consecutive weeks don't pull the same fallbacks.
+    """
+    if len(items) >= target:
+        return items
+    pool = [e for e in EVERGREEN_FALLBACKS if e['title'] not in used_titles]
+    if not pool:
+        return items
+    needed = target - len(items)
+    picks = random.sample(pool, min(needed, len(pool)))
+    for ev in picks:
+        items.append(formatter(ev))
+        used_titles.add(ev['title'])
+        print(f'  [fallback] padded {source_label} with: {ev["title"]}')
+    return items
 
 # ═══════════════════════════════════════════════════════════════════
 # SOURCE 1: TICKETMASTER — concerts, sports, family events
@@ -85,7 +225,7 @@ def fetch_ticketmaster():
 
         for ev in events:
             name = ev.get('name', '')
-            if not name or any(x in name.lower() for x in EXCLUDED):
+            if not name or is_excluded(name):
                 continue
 
             venues = ev.get('_embedded', {}).get('venues', [{}])
@@ -171,7 +311,7 @@ def fetch_eventbrite():
 
         for ev in events[:20]:
             name = ev.get('name', {}).get('text', '')
-            if not name or any(x in name.lower() for x in EXCLUDED):
+            if not name or is_excluded(name):
                 continue
 
             venue_name = ''
@@ -238,8 +378,9 @@ def fetch_reddit(subreddit='tampa'):
             # Skip low engagement, stickied, excluded, or low-quality content
             if d.get('stickied'): continue
             if score < 30: continue
-            if any(x in title.lower() for x in EXCLUDED): continue
-            if any(x in selftext.lower() for x in EXCLUDED): continue
+            if is_excluded(title): continue
+            if is_excluded(selftext): continue
+            if is_excluded(flair): continue
             # Skip generic questions, moving posts, rants
             skip_words = ['moving to tampa', 'thinking of moving', 'is tampa safe',
                          'how is tampa', 'visiting tampa', 'road rage', 'rant',
@@ -294,7 +435,7 @@ def scrape_page(url, name, selectors):
             title_el = el.find(['h1','h2','h3','h4']) if el.name not in ('a',) else el
             title = clean(title_el.get_text()) if title_el else ''
             if not title or title in seen or len(title) < 8: continue
-            if any(x in title.lower() for x in EXCLUDED): continue
+            if is_excluded(title): continue
             seen.add(title)
 
             link_el = el.find('a') if el.name != 'a' else el
@@ -305,7 +446,7 @@ def scrape_page(url, name, selectors):
 
             desc_el = el.find('p')
             desc = clean(desc_el.get_text())[:150] if desc_el else ''
-            if any(x in (desc or '').lower() for x in EXCLUDED): continue
+            if is_excluded(desc): continue
 
             results.append({
                 'source': name,
@@ -331,6 +472,92 @@ def fetch_visit_tampa_bay():
 def fetch_tampa_bay_times():
     return scrape_page('https://www.tampabay.com/life-culture/', 'Tampa Bay Times',
         ['article', '.story', '.card', 'h2 a', 'h3 a'])
+
+# Venue + lifestyle scrapers — fill the gap when Ticketmaster/Eventbrite
+# keys aren't set. Each hits a public events/calendar page using the same
+# generic scrape_page() helper. Selectors are best-effort + fall through.
+
+def fetch_tampa_theatre():
+    return scrape_page('https://tampatheatre.org/calendar/', 'Tampa Theatre',
+        ['.tribe-events-calendar-list__event', '.event', 'article',
+         '.tribe-event', 'h3 a', 'h2 a'])
+
+def fetch_straz_center():
+    return scrape_page('https://www.strazcenter.org/Events', 'Straz Center',
+        ['.event-card', '.event', 'article', '.show-card', 'h3 a', 'h2 a'])
+
+def fetch_amalie_arena():
+    return scrape_page('https://www.amaliearena.com/events', 'Amalie Arena',
+        ['.event', '.eventItem', '.event-listing', 'article', 'h3 a', 'h2 a'])
+
+def fetch_sparkman_wharf():
+    return scrape_page('https://sparkmanwharf.com/events/', 'Sparkman Wharf',
+        ['.event', '.event-card', 'article', '.tribe-events-calendar-list__event', 'h3 a', 'h2 a'])
+
+def fetch_armature_works():
+    return scrape_page('https://armatureworks.com/events/', 'Armature Works',
+        ['.event', '.event-card', 'article', '.tribe-events-calendar-list__event', 'h3 a', 'h2 a'])
+
+def fetch_hillsborough_arts():
+    return scrape_page('https://hillsborougharts.org/events/', 'Hillsborough Arts',
+        ['.event', '.event-card', 'article', '.tribe-events-calendar-list__event', 'h3 a', 'h2 a'])
+
+def fetch_thats_so_tampa():
+    return scrape_page('https://thatssotampa.com/', 'Thats So Tampa',
+        ['article', '.post', '.story', 'h2 a', 'h3 a'])
+
+def fetch_813_area():
+    return scrape_page('https://www.813area.com/', '813area',
+        ['article', '.event', '.story', 'h2 a', 'h3 a'])
+
+def fetch_tampa_downtown():
+    return scrape_page('https://www.tampasdowntown.com/all-events/', 'Tampa Downtown',
+        ['.event', '.event-card', 'article', '.tribe-events-calendar-list__event', 'h3 a', 'h2 a'])
+
+def fetch_tampa_bay_markets():
+    return scrape_page('https://tampabaymarkets.com/', 'Tampa Bay Markets',
+        ['.market', '.market-card', 'article', '.location', 'h2 a', 'h3 a'])
+
+def fetch_unation():
+    return scrape_page('https://www.unation.com/cities/tampa', 'UNATION',
+        ['.event', '.event-card', 'article', 'h2 a', 'h3 a'])
+
+# Aggregator that runs all venue scrapers and dedupes by title
+def fetch_all_venues():
+    """Hit every venue scraper and return a deduped event-shaped list."""
+    venue_fns = [
+        ('Tampa Theatre',     fetch_tampa_theatre),
+        ('Straz Center',      fetch_straz_center),
+        ('Amalie Arena',      fetch_amalie_arena),
+        ('Sparkman Wharf',    fetch_sparkman_wharf),
+        ('Armature Works',    fetch_armature_works),
+        ('Hillsborough Arts', fetch_hillsborough_arts),
+        ('Tampa Downtown',    fetch_tampa_downtown),
+    ]
+    seen, out = set(), []
+    for name, fn in venue_fns:
+        try:
+            for item in fn():
+                key = item['title'].strip().lower()
+                if key in seen:
+                    continue
+                seen.add(key)
+                # Reshape into the same dict the events pipeline expects.
+                out.append({
+                    'source':   item['source'],
+                    'title':    item['title'],
+                    'venue':    name,
+                    'date':     '',
+                    'time':     '',
+                    'price':    '',
+                    'genre':    '',
+                    'category': 'events',
+                    'url':      item.get('url', ''),
+                })
+        except Exception as e:
+            print(f'  [{name}] aggregator error: {e}')
+    print(f'  [Venues] aggregated {len(out)} unique items across {len(venue_fns)} sources')
+    return out
 
 # ═══════════════════════════════════════════════════════════════════
 # SOURCE 5: WEATHER — OpenWeather 7-day forecast (or fallback)
@@ -456,9 +683,19 @@ def generate_newsletter(events, reddit_posts, local_items, weather):
     issue_date = thu.strftime('%Y-%m-%d')
 
     # ── Combine all content ──
-    all_events = events[:12]
-    top_reddit = reddit_posts[:5]
-    top_local = local_items[:8]
+    # Defensive second-pass filter: source filters already strip the bulk,
+    # but this guarantees nothing politics/crime touches downstream sections
+    # even if a new scraper adds an unfiltered source later.
+    def _clean(items):
+        return [
+            it for it in items
+            if not is_excluded(it.get('title', ''))
+            and not is_excluded(it.get('description', ''))
+            and not is_excluded(it.get('venue', ''))
+        ]
+    all_events = _clean(events)[:12]
+    top_reddit = _clean(reddit_posts)[:5]
+    top_local = _clean(local_items)[:8]
 
     # ── Pick highlights for "This Week at a Glance" (top 7) ──
     glance_items = []
@@ -486,9 +723,17 @@ def generate_newsletter(events, reddit_posts, local_items, weather):
     for w in weather[:7]:
         weather_table += f'| {w["day"]} | {w["emoji"]} | {w["high"]}°/{w["low"]}° | {w["desc"]} |\n'
 
+    # Track every title used in the newsletter so evergreen padding never
+    # collides with a real source item or duplicates across sections.
+    used_titles = set()
+
     # ── Marv's Pro Tips (6 specific actionable tips) ──
+    # Defensive is_excluded() pass: events/local items already filtered at
+    # source, but this is the section that landed Issue 16's 4 bad picks.
     tips = []
-    for ev in all_events[:3]:
+    for ev in all_events[:6]:
+        if is_excluded(ev.get('title', '')) or is_excluded(ev.get('venue', '')):
+            continue
         tip = f'**{ev["title"]}**'
         if ev.get('venue'): tip += f' at {ev["venue"]}'
         if ev.get('date'): tip += f', {ev["date"]}'
@@ -496,40 +741,81 @@ def generate_newsletter(events, reddit_posts, local_items, weather):
         if ev.get('price'): tip += f'. {ev["price"]}'
         tip += '. Worth your time.'
         tips.append(tip)
-    for item in top_local[:3]:
+        used_titles.add(ev['title'])
+        if len([t for t in tips if 'Worth your time' in t]) >= 3: break
+    for item in top_local[:6]:
+        if is_excluded(item.get('title', '')) or is_excluded(item.get('description', '')):
+            continue
         tip = f'**{item["title"]}**'
         if item.get('description'): tip += f'. {item["description"][:100]}'
         tips.append(tip)
+        used_titles.add(item['title'])
+        if len(tips) >= 6: break
+    # Pad to ~5 tips minimum if politics/crime week wiped the local pool
+    pad_with_evergreen(
+        tips, target=5, used_titles=used_titles,
+        formatter=lambda ev: f'**{ev["title"]}**. {ev["description"]}',
+        source_label='pro tips',
+    )
 
     # ── Digest (quick hits from all sources) ──
     digest_emojis = ['🔥', '🍽️', '🎵', '🎨', '🌟', '📍', '🎉', '🏟️']
     digest = []
-    used = set()
     for i, item in enumerate(top_local + top_reddit):
-        if item['title'] in used: continue
-        used.add(item['title'])
-        emoji = digest_emojis[i % len(digest_emojis)]
+        if item['title'] in used_titles: continue
+        if is_excluded(item.get('title', '')): continue
+        if is_excluded(item.get('description', '')): continue
+        used_titles.add(item['title'])
+        emoji = digest_emojis[len(digest) % len(digest_emojis)]
         line = f'{emoji} **{item["title"]}**'
         if item.get('description'):
             line += f'. {item["description"][:120]}'
         digest.append(line)
         if len(digest) >= 7: break
+    # Pad to 5 minimum so Digest never goes hollow on a heavy-news week
+    pad_with_evergreen(
+        digest, target=5, used_titles=used_titles,
+        formatter=lambda ev, _emojis=digest_emojis: (
+            f'{_emojis[(len(digest)) % len(_emojis)]} **{ev["title"]}**. {ev["description"]}'
+        ),
+        source_label='digest',
+    )
 
     # ── Hidden Gems (from Reddit buzz + local items) ──
     gems = []
     gem_emojis = ['🗝️', '🍳', '🛍️', '🎨', '🍕']
-    gem_sources = [r for r in reddit_posts if r.get('score', 0) > 30][:3] + local_items[4:7]
-    for i, item in enumerate(gem_sources[:5]):
-        emoji = gem_emojis[i % len(gem_emojis)]
+    gem_sources = [r for r in reddit_posts if r.get('score', 0) > 30][:5] + local_items[4:9]
+    for item in gem_sources:
+        if item['title'] in used_titles: continue
+        if is_excluded(item.get('title', '')): continue
+        if is_excluded(item.get('description', '')): continue
+        used_titles.add(item['title'])
+        emoji = gem_emojis[len(gems) % len(gem_emojis)]
         line = f'{emoji} **{item["title"]}**'
         if item.get('description'):
             line += f'. {item["description"][:120]}'
         gems.append(line)
+        if len(gems) >= 5: break
+    # Pad to 3 minimum — Hidden Gems is the section that most needs to feel full
+    pad_with_evergreen(
+        gems, target=3, used_titles=used_titles,
+        formatter=lambda ev, _emojis=gem_emojis: (
+            f'{_emojis[(len(gems)) % len(_emojis)]} **{ev["title"]}**. {ev["description"]}'
+        ),
+        source_label='hidden gems',
+    )
 
     # ── Community Pick (from highest Reddit engagement) ──
+    # Walk the list to find the first post that survives the blocklist —
+    # belt-and-suspenders against a politics post slipping through r/tampa.
     community_pick = ''
-    if reddit_posts:
-        top_post = reddit_posts[0]
+    top_post = next(
+        (p for p in reddit_posts
+         if not is_excluded(p.get('title', ''))
+         and not is_excluded(p.get('description', ''))),
+        None,
+    )
+    if top_post:
         community_pick = f'''> This week's Community Pick comes from r/tampa where **{top_post["title"]}** is getting a lot of buzz ({top_post.get("score", 0)} upvotes, {top_post.get("comments", 0)} comments). {top_post.get("description", "")[:200]}
 >
 > *The kind of thing that reminds you Tampa's got a real community behind the scenes.*'''
@@ -668,37 +954,49 @@ def main():
     # Gather from all sources
     print('\n── GATHERING CONTENT ──')
 
-    print('\n[1/7] Ticketmaster events...')
+    print('\n[1/11] Ticketmaster events...')
     tm_events = fetch_ticketmaster()
 
-    print('\n[2/7] Eventbrite events...')
+    print('\n[2/11] Eventbrite events...')
     eb_events = fetch_eventbrite()
 
-    print('\n[3/7] Reddit r/tampa...')
+    print('\n[3/11] Venue scrapers (Tampa Theatre / Straz / Amalie / Sparkman / Armature / Hillsborough Arts / Tampa Downtown)...')
+    venue_events = fetch_all_venues()
+
+    print('\n[4/11] Reddit r/tampa...')
     reddit_tampa = fetch_reddit('tampa')
 
-    print('\n[4/7] Reddit r/StPetersburgFL...')
+    print('\n[5/11] Reddit r/StPetersburgFL...')
     reddit_stpete = fetch_reddit('StPetersburgFL')
 
-    print('\n[5/7] Creative Loafing Tampa...')
+    print('\n[6/11] Creative Loafing Tampa...')
     cl_items = fetch_creative_loafing()
 
-    print('\n[6/7] Visit Tampa Bay...')
+    print('\n[7/11] Visit Tampa Bay...')
     vtb_items = fetch_visit_tampa_bay()
 
-    print('\n[7/7] Weather forecast...')
+    print('\n[8/11] Tampa Bay Times life & culture...')
+    tbt_items = fetch_tampa_bay_times()
+
+    print('\n[9/11] ThatsSoTampa lifestyle...')
+    tst_items = fetch_thats_so_tampa()
+
+    print('\n[10/11] 813area weekend guide...')
+    a813_items = fetch_813_area()
+
+    print('\n[11/11] Weather forecast...')
     weather = fetch_weather()
 
-    # Combine events
-    all_events = tm_events + eb_events
+    # Combine events — paid APIs first (richer metadata), then venue scrapes
+    all_events = tm_events + eb_events + venue_events
     all_reddit = reddit_tampa + reddit_stpete
-    all_local = cl_items + vtb_items
+    all_local = cl_items + vtb_items + tbt_items + tst_items + a813_items
 
     total = len(all_events) + len(all_reddit) + len(all_local)
     print(f'\n── TOTAL CONTENT: {total} items ──')
-    print(f'  Events: {len(all_events)}')
+    print(f'  Events: {len(all_events)}  (TM:{len(tm_events)} EB:{len(eb_events)} Venues:{len(venue_events)})')
     print(f'  Reddit: {len(all_reddit)}')
-    print(f'  Local:  {len(all_local)}')
+    print(f'  Local:  {len(all_local)}  (CL:{len(cl_items)} VTB:{len(vtb_items)} TBT:{len(tbt_items)} TST:{len(tst_items)} 813:{len(a813_items)})')
 
     # Generate the newsletter
     print('\n── GENERATING NEWSLETTER ──')
