@@ -4,9 +4,13 @@ import { Resend } from "resend";
 import { parseNewsletter, getLatestIssueNumber } from "@/lib/newsletter-parser";
 import { getMarvSignoff } from "@/lib/marv-signoffs";
 
+// Server-side route — must use the service role key so RLS doesn't block
+// reads of the subscribers and newsletter_sends tables. Falls back to the
+// anon key in dev if service role isn't configured.
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  { auth: { persistSession: false } }
 );
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -238,7 +242,39 @@ export async function POST(req: NextRequest) {
     // Get issue number from query or use latest
     const url = new URL(req.url);
     const issueParam = url.searchParams.get("issue");
+    const debug = url.searchParams.get("debug") === "1";
     const issueNumber = issueParam ? parseInt(issueParam) : getLatestIssueNumber();
+
+    if (debug) {
+      // Diagnostic mode — never sends. Reports what the function actually
+      // sees on disk so we can verify deploy state without emailing anyone.
+      const fs = await import("fs");
+      const path = await import("path");
+      const cwd = process.cwd();
+      const dirs = [
+        path.join(cwd, "content", "newsletters"),
+        path.join(cwd, "site", "content", "newsletters"),
+      ];
+      const inspect = dirs.map((d) => ({
+        path: d,
+        exists: fs.existsSync(d),
+        files: fs.existsSync(d) ? fs.readdirSync(d).filter((f) => f.endsWith(".md")) : [],
+      }));
+      return NextResponse.json({
+        debug: true,
+        cwd,
+        latestIssue: getLatestIssueNumber(),
+        requestedIssue: issueNumber,
+        candidateDirs: inspect,
+        envHas: {
+          SUPABASE_SERVICE_ROLE_KEY: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+          NEXT_PUBLIC_SUPABASE_URL: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+          RESEND_API_KEY: !!process.env.RESEND_API_KEY,
+          CRON_SECRET: !!process.env.CRON_SECRET,
+        },
+      });
+    }
 
     if (!issueNumber) {
       return NextResponse.json(

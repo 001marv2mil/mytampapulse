@@ -34,23 +34,46 @@ export interface ParsedNewsletter {
   footer: string;
 }
 
-const NEWSLETTERS_DIR = path.join(
-  process.cwd(),
-  "content",
-  "newsletters"
-);
+// Try multiple candidate locations because Vercel's process.cwd() and
+// Next.js outputFileTracing don't always agree on where bundled content
+// lives. First match wins. This is intentionally defensive — without it
+// the cron silently returned 0 files and no email ever shipped.
+const CANDIDATE_DIRS = [
+  path.join(process.cwd(), "content", "newsletters"),
+  path.join(process.cwd(), "site", "content", "newsletters"),
+  path.join(process.cwd(), ".next", "server", "content", "newsletters"),
+  // Resolved from this source file's location — survives bundler moves
+  path.resolve(__dirname, "..", "content", "newsletters"),
+  path.resolve(__dirname, "..", "..", "content", "newsletters"),
+];
+
+function resolveNewslettersDir(): string | null {
+  for (const dir of CANDIDATE_DIRS) {
+    try {
+      if (fs.existsSync(dir)) return dir;
+    } catch {
+      // ignore
+    }
+  }
+  return null;
+}
+
+const NEWSLETTERS_DIR = resolveNewslettersDir() ?? CANDIDATE_DIRS[0];
 
 export function getNewsletterFiles(): string[] {
-  if (!fs.existsSync(NEWSLETTERS_DIR)) return [];
-  return fs.readdirSync(NEWSLETTERS_DIR).filter((f) => f.endsWith(".md"));
+  const dir = resolveNewslettersDir();
+  if (!dir) return [];
+  return fs.readdirSync(dir).filter((f) => f.endsWith(".md"));
 }
 
 export function findNewsletterFile(issueNumber: number): string | null {
-  const files = getNewsletterFiles();
+  const dir = resolveNewslettersDir();
+  if (!dir) return null;
+  const files = fs.readdirSync(dir).filter((f) => f.endsWith(".md"));
   const match = files.find((f) =>
     f.startsWith(`issue-${issueNumber}-`)
   );
-  return match ? path.join(NEWSLETTERS_DIR, match) : null;
+  return match ? path.join(dir, match) : null;
 }
 
 export function getLatestIssueNumber(): number {
