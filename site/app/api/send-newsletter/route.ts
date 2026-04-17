@@ -256,12 +256,30 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Get all active subscribers who haven't received this issue yet
-    const { data: subscribers, error: fetchError } = await supabase
+    // Get the set of subscriber_ids that already received this issue.
+    // The previous version inlined a raw `(SELECT ...)` subquery via .not("id", "in", ...)
+    // — Supabase JS doesn't support that syntax and silently 500'd, which is
+    // why no Thursday cron has actually emailed anyone in weeks. Splitting
+    // into two explicit queries fixes it.
+    const { data: prevSends, error: sendsError } = await supabase
+      .from("newsletter_sends")
+      .select("subscriber_id")
+      .eq("issue_number", issueNumber);
+
+    if (sendsError) {
+      console.error("Fetch newsletter_sends error:", sendsError);
+      return NextResponse.json(
+        { error: "Failed to fetch send history" },
+        { status: 500 }
+      );
+    }
+
+    const alreadySent = new Set((prevSends ?? []).map((r) => r.subscriber_id));
+
+    const { data: allActive, error: fetchError } = await supabase
       .from("subscribers")
       .select("id, email, unsubscribe_token")
-      .eq("status", "active")
-      .not("id", "in", `(SELECT subscriber_id FROM newsletter_sends WHERE issue_number = ${issueNumber})`);
+      .eq("status", "active");
 
     if (fetchError) {
       console.error("Fetch subscribers error:", fetchError);
@@ -270,6 +288,8 @@ export async function POST(req: NextRequest) {
         { status: 500 }
       );
     }
+
+    const subscribers = (allActive ?? []).filter((s) => !alreadySent.has(s.id));
 
     if (!subscribers || subscribers.length === 0) {
       return NextResponse.json({
