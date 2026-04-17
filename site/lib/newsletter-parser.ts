@@ -42,9 +42,7 @@ const CANDIDATE_DIRS = [
   path.join(process.cwd(), "content", "newsletters"),
   path.join(process.cwd(), "site", "content", "newsletters"),
   path.join(process.cwd(), ".next", "server", "content", "newsletters"),
-  // Resolved from this source file's location — survives bundler moves
-  path.resolve(__dirname, "..", "content", "newsletters"),
-  path.resolve(__dirname, "..", "..", "content", "newsletters"),
+  path.join(process.cwd(), "..", "content", "newsletters"),
 ];
 
 function resolveNewslettersDir(): string | null {
