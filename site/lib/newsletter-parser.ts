@@ -227,8 +227,15 @@ export function parseNewsletter(issueNumber: number): ParsedNewsletter | null {
       continue;
     }
 
-    // Pro Tip (blockquote section)
-    if (firstLine.includes("Pro Tip") && firstLine.startsWith("###")) {
+    // Pro Tip (blockquote section). MUST check that this is the SINGULAR
+    // "Pro Tip" heading and not the plural "Marv's Pro Tips" — otherwise
+    // the bulleted Marv's Pro Tips section gets eaten by the blockquote
+    // handler and result.proTips ends up empty (rendering nothing).
+    if (
+      firstLine.includes("Pro Tip") &&
+      !firstLine.includes("Pro Tips") &&
+      firstLine.startsWith("###")
+    ) {
       const rest = lines.slice(1).join("\n").trim();
       result.proTip = parseBlockquote(rest).replace(/^\*|\*$/g, "").trim();
       continue;
@@ -378,6 +385,8 @@ function getIssueTitleFromData(issueNumber: number): string {
     13: "They're attempting a 370-foot Cuban sandwich. This is real life",
     14: "Billy Strings sold out the arena. Here's what else is happening",
     15: "Donovan Frankenreiter's at Zodiac Live. Here's what else Tampa's got this week",
+    16: "Tampa Tarpons, Lightning vs Rangers, and the rest of the week worth showing up for",
+    17: "BTS takes Raymond James for THREE nights. Here's the rest of your week",
   };
   return titles[issueNumber] || `Issue #${issueNumber}`;
 }
