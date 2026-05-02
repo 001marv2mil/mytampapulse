@@ -32,11 +32,11 @@ export default function StickyEmailBar() {
         body: JSON.stringify({ email, ref }),
       });
       if (!res.ok) throw new Error();
-      setSubmitted(true);
       if (typeof window !== "undefined" && (window as any).fbq) {
+        (window as any).fbq("track", "Lead");
         (window as any).fbq("track", "CompleteRegistration");
       }
-      setTimeout(() => setDismissed(true), 2500);
+      window.location.href = "/thank-you";
     } catch {
       // silent fail — sticky bar is supplementary
     }

@@ -33,12 +33,11 @@ export default function EmailSignup({
         body: JSON.stringify({ email, ref }),
       });
       if (!res.ok) throw new Error();
-      setSubmitted(true);
-      setEmail("");
       if (typeof window !== "undefined" && (window as any).fbq) {
+        (window as any).fbq("track", "Lead");
         (window as any).fbq("track", "CompleteRegistration");
       }
-      setTimeout(() => setSubmitted(false), 3000);
+      window.location.href = "/thank-you";
     } catch {
       setError("Something went wrong. Try again.");
     }

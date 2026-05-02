@@ -25,10 +25,11 @@ export default function JoinPage() {
         body: JSON.stringify({ email, ref }),
       });
       if (!res.ok) throw new Error();
-      setSubmitted(true);
       if (typeof window !== "undefined" && (window as any).fbq) {
+        (window as any).fbq("track", "Lead");
         (window as any).fbq("track", "CompleteRegistration");
       }
+      window.location.href = "/thank-you";
     } catch {
       setError("Something went wrong. Try again.");
     }
