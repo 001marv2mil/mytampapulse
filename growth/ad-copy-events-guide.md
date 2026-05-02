@@ -30,7 +30,13 @@ All 4: **candid POV style, looks like an Instagram story or friend's text, NOT p
 
 **Backup set — Seedream 4.5** (initial generation, kept for reference): `events-guide-seedream-v1.png` through `seedream-v4.png`. These have AI-generated fake editorial captions at the top — do not use without cropping.
 
-**Recommended:** Use `events-guide-ugc-v1.png` as primary creative. Run `events-guide-ugc-v3.png` as the strongest A/B variant (Tampa skyline is unmistakable). Use `ugc-v2.png` and `ugc-v4.png` as additional variants.
+**Recommended creatives (2 usable):**
+- `events-guide-ugc-v3.png` — Tampa skyline background, Apple Watch wrist **(PRIMARY)**
+- `events-guide-ugc-v4.png` — Boardwalk railing, water, 2:53 clock, clean render **(A/B VARIANT)**
+
+**Do not use:**
+- `events-guide-ugc-v1.png` — clock shows impossible "9:62", "Localss" double-s typo
+- `events-guide-ugc-v2.png` — AI rendered a cracked/shattered phone screen
 
 ---
 
