@@ -56,13 +56,13 @@ export default function EventsGuidePage() {
 
           {/* Headline */}
           <h1 className="font-heading text-3xl sm:text-4xl font-black text-white leading-tight mb-4 text-center">
-            Just moved to Tampa?<br />
-            <span className="text-[#FF5A36]">Or lived here forever?</span>
+            Don&apos;t miss what&apos;s happening<br />
+            <span className="text-[#FF5A36]">in Tampa this weekend.</span>
           </h1>
 
           {/* Sub-headline */}
           <p className="text-white/60 text-base text-center mb-8 leading-relaxed">
-            Get the free <strong className="text-white">60-Day Tampa Events Guide</strong> — locals&apos; picks, not tourist traps. Sent straight to your inbox.
+            Get the free <strong className="text-white">60-Day Tampa Events Guide</strong> — everything worth doing, already curated. No searching required.
           </p>
 
           {/* Guide preview */}
