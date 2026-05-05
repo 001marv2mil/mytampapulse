@@ -90,11 +90,11 @@ export default function BlackMaskPage() {
             <div className="flex items-center gap-2">
               <div className="flex -space-x-2">
                 {[
-                  "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=96&h=96&fit=crop&crop=faces",
-                  "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=96&h=96&fit=crop&crop=faces",
-                  "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=96&h=96&fit=crop&crop=faces",
-                  "https://images.unsplash.com/photo-1504257432389-52343af06ae3?w=96&h=96&fit=crop&crop=faces",
-                  "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=96&h=96&fit=crop&crop=faces",
+                  "https://i.pravatar.cc/150?img=47",
+                  "https://i.pravatar.cc/150?img=12",
+                  "https://i.pravatar.cc/150?img=32",
+                  "https://i.pravatar.cc/150?img=5",
+                  "https://i.pravatar.cc/150?img=23",
                 ].map((src, i) => (
                   <img key={i} src={src} alt="" width={32} height={32} className="w-8 h-8 rounded-full border-2 border-black object-cover" />
                 ))}
