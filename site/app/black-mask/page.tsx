@@ -75,7 +75,7 @@ export default function BlackMaskPage() {
 
           {/* Sub-headline */}
           <p className="text-white/60 text-base leading-relaxed mb-8 max-w-sm">
-            Drop your email and we&apos;ll hit you when the next Black Mask Social drops — plus Tampa&apos;s best weekly roundup, free.
+            Drop your email and we&apos;ll hit you when the next Black Mask Social drops. Plus Tampa&apos;s best weekly roundup, free.
           </p>
 
           {/* Social proof */}
@@ -90,11 +90,11 @@ export default function BlackMaskPage() {
             <div className="flex items-center gap-2">
               <div className="flex -space-x-2">
                 {[
-                  "https://randomuser.me/api/portraits/women/44.jpg",
-                  "https://randomuser.me/api/portraits/men/32.jpg",
-                  "https://randomuser.me/api/portraits/women/68.jpg",
-                  "https://randomuser.me/api/portraits/men/45.jpg",
-                  "https://randomuser.me/api/portraits/women/85.jpg",
+                  "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=96&h=96&fit=crop&crop=faces",
+                  "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=96&h=96&fit=crop&crop=faces",
+                  "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=96&h=96&fit=crop&crop=faces",
+                  "https://images.unsplash.com/photo-1504257432389-52343af06ae3?w=96&h=96&fit=crop&crop=faces",
+                  "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=96&h=96&fit=crop&crop=faces",
                 ].map((src, i) => (
                   <img key={i} src={src} alt="" width={32} height={32} className="w-8 h-8 rounded-full border-2 border-black object-cover" />
                 ))}
