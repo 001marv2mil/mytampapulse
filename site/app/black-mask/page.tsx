@@ -23,7 +23,7 @@ export default function BlackMaskPage() {
       const res = await fetch("/api/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, ref }),
+        body: JSON.stringify({ email, ref, source: "black-mask" }),
       });
       if (!res.ok) throw new Error();
       if (typeof window !== "undefined" && (window as any).fbq) {

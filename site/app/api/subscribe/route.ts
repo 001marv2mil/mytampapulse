@@ -1,6 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
+import { createHash } from "crypto";
+
+async function sendMetaCAPIEvent(email: string, sourceUrl: string) {
+  const token = process.env.META_CAPI_TOKEN;
+  if (!token) return;
+
+  const hashedEmail = createHash("sha256").update(email.toLowerCase().trim()).digest("hex");
+
+  try {
+    await fetch("https://graph.facebook.com/v21.0/1272183185072628/events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        data: [{
+          event_name: "Lead",
+          event_time: Math.floor(Date.now() / 1000),
+          action_source: "website",
+          event_source_url: sourceUrl,
+          user_data: { em: [hashedEmail] },
+        }],
+        access_token: token,
+      }),
+    });
+  } catch (err) {
+    console.error("Meta CAPI error:", err);
+  }
+}
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -17,7 +44,7 @@ const MILESTONES: Record<number, { prize: string; description: string }> = {
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, ref } = await req.json();
+    const { email, ref, source } = await req.json();
     if (!email || typeof email !== "string") {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
@@ -38,6 +65,10 @@ export async function POST(req: NextRequest) {
       console.error("Supabase insert error:", error);
       return NextResponse.json({ error: "Failed to subscribe" }, { status: 500 });
     }
+
+    // Fire Meta CAPI Lead event server-side (bypasses iOS/ad blocker tracking)
+    const sourceUrl = req.headers.get("referer") || "https://mytampapulse.com";
+    sendMetaCAPIEvent(email, sourceUrl);
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mytampapulse.com";
     const unsubscribeUrl = `${siteUrl}/unsubscribe?token=${data.unsubscribe_token}`;
@@ -177,12 +208,74 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Welcome email to new subscriber — delivers 60-Day Events Guide
+    // Welcome email — different copy depending on signup source
+    const isBlackMask = source === "black-mask";
+
     await resend.emails.send({
       from: "Tampa Pulse <newsletter@mytampapulse.com>",
       to: email,
-      subject: "Your free 60-Day Tampa Events Guide is here 🎉",
-      html: `
+      subject: isBlackMask
+        ? "You're on the list. Here's something for you while you wait 🎭"
+        : "Your free 60-Day Tampa Events Guide is here 🎉",
+      html: isBlackMask ? `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 20px; color: #1a1a1a;">
+          <div style="text-align: center; margin-bottom: 32px;">
+            <span style="font-size: 28px; font-weight: 900; color: #1a1a1a;">tampa<span style="color: #FF5A36;">pulse</span></span>
+          </div>
+
+          <h1 style="font-size: 24px; font-weight: 800; margin-bottom: 12px;">You're on the list. 🎭</h1>
+
+          <p style="font-size: 15px; line-height: 1.7; color: #444; margin-bottom: 20px;">
+            The next Black Mask Social is coming — and you'll be the first to know when it drops. I'll hit your inbox with the date, location, and everything you need before it goes public.
+          </p>
+
+          <p style="font-size: 15px; line-height: 1.7; color: #444; margin-bottom: 28px;">
+            In the meantime, I put together something for you. No reason to just sit and wait — Tampa's got moves every weekend and I made sure you won't miss any of them.
+          </p>
+
+          <div style="background: #0d0d0d; border-radius: 16px; padding: 28px; margin: 0 0 28px; text-align: center;">
+            <p style="font-size: 12px; font-weight: 700; color: #FF5A36; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 8px;">Free Gift — On Me</p>
+            <p style="font-size: 22px; font-weight: 900; color: #ffffff; margin: 0 0 8px;">60-Day Tampa Events Guide</p>
+            <p style="font-size: 14px; line-height: 1.6; color: #aaa; margin: 0 0 20px;">60 days of concerts, rooftop events, restaurant openings, and weekend moves — curated for locals, not tourists.</p>
+            <a href="${siteUrl}/events-guide.pdf" style="display: inline-block; background: #FF5A36; color: white; font-weight: 800; font-size: 15px; padding: 14px 32px; border-radius: 10px; text-decoration: none;">
+              Grab Your Free Guide →
+            </a>
+            <p style="font-size: 11px; color: #666; margin: 12px 0 0;">PDF · Free · No strings</p>
+          </div>
+
+          <p style="font-size: 15px; line-height: 1.7; color: #444; margin-bottom: 8px;">
+            I also send a weekly newsletter every Thursday — Tampa's best spots, what's opening, and what's worth your time. You're already on it.
+          </p>
+
+          <div style="border: 1px solid #eee; border-radius: 12px; padding: 20px; margin: 24px 0;">
+            <p style="font-size: 14px; font-weight: 700; color: #1a1a1a; margin: 0 0 6px;">🎁 Refer a friend, get more</p>
+            <p style="font-size: 13px; color: #666; margin: 0 0 10px;">Share your link and unlock bonus guides + giveaway entries:</p>
+            <p style="font-size: 13px; color: #444; margin: 0 0 3px;">1 referral — Tampa Neighborhoods Guide + First-Timer's Checklist</p>
+            <p style="font-size: 13px; color: #444; margin: 0 0 3px;">5 referrals — Restaurant voucher entry</p>
+            <p style="font-size: 13px; color: #444; margin: 0 0 14px;">10+ referrals — $100 gift card &amp; iPad giveaway</p>
+            <p style="font-size: 13px; font-weight: 600; color: #FF5A36; margin: 0;">Your link: <a href="${referralLink}" style="color: #FF5A36;">${referralLink}</a></p>
+          </div>
+
+          <div style="background: linear-gradient(135deg, #405DE6, #833AB4, #E1306C, #F77737); border-radius: 12px; padding: 3px; margin: 0 0 28px;">
+            <div style="background: #ffffff; border-radius: 10px; padding: 20px; text-align: center;">
+              <p style="font-size: 14px; font-weight: 700; color: #1a1a1a; margin: 0 0 6px;">Daily Tampa drops between newsletters</p>
+              <p style="font-size: 13px; color: #666; margin: 0 0 14px;">New openings, events, and local moves — stuff that can't wait until Thursday.</p>
+              <a href="https://instagram.com/thetampapulse" style="display: inline-block; background: #1a1a1a; color: white; font-weight: 700; font-size: 13px; padding: 10px 22px; border-radius: 8px; text-decoration: none;">
+                Follow @thetampapulse →
+              </a>
+            </div>
+          </div>
+
+          <p style="font-size: 15px; line-height: 1.7; color: #444; margin-bottom: 0;">See you at the next one.</p>
+          <p style="font-size: 15px; font-weight: 700; color: #1a1a1a; margin-top: 4px;">— Marv</p>
+
+          <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0 16px;" />
+          <p style="font-size: 11px; color: #999; text-align: center;">
+            <a href="${unsubscribeUrl}" style="color: #999; text-decoration: underline;">Unsubscribe</a>
+            &nbsp;&middot;&nbsp; Tampa Bay, FL
+          </p>
+        </div>
+      ` : `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 20px; color: #1a1a1a;">
           <div style="text-align: center; margin-bottom: 32px;">
             <span style="font-size: 28px; font-weight: 900; color: #1a1a1a;">tampa<span style="color: #FF5A36;">pulse</span></span>
