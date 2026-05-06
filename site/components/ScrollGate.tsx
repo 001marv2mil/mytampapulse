@@ -3,7 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
-export default function ScrollGate({ children }: { children: React.ReactNode }) {
+export default function ScrollGate({
+  children,
+  isSubscriber = false,
+}: {
+  children: React.ReactNode;
+  isSubscriber?: boolean;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [gated, setGated] = useState(false);
   const [fadeAmount, setFadeAmount] = useState(0); // 0 = clear, 1 = fully blurred/faded
@@ -36,6 +42,11 @@ export default function ScrollGate({ children }: { children: React.ReactNode }) 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Verified subscriber (arrived via token link in email) — show everything, no gate
+  if (isSubscriber) {
+    return <div>{children}</div>;
+  }
 
   return (
     <div ref={containerRef} className="relative">

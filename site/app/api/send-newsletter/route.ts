@@ -18,10 +18,11 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 function renderNewsletterHTML(
   parsed: ReturnType<typeof parseNewsletter>,
   unsubscribeUrl: string,
-  issueNumber: number
+  issueNumber: number,
+  accessToken: string
 ): string {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mytampapulse.com";
-  const fullIssueUrl = `${siteUrl}/newsletter`;
+  const fullIssueUrl = `${siteUrl}/newsletter/${issueNumber}?access_token=${accessToken}`;
 
   const renderBullets = (items: string[]) =>
     items.map((item) => `<li>${item}</li>`).join("");
@@ -343,7 +344,7 @@ export async function POST(req: NextRequest) {
     for (const subscriber of subscribers) {
       try {
         const unsubscribeUrl = `${siteUrl}/unsubscribe?token=${subscriber.unsubscribe_token}`;
-        const html = renderNewsletterHTML(parsed, unsubscribeUrl, issueNumber);
+        const html = renderNewsletterHTML(parsed, unsubscribeUrl, issueNumber, subscriber.unsubscribe_token);
 
         await resend.emails.send({
           from: "Tampa Pulse <newsletter@mytampapulse.com>",

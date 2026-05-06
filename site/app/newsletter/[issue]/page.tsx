@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { createClient } from "@supabase/supabase-js";
 import {
   parseNewsletter,
   getAllIssueNumbers,
@@ -11,6 +12,7 @@ import ScrollGate from "@/components/ScrollGate";
 
 interface PageProps {
   params: Promise<{ issue: string }>;
+  searchParams?: Promise<{ access_token?: string }>;
 }
 
 export async function generateStaticParams() {
@@ -60,7 +62,7 @@ function stripEmDashes(text: string): string {
   return text.replace(/\u2014/g, "-").replace(/\u2013/g, "-");
 }
 
-export default async function NewsletterIssuePage({ params }: PageProps) {
+export default async function NewsletterIssuePage({ params, searchParams }: PageProps) {
   const { issue: issueParam } = await params;
   const issueNumber = parseInt(issueParam, 10);
 
@@ -76,8 +78,29 @@ export default async function NewsletterIssuePage({ params }: PageProps) {
   const nextIssue = currentIndex < allNumbers.length - 1 ? allNumbers[currentIndex + 1] : null;
   const isLatest = issueNumber === getLatestIssueNumber();
 
+  // Validate subscriber token — lets email recipients read the full issue on the web
+  // without needing a password. Token comes from the "Read Full Issue →" link in emails.
+  let isSubscriber = false;
+  const resolvedSearch = searchParams ? await searchParams : {};
+  const accessToken = resolvedSearch.access_token;
+  if (accessToken) {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { auth: { persistSession: false } }
+    );
+    const { data } = await supabase
+      .from("subscribers")
+      .select("id")
+      .eq("unsubscribe_token", accessToken)
+      .eq("status", "active")
+      .maybeSingle();
+    isSubscriber = !!data;
+  }
+
   // Older issues: show title + blurred content + subscribe wall
-  if (!isLatest) {
+  // Subscribers arriving via email link skip the gate entirely
+  if (!isLatest && !isSubscriber) {
     return (
       <div className="min-h-screen bg-[#FFFBF7] pt-24 pb-20">
         <article className="max-w-2xl mx-auto px-6">
@@ -170,8 +193,9 @@ export default async function NewsletterIssuePage({ params }: PageProps) {
 
         <hr className="border-gray-200 mb-10" />
 
-        {/* ScrollGate wraps all content — fades and gates on scroll */}
-        <ScrollGate>
+        {/* ScrollGate wraps all content — fades and gates on scroll.
+            Subscribers arriving via email token link bypass the gate entirely. */}
+        <ScrollGate isSubscriber={isSubscriber}>
           {/* Greeting */}
           {newsletter.greeting && (
             <section className="mb-10">
