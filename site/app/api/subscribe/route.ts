@@ -247,6 +247,14 @@ export async function POST(req: NextRequest) {
             I also send a weekly newsletter every Thursday — Tampa's best spots, what's opening, and what's worth your time. You're already on it.
           </p>
 
+          <div style="background: #F7F8FA; border-radius: 12px; padding: 20px; margin: 16px 0; text-align: center;">
+            <p style="font-size: 13px; font-weight: 700; color: #1a1a1a; margin: 0 0 6px;">📬 Want to read past issues?</p>
+            <p style="font-size: 13px; color: #666; margin: 0 0 12px;">Browse the full archive — every issue we've ever sent, all in one place.</p>
+            <a href="${siteUrl}/newsletter" style="display: inline-block; background: #1a1a1a; color: white; font-weight: 700; font-size: 13px; padding: 10px 22px; border-radius: 8px; text-decoration: none;">
+              Read the Archive →
+            </a>
+          </div>
+
           <div style="border: 1px solid #eee; border-radius: 12px; padding: 20px; margin: 24px 0;">
             <p style="font-size: 14px; font-weight: 700; color: #1a1a1a; margin: 0 0 6px;">🎁 Refer a friend, get more</p>
             <p style="font-size: 13px; color: #666; margin: 0 0 10px;">Share your link and unlock bonus guides + giveaway entries:</p>
