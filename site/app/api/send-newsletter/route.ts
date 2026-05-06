@@ -22,7 +22,9 @@ function renderNewsletterHTML(
   accessToken: string
 ): string {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mytampapulse.com";
-  const fullIssueUrl = `${siteUrl}/newsletter/${issueNumber}?access_token=${accessToken}`;
+  // Route through /api/auth/sub so clicking the link sets the 30-day cookie on
+  // whatever device they open the email on — phone, iPad, laptop, anywhere.
+  const fullIssueUrl = `${siteUrl}/api/auth/sub?token=${accessToken}&to=/newsletter/${issueNumber}`;
 
   const renderBullets = (items: string[]) =>
     items.map((item) => `<li>${item}</li>`).join("");

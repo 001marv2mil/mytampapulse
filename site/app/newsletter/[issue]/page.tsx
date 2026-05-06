@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
 import {
   parseNewsletter,
@@ -12,7 +13,6 @@ import ScrollGate from "@/components/ScrollGate";
 
 interface PageProps {
   params: Promise<{ issue: string }>;
-  searchParams?: Promise<{ access_token?: string }>;
 }
 
 export async function generateStaticParams() {
@@ -62,7 +62,7 @@ function stripEmDashes(text: string): string {
   return text.replace(/\u2014/g, "-").replace(/\u2013/g, "-");
 }
 
-export default async function NewsletterIssuePage({ params, searchParams }: PageProps) {
+export default async function NewsletterIssuePage({ params }: PageProps) {
   const { issue: issueParam } = await params;
   const issueNumber = parseInt(issueParam, 10);
 
@@ -78,12 +78,12 @@ export default async function NewsletterIssuePage({ params, searchParams }: Page
   const nextIssue = currentIndex < allNumbers.length - 1 ? allNumbers[currentIndex + 1] : null;
   const isLatest = issueNumber === getLatestIssueNumber();
 
-  // Validate subscriber token — lets email recipients read the full issue on the web
-  // without needing a password. Token comes from the "Read Full Issue →" link in emails.
+  // Check subscriber cookie — set when they click any email link or magic link.
+  // Works on any device, any country, without a password.
   let isSubscriber = false;
-  const resolvedSearch = searchParams ? await searchParams : {};
-  const accessToken = resolvedSearch.access_token;
-  if (accessToken) {
+  const cookieStore = await cookies();
+  const spToken = cookieStore.get("sp_token")?.value;
+  if (spToken) {
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -92,7 +92,7 @@ export default async function NewsletterIssuePage({ params, searchParams }: Page
     const { data } = await supabase
       .from("subscribers")
       .select("id")
-      .eq("unsubscribe_token", accessToken)
+      .eq("unsubscribe_token", spToken)
       .eq("status", "active")
       .maybeSingle();
     isSubscriber = !!data;

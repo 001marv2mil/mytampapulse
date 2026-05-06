@@ -100,6 +100,12 @@ export default function ScrollGate({
             >
               Subscribe Free →
             </Link>
+            <p className="mt-5 text-gray-400 text-xs">
+              Already subscribed?{" "}
+              <Link href="/newsletter/access" className="text-pulse-orange hover:underline font-medium">
+                Get full access →
+              </Link>
+            </p>
           </div>
         </div>
       )}
