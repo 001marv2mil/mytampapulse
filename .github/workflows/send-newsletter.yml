@@ -1,0 +1,33 @@
+name: Send Weekly Newsletter
+
+on:
+  schedule:
+    # Every Thursday at 13:00 UTC = 8:00 AM EST
+    - cron: '0 13 * * 4'
+  workflow_dispatch:
+    # Allow manual trigger from GitHub Actions tab anytime
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger newsletter send
+        run: |
+          response=$(curl -s -w "\n%{http_code}" -X POST \
+            "https://www.mytampapulse.com/api/send-newsletter" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            --max-time 120)
+
+          body=$(echo "$response" | head -n -1)
+          status=$(echo "$response" | tail -n 1)
+
+          echo "HTTP Status: $status"
+          echo "Response: $body"
+
+          if [ "$status" != "200" ]; then
+            echo "ERROR: Newsletter send failed with status $status"
+            exit 1
+          fi
+
+          echo "Newsletter sent successfully!"
