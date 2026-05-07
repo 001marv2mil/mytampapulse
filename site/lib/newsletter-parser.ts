@@ -36,7 +36,7 @@ export interface ParsedNewsletter {
 
 // Try multiple candidate locations because Vercel's process.cwd() and
 // Next.js outputFileTracing don't always agree on where bundled content
-// lives. First match wins. This is intentionally defensive — without it
+// lives. First match wins. This is intentionally defensive without it
 // the cron silently returned 0 files and no email ever shipped.
 const CANDIDATE_DIRS = [
   path.join(process.cwd(), "content", "newsletters"),
@@ -228,7 +228,7 @@ export function parseNewsletter(issueNumber: number): ParsedNewsletter | null {
     }
 
     // Pro Tip (blockquote section). MUST check that this is the SINGULAR
-    // "Pro Tip" heading and not the plural "Marv's Pro Tips" — otherwise
+    // "Pro Tip" heading and not the plural "Marv's Pro Tips" otherwise
     // the bulleted Marv's Pro Tips section gets eaten by the blockquote
     // handler and result.proTips ends up empty (rendering nothing).
     if (
@@ -377,7 +377,7 @@ function getIssueTitleFromData(issueNumber: number): string {
     5:  "Pirates in puffer jackets. The coldest Gasparilla on record",
     6:  "Super Bowl week in Tampa. Plus: State Fair things you'll actually want to eat",
     7:  "Valentine's in Ybor hits different. Here's your plan",
-    8:  "Tattoos, a 5K, and spring training — Tampa doing the most this weekend",
+    8:  "Tattoos, a 5K, and spring training Tampa doing the most this weekend",
     9:  "Barry Manilow's last tour, IndyCar on the streets, and art you can actually afford",
     10: "Strawberry season is here. Plus: spring training and why you should go",
     11: "St. Patrick's week in Tampa is unhinged. Here's the full breakdown",
@@ -387,6 +387,8 @@ function getIssueTitleFromData(issueNumber: number): string {
     15: "Donovan Frankenreiter's at Zodiac Live. Here's what else Tampa's got this week",
     16: "Tampa Tarpons, Lightning vs Rangers, and the rest of the week worth showing up for",
     17: "BTS takes Raymond James for THREE nights. Here's the rest of your week",
+    18: "Rock the Park is back. Here's the rest of your May 1st week",
+    19: "WWE Backlash, Kid Cudi, and a taco spot making tortillas the right way",
   };
   return titles[issueNumber] || `Issue #${issueNumber}`;
 }

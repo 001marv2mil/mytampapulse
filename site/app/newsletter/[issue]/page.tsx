@@ -13,6 +13,7 @@ import ScrollGate from "@/components/ScrollGate";
 
 interface PageProps {
   params: Promise<{ issue: string }>;
+  searchParams: Promise<{ preview?: string }>;
 }
 
 export async function generateStaticParams() {
@@ -62,8 +63,9 @@ function stripEmDashes(text: string): string {
   return text.replace(/\u2014/g, "-").replace(/\u2013/g, "-");
 }
 
-export default async function NewsletterIssuePage({ params }: PageProps) {
+export default async function NewsletterIssuePage({ params, searchParams }: PageProps) {
   const { issue: issueParam } = await params;
+  const { preview } = await searchParams;
   const issueNumber = parseInt(issueParam, 10);
 
   if (isNaN(issueNumber)) notFound();
@@ -78,12 +80,13 @@ export default async function NewsletterIssuePage({ params }: PageProps) {
   const nextIssue = currentIndex < allNumbers.length - 1 ? allNumbers[currentIndex + 1] : null;
   const isLatest = issueNumber === getLatestIssueNumber();
 
-  // Check subscriber cookie — set when they click any email link or magic link.
+  // Check subscriber cookie set when they click any email link or magic link.
   // Works on any device, any country, without a password.
-  let isSubscriber = false;
+  // ?preview=true bypasses the gate for local draft review (never deployed in production).
+  let isSubscriber = preview === "true";
   const cookieStore = await cookies();
   const spToken = cookieStore.get("sp_token")?.value;
-  if (spToken) {
+  if (!isSubscriber && spToken) {
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -193,7 +196,7 @@ export default async function NewsletterIssuePage({ params }: PageProps) {
 
         <hr className="border-gray-200 mb-10" />
 
-        {/* ScrollGate wraps all content — fades and gates on scroll.
+        {/* ScrollGate wraps all content fades and gates on scroll.
             Subscribers arriving via email token link bypass the gate entirely. */}
         <ScrollGate isSubscriber={isSubscriber}>
           {/* Greeting */}
@@ -294,15 +297,15 @@ export default async function NewsletterIssuePage({ params }: PageProps) {
             </section>
           )}
 
-          {/* Image 1 */}
+          <hr className="border-gray-200 mb-10" />
+
+          {/* Image 1 — above Digest, sits right on top of the first event it relates to */}
           {newsletter.images[0] && (
-            <div className="mb-12 rounded-2xl overflow-hidden shadow-sm">
+            <div className="mb-8 rounded-2xl overflow-hidden shadow-sm">
               <img src={newsletter.images[0].src} alt={newsletter.images[0].alt} className="w-full h-56 sm:h-72 object-cover" />
               {newsletter.images[0].alt && <p className="text-gray-400 text-xs mt-2 italic px-1">{stripEmDashes(newsletter.images[0].alt)}</p>}
             </div>
           )}
-
-          <hr className="border-gray-200 mb-10" />
 
           {/* Digest */}
           {newsletter.digest.length > 0 && (
@@ -334,15 +337,15 @@ export default async function NewsletterIssuePage({ params }: PageProps) {
             </section>
           )}
 
-          {/* Image 2 */}
+          {/* Image 2 — sits directly above Community Pick, no divider so it flows into the story */}
           {newsletter.images[1] && (
-            <div className="mb-12 rounded-2xl overflow-hidden shadow-sm">
+            <div className="mb-6 rounded-2xl overflow-hidden shadow-sm">
               <img src={newsletter.images[1].src} alt={newsletter.images[1].alt} className="w-full h-56 sm:h-72 object-cover" />
               {newsletter.images[1].alt && <p className="text-gray-400 text-xs mt-2 italic px-1">{stripEmDashes(newsletter.images[1].alt)}</p>}
             </div>
           )}
 
-          <hr className="border-gray-200 mb-10" />
+          {newsletter.images[1] && newsletter.communityPickBody.length > 0 ? null : <hr className="border-gray-200 mb-10" />}
 
           {/* Community Pick */}
           {newsletter.communityPickBody.length > 0 && (
