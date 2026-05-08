@@ -84,6 +84,7 @@ export default async function NewsletterIssuePage({ params, searchParams }: Page
   // Works on any device, any country, without a password.
   // ?preview=true bypasses the gate for local draft review (never deployed in production).
   let isSubscriber = preview === "true";
+  let subscriberId: string | undefined;
   const cookieStore = await cookies();
   const spToken = cookieStore.get("sp_token")?.value;
   if (!isSubscriber && spToken) {
@@ -99,6 +100,7 @@ export default async function NewsletterIssuePage({ params, searchParams }: Page
       .eq("status", "active")
       .maybeSingle();
     isSubscriber = !!data;
+    subscriberId = data?.id;
   }
 
   // Older issues: show title + blurred content + subscribe wall
@@ -473,7 +475,7 @@ export default async function NewsletterIssuePage({ params, searchParams }: Page
 
           {/* Referral */}
           <div className="-mx-6">
-            <ReferralSection />
+            <ReferralSection subscriberId={subscriberId} issueNumber={issueNumber} />
           </div>
         </ScrollGate>
       </article>
