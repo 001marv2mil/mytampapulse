@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -23,9 +23,9 @@ const PACKAGES = [
     name: "Featured Spot",
     price: "$599",
     per: "per issue",
-    desc: "Your business gets the full Hidden Gem or Event Pick treatment — written in our voice, front and center.",
+    desc: "Your business gets the full Hidden Gem or Event Pick treatment written in our voice, front and center.",
     includes: [
-      "Dedicated feature section (150–200 words)",
+      "Dedicated feature section (150-200 words)",
       "Written in Pulse editorial voice",
       "Photo + full description",
       "Link + CTA button",
@@ -39,7 +39,7 @@ const PACKAGES = [
     name: "Full Sponsor",
     price: "$999",
     per: "per issue",
-    desc: "Exclusive ownership of one issue. Your brand is woven throughout — newsletter + Instagram + stories.",
+    desc: "Exclusive ownership of one issue. Your brand is woven throughout newsletter + Instagram + stories.",
     includes: [
       "Everything in Featured Spot",
       "\"Presented by [your brand]\" throughout issue",
@@ -100,7 +100,7 @@ export default function AdvertisePage() {
             </h1>
 
             <p className="text-gray-500 text-lg max-w-xl leading-relaxed mb-10">
-              mytampapulse reaches 1,000+ Tampa Bay locals who actively seek out the best events, restaurants, bars, and experiences. These aren&apos;t passive followers — they read every issue and actually go out.
+              mytampapulse reaches 1,000+ Tampa Bay locals who actively seek out the best events, restaurants, bars, and experiences. These aren&apos;t passive followers they read every issue and actually go out.
             </p>
 
             <a href="#packages"
@@ -138,8 +138,8 @@ export default function AdvertisePage() {
           <div className="grid sm:grid-cols-3 gap-5">
             {[
               { icon: "🎯", title: "Hyper-targeted", desc: "Every subscriber is a Tampa Bay local who opted in specifically for recommendations like yours." },
-              { icon: "📖", title: "Editorial voice", desc: "We write about your business the same way we write about everything else — like a trusted friend, not a press release." },
-              { icon: "🔁", title: "Action-oriented", desc: "Our subscribers don't just read — they go. They book, they show up, they spend. That's the whole point of the Pulse." },
+              { icon: "📖", title: "Editorial voice", desc: "We write about your business the same way we write about everything else like a trusted friend, not a press release." },
+              { icon: "🔁", title: "Action-oriented", desc: "Our subscribers don't just read they go. They book, they show up, they spend. That's the whole point of the Pulse." },
             ].map((item, i) => (
               <motion.div key={item.title} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }} transition={{ delay: i * 0.1 }}
@@ -160,7 +160,7 @@ export default function AdvertisePage() {
             className="text-center mb-12">
             <p className="text-pulse-orange text-xs font-bold tracking-[0.3em] uppercase mb-3">Sponsorship Options</p>
             <h2 className="font-heading text-4xl font-black text-gray-900">Pick your placement</h2>
-            <p className="text-gray-500 text-sm mt-3 max-w-md mx-auto">All packages include editorial write-up in our voice — no copy-pasting your press release.</p>
+            <p className="text-gray-500 text-sm mt-3 max-w-md mx-auto">All packages include editorial write-up in our voice no copy-pasting your press release.</p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-6">
@@ -271,9 +271,9 @@ export default function AdvertisePage() {
                 <select required value={form.package} onChange={e => setForm({...form, package: e.target.value})}
                   className="w-full bg-gray-50 border border-gray-200 focus:border-pulse-orange rounded-xl px-4 py-3 text-gray-800 text-sm focus:outline-none transition-colors">
                   <option value="">Select a package</option>
-                  <option>Shoutout — $299/issue</option>
-                  <option>Featured Spot — $599/issue</option>
-                  <option>Full Sponsor — $999/issue</option>
+                  <option>Shoutout $299/issue</option>
+                  <option>Featured Spot $599/issue</option>
+                  <option>Full Sponsor $999/issue</option>
                   <option>Not sure, let&apos;s talk</option>
                 </select>
               </div>

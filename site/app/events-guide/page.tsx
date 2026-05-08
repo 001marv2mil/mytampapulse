@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 
@@ -62,7 +62,7 @@ export default function EventsGuidePage() {
 
           {/* Sub-headline */}
           <p className="text-white/60 text-base text-center mb-8 leading-relaxed">
-            Get the free <strong className="text-white">60-Day Tampa Events Guide</strong> — everything worth doing, already curated. No searching required.
+            Get the free <strong className="text-white">60-Day Tampa Events Guide</strong> everything worth doing, already curated. No searching required.
           </p>
 
           {/* Guide preview */}
@@ -84,7 +84,7 @@ export default function EventsGuidePage() {
             </ul>
             <div className="mt-4 pt-4 border-t border-white/10">
               <p className="text-[#FF5A36] text-xs font-semibold">
-                Free PDF · Instant download · Updated for May–July 2026
+                Free PDF · Instant download · Updated for May-July 2026
               </p>
             </div>
           </div>

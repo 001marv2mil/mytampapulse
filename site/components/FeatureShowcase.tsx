@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 
@@ -31,7 +31,7 @@ const features = [
       </svg>
     ),
     title: "Date Night Picks",
-    desc: "Impress anyone, every time. From rooftop bars to underground supper clubs — we got you covered.",
+    desc: "Impress anyone, every time. From rooftop bars to underground supper clubs we got you covered.",
     accent: "from-amber-400 to-orange-400",
   },
   {
@@ -41,7 +41,7 @@ const features = [
       </svg>
     ),
     title: "Weekend Moves",
-    desc: "Your Friday–Sunday planned in 60 seconds flat. Never waste a weekend wondering what to do again.",
+    desc: "Your Friday-Sunday planned in 60 seconds flat. Never waste a weekend wondering what to do again.",
     accent: "from-emerald-400 to-teal-400",
   },
 ];

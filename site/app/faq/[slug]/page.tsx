@@ -22,8 +22,8 @@ const FAQ_TOPICS = [
 function getGenericFAQs(title: string) {
   return [
     { q: `What are the best ${title.toLowerCase()} options?`, a: `Tampa Bay has a wide range of options. Our local guide is updated regularly with the best picks recommended by residents.` },
-    { q: `Are there free options for ${title.toLowerCase()}?`, a: `Yes — Tampa Bay regularly offers free and low-cost options. Check our events calendar for current free activities.` },
-    { q: `What time of year is best for ${title.toLowerCase()}?`, a: `Tampa Bay's mild winter (October–April) is peak season. Summer brings heat and afternoon storms but also great indoor options and deals.` },
+    { q: `Are there free options for ${title.toLowerCase()}?`, a: `Yes Tampa Bay regularly offers free and low-cost options. Check our events calendar for current free activities.` },
+    { q: `What time of year is best for ${title.toLowerCase()}?`, a: `Tampa Bay's mild winter (October-April) is peak season. Summer brings heat and afternoon storms but also great indoor options and deals.` },
     { q: `How do I find the latest information about ${title.toLowerCase()}?`, a: `Tampa Pulse is updated weekly with fresh local content. Bookmark this page and check back regularly.` },
   ]
 }
@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const title = topic?.title ?? 'Tampa Bay FAQ'
   const updated = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
   return {
-    title: `${title} — FAQ & Local Guide`,
+    title: `${title} FAQ & Local Guide`,
     description: `Answers to common questions about ${title.toLowerCase()} in Tampa Bay. Updated ${updated}.`,
   }
 }

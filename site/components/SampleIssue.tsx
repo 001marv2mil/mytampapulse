@@ -1,11 +1,11 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import Link from "next/link";
 
 const PICKS = [
   { icon: "🥪", category: "EVENT", title: "Cuban Sandwich Festival", detail: "Centennial Park · Sun 12PM · Free · 370-ft world record attempt + live salsa" },
-  { icon: "🎨", category: "EVENT", title: "Mainsail Art Festival", detail: "Vinoy Park · Sat–Sun · Free · 250+ juried artists, 51 years running" },
+  { icon: "🎨", category: "EVENT", title: "Mainsail Art Festival", detail: "Vinoy Park · Sat-Sun · Free · 250+ juried artists, 51 years running" },
   { icon: "💎", category: "HIDDEN GEM", title: "Trailer Daddy", detail: "Central Ave, St. Pete · Trailer-park cocktail bar. Sounds weird. Drinks go hard." },
   { icon: "🎵", category: "NIGHTLIFE", title: "Katt Williams: Golden Age Tour", detail: "Benchmark Arena · Fri 8PM · Tickets from $89" },
   { icon: "🌅", category: "DATE NIGHT", title: "ZooBrews Adults Night", detail: "Zoo Tampa · Sat 7:30PM · $84 · Unlimited drinks, live music, no kids" },
@@ -29,7 +29,7 @@ export default function SampleIssue({ latestIssueNumber }: { latestIssueNumber?:
             </p>
 
             <div className="space-y-3 mb-8">
-              {["Zero filler. Every pick earns its spot.", "Written in plain English, not marketing copy.", "Covers all of Tampa Bay — Ybor, SoHo, St. Pete, Seminole Heights.", "Delivered Thursday so you can actually use it this weekend."].map((point) => (
+              {["Zero filler. Every pick earns its spot.", "Written in plain English, not marketing copy.", "Covers all of Tampa Bay Ybor, SoHo, St. Pete, Seminole Heights.", "Delivered Thursday so you can actually use it this weekend."].map((point) => (
                 <div key={point} className="flex items-start gap-3">
                   <span className="text-green-500 mt-0.5 shrink-0">✓</span>
                   <p className="text-gray-600 text-sm">{point}</p>
@@ -44,7 +44,7 @@ export default function SampleIssue({ latestIssueNumber }: { latestIssueNumber?:
             </Link>
           </motion.div>
 
-          {/* Right — picks preview */}
+          {/* Right picks preview */}
           <div className="space-y-3">
             {PICKS.map((pick, i) => (
               <motion.div key={i}
@@ -74,7 +74,7 @@ export default function SampleIssue({ latestIssueNumber }: { latestIssueNumber?:
                 <div>
                   <span className="text-[10px] font-black bg-teal-50 text-teal-600 px-2 py-0.5 rounded-full">HAPPY HOUR</span>
                   <p className="text-gray-900 font-bold text-sm mt-1">Hidden rooftop bar, $5 drinks</p>
-                  <p className="text-gray-400 text-xs">SoHo · Thu–Sat 5–8PM · Only subscribers know</p>
+                  <p className="text-gray-400 text-xs">SoHo · Thu-Sat 5-8PM · Only subscribers know</p>
                 </div>
               </div>
             </div>

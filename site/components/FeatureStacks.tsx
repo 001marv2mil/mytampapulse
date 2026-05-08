@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
@@ -15,7 +15,7 @@ const FEATURES = [
   {
     number: "02",
     title: "Hidden Gems",
-    desc: "The spots locals know but tourists never find. Neighborhood dives, underground dinners, secret rooftops — we got 'em.",
+    desc: "The spots locals know but tourists never find. Neighborhood dives, underground dinners, secret rooftops we got 'em.",
     tag: "Weekly Drop",
     icon: "💎",
     accent: "#FF7A00",
@@ -31,7 +31,7 @@ const FEATURES = [
   {
     number: "04",
     title: "Weekend Moves",
-    desc: "Your entire Friday–Sunday planned in 60 seconds. Morning market, afternoon beach, evening rooftop — done.",
+    desc: "Your entire Friday-Sunday planned in 60 seconds. Morning market, afternoon beach, evening rooftop done.",
     tag: "Plan Your Weekend",
     icon: "🌴",
     accent: "#FF7A00",

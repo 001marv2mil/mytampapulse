@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 
 interface AdminPageProps {
@@ -237,7 +237,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                             {e.share_method?.replace(/_/g, " ")}
                           </span>
                         </td>
-                        <td className="py-3 px-5 text-gray-400 text-xs">{e.share_cta?.replace(/_/g, " ") || "—"}</td>
+                        <td className="py-3 px-5 text-gray-400 text-xs">{e.share_cta?.replace(/_/g, " ") || ", "}</td>
                         <td className="py-3 px-5 text-gray-500">#{e.issue_number}</td>
                       </tr>
                     );
