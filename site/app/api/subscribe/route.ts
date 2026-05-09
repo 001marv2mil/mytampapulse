@@ -49,6 +49,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
+    // Derive these early so they're available in the duplicate handler too
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mytampapulse.com";
+    const isEventSignup = source && source !== "join";
+    const eventDisplayName =
+      source === "black-mask" ? "Black Mask Social" : (source || "the next event");
+
     // Insert subscriber
     const { data, error } = await supabase
       .from("subscribers")
@@ -56,10 +62,104 @@ export async function POST(req: NextRequest) {
       .select("id, unsubscribe_token")
       .single();
 
-    // Duplicate email still return success
+    // ── Duplicate email handler ──────────────────────────────────────────────
+    // The email is already in the system. We never double-insert, but we do
+    // need to handle three cases intelligently:
+    //   1. Previously unsubscribed → reactivate + send fresh welcome
+    //   2. Active + came from an event ad → confirm they're on the list for that event
+    //   3. Active + generic signup → silent success, no spam
     if (error && error.code === "23505") {
+      const { data: existing } = await supabase
+        .from("subscribers")
+        .select("id, unsubscribe_token, status")
+        .eq("email", email)
+        .single();
+
+      if (existing) {
+        const referralLink = `${siteUrl}?ref=${existing.id}`;
+        const unsubUrl = `${siteUrl}/unsubscribe?token=${existing.unsubscribe_token}`;
+
+        if (existing.status === "unsubscribed") {
+          // Reactivate — they want back in
+          await supabase
+            .from("subscribers")
+            .update({ status: "active", source: source ?? existing.status })
+            .eq("id", existing.id);
+
+          // Send a "welcome back" version of the event or generic email
+          await resend.emails.send({
+            from: "Tampa Pulse <newsletter@mytampapulse.com>",
+            to: email,
+            subject: isEventSignup
+              ? `Welcome back — you're on the list for ${eventDisplayName} 🎭`
+              : "Welcome back to Tampa Pulse 👋",
+            html: `
+              <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 20px; color: #1a1a1a;">
+                <div style="text-align: center; margin-bottom: 32px;">
+                  <span style="font-size: 28px; font-weight: 900; color: #1a1a1a;">tampa<span style="color: #FF5A36;">pulse</span></span>
+                </div>
+                <h1 style="font-size: 24px; font-weight: 800; margin-bottom: 12px;">You're back. 👋</h1>
+                <p style="font-size: 15px; line-height: 1.7; color: #444; margin-bottom: 20px;">
+                  ${isEventSignup
+                    ? `Good to have you back. You're on the list for <strong>${eventDisplayName}</strong> — we'll hit you first when it drops.`
+                    : `Good to have you back. You're back on Tampa Pulse — every Thursday, Tampa's best events, food, and moves, straight to your inbox.`
+                  }
+                </p>
+                <div style="border: 1px solid #eee; border-radius: 12px; padding: 20px; margin: 24px 0;">
+                  <p style="font-size: 14px; font-weight: 700; color: #1a1a1a; margin: 0 0 6px;">🎁 Your referral link</p>
+                  <p style="font-size: 13px; color: #666; margin: 0 0 10px;">Share this and earn rewards — restaurant vouchers, gift cards, iPad giveaway.</p>
+                  <p style="font-size: 13px; font-weight: 600; color: #FF5A36; margin: 0;"><a href="${referralLink}" style="color: #FF5A36;">${referralLink}</a></p>
+                </div>
+                <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0 16px;" />
+                <p style="font-size: 11px; color: #999; text-align: center;">
+                  <a href="${unsubUrl}" style="color: #999; text-decoration: underline;">Unsubscribe</a>
+                  &nbsp;&middot;&nbsp; Tampa Bay, FL
+                </p>
+              </div>
+            `,
+          });
+
+        } else if (isEventSignup) {
+          // Active subscriber — already on the list, saw an event ad and signed up again.
+          // Acknowledge the event, don't touch their record, don't send duplicate welcome.
+          await resend.emails.send({
+            from: "Tampa Pulse <newsletter@mytampapulse.com>",
+            to: email,
+            subject: `You're already in — we'll hit you when ${eventDisplayName} drops 🎭`,
+            html: `
+              <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 20px; color: #1a1a1a;">
+                <div style="text-align: center; margin-bottom: 32px;">
+                  <span style="font-size: 28px; font-weight: 900; color: #1a1a1a;">tampa<span style="color: #FF5A36;">pulse</span></span>
+                </div>
+                <h1 style="font-size: 24px; font-weight: 800; margin-bottom: 12px;">You're already on the list. ✅</h1>
+                <p style="font-size: 15px; line-height: 1.7; color: #444; margin-bottom: 20px;">
+                  Good news — you're already a Tampa Pulse subscriber, so you're first in line.
+                  When <strong>${eventDisplayName}</strong> drops, you'll hear about it before anyone else.
+                  No action needed.
+                </p>
+                <p style="font-size: 15px; line-height: 1.7; color: #444; margin-bottom: 28px;">
+                  In the meantime, keep an eye on your Thursday newsletter — that's where the real stuff lives.
+                </p>
+                <div style="border: 1px solid #eee; border-radius: 12px; padding: 20px; margin: 24px 0;">
+                  <p style="font-size: 14px; font-weight: 700; color: #1a1a1a; margin: 0 0 6px;">🎁 Know someone who'd be into it?</p>
+                  <p style="font-size: 13px; color: #666; margin: 0 0 10px;">Share your link — every signup you send earns you rewards.</p>
+                  <p style="font-size: 13px; font-weight: 600; color: #FF5A36; margin: 0;"><a href="${referralLink}" style="color: #FF5A36;">${referralLink}</a></p>
+                </div>
+                <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0 16px;" />
+                <p style="font-size: 11px; color: #999; text-align: center;">
+                  <a href="${unsubUrl}" style="color: #999; text-decoration: underline;">Unsubscribe</a>
+                  &nbsp;&middot;&nbsp; Tampa Bay, FL
+                </p>
+              </div>
+            `,
+          });
+        }
+        // Active + generic signup → silent success, no email (they're already in, no need to remind them)
+      }
+
       return NextResponse.json({ success: true });
     }
+    // ── End duplicate handler ────────────────────────────────────────────────
 
     if (error) {
       console.error("Supabase insert error:", error);
@@ -70,7 +170,6 @@ export async function POST(req: NextRequest) {
     const sourceUrl = req.headers.get("referer") || "https://mytampapulse.com";
     sendMetaCAPIEvent(email, sourceUrl);
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mytampapulse.com";
     const unsubscribeUrl = `${siteUrl}/unsubscribe?token=${data.unsubscribe_token}`;
     const referralLink = `${siteUrl}?ref=${data.id}`;
 
@@ -208,11 +307,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Welcome email different copy depending on signup source
-    const isEventSignup = source && source !== "join";
-    const eventDisplayName =
-      source === "black-mask" ? "Black Mask Social" : (source || "the next event");
-
+    // Welcome email — copy varies by signup source (isEventSignup + eventDisplayName defined above)
     await resend.emails.send({
       from: "Tampa Pulse <newsletter@mytampapulse.com>",
       to: email,
