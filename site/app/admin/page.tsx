@@ -54,6 +54,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
     { data: topReferrers },
     { data: recentSubs },
     { data: sends },
+    { data: sourceData },
   ] = await Promise.all([
     supabase.from("subscribers").select("*", { count: "exact", head: true }).eq("status", "active"),
     supabase.from("subscribers").select("*", { count: "exact", head: true }).eq("status", "active").gte("created_at", sevenDaysAgo),
@@ -62,9 +63,18 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
     supabase.from("share_events").select("share_method, share_cta, issue_number, created_at, subscriber_id").order("created_at", { ascending: false }),
     supabase.from("referrals").select("*", { count: "exact", head: true }),
     supabase.from("subscribers").select("email, referral_count").gt("referral_count", 0).order("referral_count", { ascending: false }).limit(10),
-    supabase.from("subscribers").select("email, created_at, referral_count").eq("status", "active").order("created_at", { ascending: false }).limit(10),
+    supabase.from("subscribers").select("email, created_at, referral_count, source").eq("status", "active").order("created_at", { ascending: false }).limit(10),
     supabase.from("newsletter_sends").select("issue_number").order("issue_number", { ascending: false }).limit(1),
+    supabase.from("subscribers").select("source").eq("status", "active"),
   ]);
+
+  // Aggregate signup sources
+  const bySource: Record<string, number> = {};
+  for (const row of (sourceData ?? [])) {
+    const key = row.source ?? "organic";
+    bySource[key] = (bySource[key] ?? 0) + 1;
+  }
+  const maxSource = Math.max(1, ...Object.values(bySource));
 
   // Aggregate shares
   const byMethod: Record<string, number> = {};
@@ -119,6 +129,23 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
             <StatCard label="New This Week" value={new7d ?? 0} sub="last 7 days" />
             <StatCard label="New This Month" value={new30d ?? 0} sub="last 30 days" />
             <StatCard label="Retention" value={`${retentionRate}%`} sub={`${totalUnsub ?? 0} unsubs total`} />
+          </div>
+        </section>
+
+        {/* Signup sources */}
+        <section>
+          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">Signup Sources</h2>
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+            {Object.keys(bySource).length === 0 ? (
+              <p className="text-gray-400 text-sm">No source data yet — will populate for new signups.</p>
+            ) : (
+              Object.entries(bySource)
+                .sort((a, b) => b[1] - a[1])
+                .map(([src, count]) => (
+                  <Bar key={src} label={src.replace(/-/g, " ")} value={count} max={maxSource} color="#6366f1" />
+                ))
+            )}
+            <p className="text-xs text-gray-400 mt-4">"organic" = signed up before source tracking was added</p>
           </div>
         </section>
 
@@ -256,6 +283,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50">
                   <th className="text-left py-3 px-5 text-xs font-medium text-gray-400 uppercase tracking-wide">Email</th>
+                  <th className="text-left py-3 px-5 text-xs font-medium text-gray-400 uppercase tracking-wide">Source</th>
                   <th className="text-left py-3 px-5 text-xs font-medium text-gray-400 uppercase tracking-wide">Joined</th>
                   <th className="text-left py-3 px-5 text-xs font-medium text-gray-400 uppercase tracking-wide">Referrals</th>
                 </tr>
@@ -269,6 +297,15 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                   return (
                     <tr key={i} className="border-b border-gray-50 last:border-0">
                       <td className="py-3 px-5 text-gray-700">{s.email}</td>
+                      <td className="py-3 px-5">
+                        {s.source ? (
+                          <span className="inline-block bg-indigo-50 text-indigo-600 text-xs font-semibold px-2 py-0.5 rounded-full">
+                            {s.source}
+                          </span>
+                        ) : (
+                          <span className="text-gray-300 text-xs">—</span>
+                        )}
+                      </td>
                       <td className="py-3 px-5 text-gray-400 text-xs">{joined}</td>
                       <td className="py-3 px-5">
                         {(s.referral_count ?? 0) > 0 ? (

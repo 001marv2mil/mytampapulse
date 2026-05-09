@@ -38,8 +38,8 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 const MILESTONES: Record<number, { prize: string; description: string }> = {
   5:  { prize: "a Tampa restaurant voucher",       description: "dinner for two at a local Tampa spot" },
-  10: { prize: "a $100 Tampa Bay gift card",        description: "$100 to spend anywhere in Tampa Bay" },
-  25: { prize: "an iPad giveaway entry",            description: "you're entered to win an iPad — winner announced monthly" },
+  10: { prize: "a $250 Tampa Bay gift card",        description: "$250 to spend anywhere in Tampa Bay" },
+  25: { prize: "an iPad giveaway entry",            description: "you're entered to win an iPad winner announced monthly" },
 };
 
 export async function POST(req: NextRequest) {
@@ -52,11 +52,11 @@ export async function POST(req: NextRequest) {
     // Insert subscriber
     const { data, error } = await supabase
       .from("subscribers")
-      .insert({ email })
+      .insert({ email, source: source ?? null })
       .select("id, unsubscribe_token")
       .single();
 
-    // Duplicate email — still return success
+    // Duplicate email still return success
     if (error && error.code === "23505") {
       return NextResponse.json({ success: true });
     }
@@ -103,11 +103,11 @@ export async function POST(req: NextRequest) {
         const milestone = MILESTONES[newCount];
 
         if (milestone) {
-          // Milestone email — entered for a prize
+          // Milestone email entered for a prize
           await resend.emails.send({
             from: "Tampa Pulse <newsletter@mytampapulse.com>",
             to: referrer.email,
-            subject: `🏆 You hit ${newCount} referrals — you've been entered for ${milestone.prize}`,
+            subject: `🏆 You hit ${newCount} referrals you've been entered for ${milestone.prize}`,
             html: `
               <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 20px; color: #1a1a1a;">
                 <div style="text-align: center; margin-bottom: 32px;">
@@ -121,7 +121,7 @@ export async function POST(req: NextRequest) {
                 </div>
 
                 <p style="font-size: 15px; line-height: 1.7; color: #444;">
-                  That's ${newCount} people who signed up because of you. Seriously — thank you.
+                  That's ${newCount} people who signed up because of you. Seriously thank you.
                 </p>
 
                 <p style="font-size: 15px; line-height: 1.7; color: #444;">
@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
                 </p>
 
                 <p style="font-size: 15px; line-height: 1.7; color: #444;">
-                  Keep going — the next milestone unlocks an even bigger reward.
+                  Keep going the next milestone unlocks an even bigger reward.
                 </p>
 
                 <div style="border: 1px solid #eee; border-radius: 12px; padding: 20px; margin: 28px 0;">
@@ -139,7 +139,7 @@ export async function POST(req: NextRequest) {
 
                 <div style="background: #1a1a1a; border-radius: 12px; padding: 20px; margin: 0 0 28px; text-align: center;">
                   <p style="font-size: 13px; font-weight: 700; color: #fff; margin: 0 0 6px;">Follow us on Instagram for daily updates</p>
-                  <p style="font-size: 12px; color: #999; margin: 0 0 12px;">We post 3x/day — the stuff that can't wait until Thursday.</p>
+                  <p style="font-size: 12px; color: #999; margin: 0 0 12px;">We post 3x/day the stuff that can't wait until Thursday.</p>
                   <a href="https://instagram.com/thetampapulse" style="display: inline-block; background: #FF5A36; color: white; font-weight: 700; font-size: 13px; padding: 10px 22px; border-radius: 8px; text-decoration: none;">@thetampapulse</a>
                 </div>
 
@@ -152,7 +152,7 @@ export async function POST(req: NextRequest) {
             `,
           });
         } else {
-          // Standard referral email — all 3 PDFs
+          // Standard referral email all 3 PDFs
           await resend.emails.send({
             from: "Tampa Pulse <newsletter@mytampapulse.com>",
             to: referrer.email,
@@ -170,13 +170,13 @@ export async function POST(req: NextRequest) {
                 </p>
 
                 <p style="font-size: 15px; line-height: 1.7; color: #444;">
-                  Two bonus guides unlocked — on top of the 60-Day Events Guide you already have:
+                  Two bonus guides unlocked on top of the 60-Day Events Guide you already have:
                 </p>
 
                 <div style="margin: 28px 0; display: flex; flex-direction: column; gap: 12px;">
                   <a href="${siteUrl}/neighborhoods.pdf" style="display: block; background: #FF5A36; color: white; font-weight: 700; font-size: 14px; padding: 14px 24px; border-radius: 10px; text-decoration: none; margin-bottom: 10px;">
                     Tampa Neighborhoods Guide →<br>
-                    <span style="font-weight: 400; font-size: 12px; opacity: 0.85;">Ybor, SoHo, Hyde Park + more — where to actually go</span>
+                    <span style="font-weight: 400; font-size: 12px; opacity: 0.85;">Ybor, SoHo, Hyde Park + more where to actually go</span>
                   </a>
                   <a href="${siteUrl}/first-timer.pdf" style="display: block; background: #1a1a1a; color: white; font-weight: 700; font-size: 14px; padding: 14px 24px; border-radius: 10px; text-decoration: none;">
                     Tampa First-Timer's Checklist →<br>
@@ -185,14 +185,14 @@ export async function POST(req: NextRequest) {
                 </div>
 
                 <p style="font-size: 14px; line-height: 1.7; color: #666;">
-                  Keep sharing — at <strong>5 referrals</strong> you're entered for a restaurant voucher. At <strong>10</strong>, a $100 gift card. At <strong>25</strong>, an iPad giveaway.
+                  Keep sharing at <strong>5 referrals</strong> you're entered for a restaurant voucher. At <strong>10</strong>, a $250 gift card. At <strong>25</strong>, an iPad giveaway.
                 </p>
 
                 <p style="font-size: 14px; color: #999; margin-top: 8px;">Your referral link: <a href="${referralLink}" style="color: #FF5A36;">${referralLink}</a></p>
 
                 <div style="background: #1a1a1a; border-radius: 12px; padding: 20px; margin: 28px 0 0; text-align: center;">
                   <p style="font-size: 13px; font-weight: 700; color: #fff; margin: 0 0 6px;">Follow us on Instagram for daily updates</p>
-                  <p style="font-size: 12px; color: #999; margin: 0 0 12px;">We post 3x/day — the stuff that can't wait until Thursday.</p>
+                  <p style="font-size: 12px; color: #999; margin: 0 0 12px;">We post 3x/day the stuff that can't wait until Thursday.</p>
                   <a href="https://instagram.com/thetampapulse" style="display: inline-block; background: #FF5A36; color: white; font-weight: 700; font-size: 13px; padding: 10px 22px; border-radius: 8px; text-decoration: none;">@thetampapulse</a>
                 </div>
 
@@ -208,16 +208,18 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Welcome email — different copy depending on signup source
-    const isBlackMask = source === "black-mask";
+    // Welcome email different copy depending on signup source
+    const isEventSignup = source && source !== "join";
+    const eventDisplayName =
+      source === "black-mask" ? "Black Mask Social" : (source || "the next event");
 
     await resend.emails.send({
       from: "Tampa Pulse <newsletter@mytampapulse.com>",
       to: email,
-      subject: isBlackMask
-        ? "You're on the list. Here's something for you while you wait 🎭"
+      subject: isEventSignup
+        ? `You're on the list. Here's something for you while you wait 🎭`
         : "Your free 60-Day Tampa Events Guide is here 🎉",
-      html: isBlackMask ? `
+      html: isEventSignup ? `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 20px; color: #1a1a1a;">
           <div style="text-align: center; margin-bottom: 32px;">
             <span style="font-size: 28px; font-weight: 900; color: #1a1a1a;">tampa<span style="color: #FF5A36;">pulse</span></span>
@@ -226,17 +228,17 @@ export async function POST(req: NextRequest) {
           <h1 style="font-size: 24px; font-weight: 800; margin-bottom: 12px;">You're on the list. 🎭</h1>
 
           <p style="font-size: 15px; line-height: 1.7; color: #444; margin-bottom: 20px;">
-            The next Black Mask Social is coming — and you'll be the first to know when it drops. I'll hit your inbox with the date, location, and everything you need before it goes public.
+            The next ${eventDisplayName} is coming and you'll be the first to know when it drops. I'll hit your inbox with the date, location, and everything you need before it goes public.
           </p>
 
           <p style="font-size: 15px; line-height: 1.7; color: #444; margin-bottom: 28px;">
-            In the meantime, I put together something for you. No reason to just sit and wait — Tampa's got moves every weekend and I made sure you won't miss any of them.
+            In the meantime, I put together something for you. No reason to just sit and wait Tampa's got moves every weekend and I made sure you won't miss any of them.
           </p>
 
           <div style="background: #0d0d0d; border-radius: 16px; padding: 28px; margin: 0 0 28px; text-align: center;">
-            <p style="font-size: 12px; font-weight: 700; color: #FF5A36; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 8px;">Free Gift — On Me</p>
+            <p style="font-size: 12px; font-weight: 700; color: #FF5A36; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 8px;">Free Gift On Me</p>
             <p style="font-size: 22px; font-weight: 900; color: #ffffff; margin: 0 0 8px;">60-Day Tampa Events Guide</p>
-            <p style="font-size: 14px; line-height: 1.6; color: #aaa; margin: 0 0 20px;">60 days of concerts, rooftop events, restaurant openings, and weekend moves — curated for locals, not tourists.</p>
+            <p style="font-size: 14px; line-height: 1.6; color: #aaa; margin: 0 0 20px;">60 days of concerts, rooftop events, restaurant openings, and weekend moves curated for locals, not tourists.</p>
             <a href="${siteUrl}/events-guide.pdf" style="display: inline-block; background: #FF5A36; color: white; font-weight: 800; font-size: 15px; padding: 14px 32px; border-radius: 10px; text-decoration: none;">
               Grab Your Free Guide →
             </a>
@@ -244,12 +246,12 @@ export async function POST(req: NextRequest) {
           </div>
 
           <p style="font-size: 15px; line-height: 1.7; color: #444; margin-bottom: 8px;">
-            I also send a weekly newsletter every Thursday — Tampa's best spots, what's opening, and what's worth your time. You're already on it.
+            I also send a weekly newsletter every Thursday Tampa's best spots, what's opening, and what's worth your time. You're already on it.
           </p>
 
           <div style="background: #F7F8FA; border-radius: 12px; padding: 20px; margin: 16px 0; text-align: center;">
             <p style="font-size: 13px; font-weight: 700; color: #1a1a1a; margin: 0 0 6px;">📬 Want to read past issues?</p>
-            <p style="font-size: 13px; color: #666; margin: 0 0 12px;">Browse the full archive — every issue we've ever sent, all in one place.</p>
+            <p style="font-size: 13px; color: #666; margin: 0 0 12px;">Browse the full archive every issue we've ever sent, all in one place.</p>
             <a href="${siteUrl}/newsletter" style="display: inline-block; background: #1a1a1a; color: white; font-weight: 700; font-size: 13px; padding: 10px 22px; border-radius: 8px; text-decoration: none;">
               Read the Archive →
             </a>
@@ -258,16 +260,16 @@ export async function POST(req: NextRequest) {
           <div style="border: 1px solid #eee; border-radius: 12px; padding: 20px; margin: 24px 0;">
             <p style="font-size: 14px; font-weight: 700; color: #1a1a1a; margin: 0 0 6px;">🎁 Refer a friend, get more</p>
             <p style="font-size: 13px; color: #666; margin: 0 0 10px;">Share your link and unlock bonus guides + giveaway entries:</p>
-            <p style="font-size: 13px; color: #444; margin: 0 0 3px;">1 referral — Tampa Neighborhoods Guide + First-Timer's Checklist</p>
-            <p style="font-size: 13px; color: #444; margin: 0 0 3px;">5 referrals — Restaurant voucher entry</p>
-            <p style="font-size: 13px; color: #444; margin: 0 0 14px;">10+ referrals — $100 gift card &amp; iPad giveaway</p>
+            <p style="font-size: 13px; color: #444; margin: 0 0 3px;">1 referral Tampa Neighborhoods Guide + First-Timer's Checklist</p>
+            <p style="font-size: 13px; color: #444; margin: 0 0 3px;">5 referrals Restaurant voucher entry</p>
+            <p style="font-size: 13px; color: #444; margin: 0 0 14px;">10+ referrals $250 gift card &amp; iPad giveaway</p>
             <p style="font-size: 13px; font-weight: 600; color: #FF5A36; margin: 0;">Your link: <a href="${referralLink}" style="color: #FF5A36;">${referralLink}</a></p>
           </div>
 
           <div style="background: linear-gradient(135deg, #405DE6, #833AB4, #E1306C, #F77737); border-radius: 12px; padding: 3px; margin: 0 0 28px;">
             <div style="background: #ffffff; border-radius: 10px; padding: 20px; text-align: center;">
               <p style="font-size: 14px; font-weight: 700; color: #1a1a1a; margin: 0 0 6px;">Daily Tampa drops between newsletters</p>
-              <p style="font-size: 13px; color: #666; margin: 0 0 14px;">New openings, events, and local moves — stuff that can't wait until Thursday.</p>
+              <p style="font-size: 13px; color: #666; margin: 0 0 14px;">New openings, events, and local moves stuff that can't wait until Thursday.</p>
               <a href="https://instagram.com/thetampapulse" style="display: inline-block; background: #1a1a1a; color: white; font-weight: 700; font-size: 13px; padding: 10px 22px; border-radius: 8px; text-decoration: none;">
                 Follow @thetampapulse →
               </a>
@@ -275,7 +277,7 @@ export async function POST(req: NextRequest) {
           </div>
 
           <p style="font-size: 15px; line-height: 1.7; color: #444; margin-bottom: 0;">See you at the next one.</p>
-          <p style="font-size: 15px; font-weight: 700; color: #1a1a1a; margin-top: 4px;">— Marv</p>
+          <p style="font-size: 15px; font-weight: 700; color: #1a1a1a; margin-top: 4px;"> Marv</p>
 
           <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0 16px;" />
           <p style="font-size: 11px; color: #999; text-align: center;">
@@ -292,13 +294,13 @@ export async function POST(req: NextRequest) {
           <h1 style="font-size: 24px; font-weight: 800; margin-bottom: 12px;">Here's your guide. Welcome to the Pulse.</h1>
 
           <p style="font-size: 15px; line-height: 1.7; color: #444; margin-bottom: 24px;">
-            You're in. Every Thursday I send Tampa's best events, food drops, hidden gems, and weekend plans — direct to your inbox, free.
+            You're in. Every Thursday I send Tampa's best events, food drops, hidden gems, and weekend plans direct to your inbox, free.
           </p>
 
           <div style="background: #FFF5F0; border-radius: 16px; padding: 28px; margin: 0 0 28px; text-align: center;">
             <p style="font-size: 13px; font-weight: 700; color: #FF5A36; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 8px;">Your Free Download</p>
             <p style="font-size: 22px; font-weight: 900; color: #1a1a1a; margin: 0 0 8px;">60-Day Tampa Events Guide</p>
-            <p style="font-size: 14px; line-height: 1.6; color: #555; margin: 0 0 20px;">Locals' picks. Not tourist traps. 60 days of concerts, food, openings, and weekend moves — the same stuff I curate for the weekly newsletter.</p>
+            <p style="font-size: 14px; line-height: 1.6; color: #555; margin: 0 0 20px;">Locals' picks. Not tourist traps. 60 days of concerts, food, openings, and weekend moves the same stuff I curate for the weekly newsletter.</p>
             <a href="${siteUrl}/events-guide.pdf" style="display: inline-block; background: #FF5A36; color: white; font-weight: 800; font-size: 15px; padding: 14px 32px; border-radius: 10px; text-decoration: none; letter-spacing: -0.01em;">
               Download Your Guide →
             </a>
@@ -315,16 +317,16 @@ export async function POST(req: NextRequest) {
           <div style="border: 1px solid #eee; border-radius: 12px; padding: 20px; margin: 0 0 24px;">
             <p style="font-size: 14px; font-weight: 700; color: #1a1a1a; margin: 0 0 6px;">🎁 Refer a friend, unlock more</p>
             <p style="font-size: 13px; color: #666; margin: 0 0 10px;">Share your link and get bonus Tampa guides + giveaway entries:</p>
-            <p style="font-size: 13px; color: #444; margin: 0 0 3px;">1 referral — Tampa Neighborhoods Guide + First-Timer's Checklist (PDFs)</p>
-            <p style="font-size: 13px; color: #444; margin: 0 0 3px;">5 referrals — Restaurant voucher entry</p>
-            <p style="font-size: 13px; color: #444; margin: 0 0 14px;">10+ referrals — $100 gift card &amp; iPad giveaway</p>
+            <p style="font-size: 13px; color: #444; margin: 0 0 3px;">1 referral Tampa Neighborhoods Guide + First-Timer's Checklist (PDFs)</p>
+            <p style="font-size: 13px; color: #444; margin: 0 0 3px;">5 referrals Restaurant voucher entry</p>
+            <p style="font-size: 13px; color: #444; margin: 0 0 14px;">10+ referrals $250 gift card &amp; iPad giveaway</p>
             <p style="font-size: 13px; font-weight: 600; color: #FF5A36; margin: 0;">Your link: <a href="${referralLink}" style="color: #FF5A36;">${referralLink}</a></p>
           </div>
 
           <div style="background: linear-gradient(135deg, #405DE6, #833AB4, #E1306C, #F77737); border-radius: 12px; padding: 3px; margin: 0 0 28px;">
             <div style="background: #ffffff; border-radius: 10px; padding: 20px; text-align: center;">
               <p style="font-size: 14px; font-weight: 700; color: #1a1a1a; margin: 0 0 6px;">Daily Tampa updates between newsletters</p>
-              <p style="font-size: 13px; color: #666; margin: 0 0 14px;">New openings, events, and local news — the stuff that can't wait until Thursday.</p>
+              <p style="font-size: 13px; color: #666; margin: 0 0 14px;">New openings, events, and local news the stuff that can't wait until Thursday.</p>
               <a href="https://instagram.com/thetampapulse" style="display: inline-block; background: #1a1a1a; color: white; font-weight: 700; font-size: 13px; padding: 10px 22px; border-radius: 8px; text-decoration: none;">
                 Follow @thetampapulse →
               </a>
@@ -332,7 +334,7 @@ export async function POST(req: NextRequest) {
           </div>
 
           <p style="font-size: 15px; line-height: 1.7; color: #444; margin-bottom: 0;">See you Thursday.</p>
-          <p style="font-size: 15px; font-weight: 700; color: #1a1a1a; margin-top: 4px;">— Marv</p>
+          <p style="font-size: 15px; font-weight: 700; color: #1a1a1a; margin-top: 4px;"> Marv</p>
 
           <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0 16px;" />
           <p style="font-size: 11px; color: #999; text-align: center;">
