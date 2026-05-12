@@ -83,19 +83,13 @@ export default function BlackMaskPage() {
 
           {/* Headline */}
           <h1 className="font-heading text-4xl sm:text-5xl font-black text-white leading-tight mb-4">
-            {eventName ? (
-              <><span className="text-[#FF5A36]">{eventName}</span><br />is coming to Tampa.</>
-            ) : (
-              <>Want in on<br /><span className="text-[#FF5A36]">the next one?</span></>
-            )}
+            You missed it.<br />
+            <span className="text-[#FF5A36]">Join for the next<br />Black Mask Social.</span>
           </h1>
 
           {/* Sub-headline */}
           <p className="text-white/60 text-base leading-relaxed mb-8 max-w-sm">
-            {eventName
-              ? <>Drop your email for first access — plus the free weekly roundup of everything happening in the Bay.</>
-              : <>Drop your email and stay tapped in on Tampa&apos;s best events, nightlife, and things to do. Free weekly roundup, no spam.</>
-            }
+            Drop your email and we&apos;ll hit you when the next Black Mask Social drops. Plus Tampa&apos;s best weekly roundup, free.
           </p>
 
           {/* Social proof */}
