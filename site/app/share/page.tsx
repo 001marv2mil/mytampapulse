@@ -106,17 +106,17 @@ export default function SharePage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-base">🍽️</span>
+              <span className="text-base">💳</span>
               <div>
                 <p className="text-white text-xs font-bold">5 friends sign up</p>
-                <p className="text-white/50 text-xs">Dinner for 2 at Bern&apos;s Steak House — $250 on us</p>
+                <p className="text-white/50 text-xs">Entered for a $250 Tampa Bay gift card</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-base">💳</span>
+              <span className="text-base">🍽️</span>
               <div>
                 <p className="text-white text-xs font-bold">10 friends sign up</p>
-                <p className="text-white/50 text-xs">Entered for a $250 Tampa Bay gift card</p>
+                <p className="text-white/50 text-xs">Dinner for 2 at Bern&apos;s Steak House — $250 on us</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
