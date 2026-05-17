@@ -92,7 +92,7 @@ export default function SharePage() {
             Now bring your crew.
           </h2>
           <p className="text-white/55 text-sm leading-relaxed mb-5 max-w-xs">
-            These nights hit different with your people. Share your link — anyone who signs up gets first access when {eventName} drops.
+            These nights hit different with your people. Share your link. Anyone who signs up gets first access when {eventName} drops.
           </p>
 
           {/* Reward ladder */}
