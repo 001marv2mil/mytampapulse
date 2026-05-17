@@ -87,9 +87,6 @@ export default function SharePage() {
             {eventName}
           </p>
 
-          {/* Divider */}
-          <div className="w-10 h-px bg-white/20 mb-7" />
-
           {/* Hook */}
           <h2 className="font-heading text-2xl sm:text-3xl font-black text-white leading-tight mb-3">
             Now bring your crew.
@@ -112,7 +109,7 @@ export default function SharePage() {
               <span className="text-base">🍽️</span>
               <div>
                 <p className="text-white text-xs font-bold">5 friends sign up</p>
-                <p className="text-white/50 text-xs">Entered for a Tampa restaurant voucher</p>
+                <p className="text-white/50 text-xs">Dinner for 2 at Bern&apos;s Steak House — $250 on us</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
