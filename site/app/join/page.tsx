@@ -40,7 +40,9 @@ export default function JoinPage() {
       }
       const result = await res.json();
       const shareRef = result?.ref;
-      if (shareRef) {
+      // Only show the share page for direct signups (no referral).
+      // Friends arriving via a referral link go to /thank-you — they don't have context yet.
+      if (shareRef && !ref) {
         window.location.href = `/share?ref=${shareRef}&event=${encodeURIComponent(eventName ?? "Black Mask Social")}`;
       } else {
         window.location.href = "/thank-you";
