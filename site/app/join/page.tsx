@@ -82,34 +82,24 @@ export default function JoinPage() {
           </h1>
 
           {/* Sub-headline */}
-          <p className="text-white/60 text-base leading-relaxed mb-8 max-w-sm">
-            Drop your email and we&apos;ll hit you when the next {eventName ?? "Black Mask Social"}{" "}drops. Plus Tampa&apos;s best weekly roundup, free.
+          <p className="text-white/60 text-base leading-relaxed mb-6 max-w-sm">
+            Drop your email — we&apos;ll hit you when {eventName ?? "the next event"} drops.
           </p>
 
           {/* Social proof */}
-          <div className="flex flex-col items-center gap-2 mb-8">
-            <div className="flex gap-0.5">
-              {[1,2,3,4,5].map(i => (
-                <svg key={i} className="w-4 h-4 fill-yellow-400" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                </svg>
+          <div className="flex items-center gap-3 mb-8">
+            <div className="flex -space-x-2">
+              {[
+                "https://images.pexels.com/photos/7383149/pexels-photo-7383149.jpeg?auto=compress&cs=tinysrgb&w=96&h=96&dpr=1&fit=crop",
+                "https://randomuser.me/api/portraits/women/29.jpg",
+                "https://images.pexels.com/photos/7346623/pexels-photo-7346623.jpeg?auto=compress&cs=tinysrgb&w=96&h=96&dpr=1&fit=crop",
+                "https://randomuser.me/api/portraits/men/22.jpg",
+                "https://randomuser.me/api/portraits/men/54.jpg",
+              ].map((src, i) => (
+                <img key={i} src={src} alt="" width={32} height={32} className="w-8 h-8 rounded-full border-2 border-black object-cover" />
               ))}
             </div>
-            <div className="flex items-center gap-2">
-              <div className="flex -space-x-2">
-                {[
-                  "https://images.pexels.com/photos/7383149/pexels-photo-7383149.jpeg?auto=compress&cs=tinysrgb&w=96&h=96&dpr=1&fit=crop",
-                  "https://randomuser.me/api/portraits/women/29.jpg",
-                  "https://images.pexels.com/photos/7346623/pexels-photo-7346623.jpeg?auto=compress&cs=tinysrgb&w=96&h=96&dpr=1&fit=crop",
-                  "https://randomuser.me/api/portraits/men/22.jpg",
-                  "https://randomuser.me/api/portraits/men/54.jpg",
-                  "https://images.pexels.com/photos/34697032/pexels-photo-34697032.jpeg?auto=compress&cs=tinysrgb&w=96&h=96&dpr=1&fit=crop",
-                ].map((src, i) => (
-                  <img key={i} src={src} alt="" width={32} height={32} className="w-8 h-8 rounded-full border-2 border-black object-cover" />
-                ))}
-              </div>
-              <p className="text-white/50 text-xs">1,000+ locals already in</p>
-            </div>
+            <p className="text-white/50 text-xs">1,000+ locals already in ⭐⭐⭐⭐⭐</p>
           </div>
 
           {/* Form */}
@@ -128,7 +118,7 @@ export default function JoinPage() {
               disabled={loading}
               className="w-full bg-[#FF5A36] hover:bg-[#e5502f] disabled:opacity-60 text-white font-black py-4 rounded-full transition-all text-sm tracking-wide"
             >
-              {loading ? "Sending details…" : "Send Me the Details. It's Free"}
+              {loading ? "One sec…" : "I'm In — It's Free"}
             </button>
           </form>
 
@@ -138,7 +128,7 @@ export default function JoinPage() {
 
           {/* Trust */}
           <p className="text-white/20 text-xs mt-5">
-            No spam. Unsubscribe anytime. You&apos;ll get Tampa Pulse every Thursday.
+            No spam. Unsubscribe anytime.
           </p>
 
         </div>
