@@ -49,8 +49,8 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 const MILESTONES: Record<number, { prize: string; description: string }> = {
   5:  { prize: "a $250 Tampa Bay gift card",         description: "$250 to spend anywhere in Tampa Bay" },
-  10: { prize: "dinner for 2 at Bern's Steak House ($250)", description: "dinner for two at Bern's Steak House — $250 on us" },
-  25: { prize: "an iPad giveaway entry",            description: "you're entered to win an iPad winner announced monthly" },
+  10: { prize: "an iPad giveaway entry",             description: "you're entered to win an iPad — winner announced monthly" },
+  25: { prize: "dinner for 2 at Bern's Steak House", description: "dinner for two at Bern's Steak House — on us" },
 };
 
 export async function POST(req: NextRequest) {
@@ -300,7 +300,7 @@ export async function POST(req: NextRequest) {
                 </div>
 
                 <p style="font-size: 14px; line-height: 1.7; color: #666;">
-                  Keep sharing — at <strong>5 referrals</strong> you&apos;re entered for a $250 Tampa Bay gift card. At <strong>10</strong>, dinner for 2 at Bern&apos;s Steak House. At <strong>25</strong>, an iPad giveaway.
+                  Keep sharing — at <strong>5 referrals</strong> you&apos;re entered for a $250 Tampa Bay gift card. At <strong>10</strong>, an iPad giveaway. At <strong>25</strong>, dinner for 2 at Bern&apos;s Steak House.
                 </p>
 
                 <p style="font-size: 14px; color: #999; margin-top: 8px;">Your referral link: <a href="${referralLink}" style="color: #FF5A36;">${referralLink}</a></p>
@@ -373,8 +373,8 @@ export async function POST(req: NextRequest) {
             <p style="font-size: 13px; color: #666; margin: 0 0 10px;">Share your link and unlock bonus guides + giveaway entries:</p>
             <p style="font-size: 13px; color: #444; margin: 0 0 3px;">1 referral Tampa Neighborhoods Guide + First-Timer's Checklist</p>
             <p style="font-size: 13px; color: #444; margin: 0 0 3px;">5 referrals $250 Tampa Bay gift card entry</p>
-            <p style="font-size: 13px; color: #444; margin: 0 0 3px;">10 referrals Dinner for 2 at Bern's Steak House ($250)</p>
-            <p style="font-size: 13px; color: #444; margin: 0 0 14px;">25+ referrals iPad giveaway entry</p>
+            <p style="font-size: 13px; color: #444; margin: 0 0 3px;">10 referrals iPad giveaway entry</p>
+            <p style="font-size: 13px; color: #444; margin: 0 0 14px;">25 referrals Dinner for 2 at Bern's Steak House</p>
             <p style="font-size: 13px; font-weight: 600; color: #FF5A36; margin: 0;">Your link: <a href="${referralLink}" style="color: #FF5A36;">${referralLink}</a></p>
           </div>
 
@@ -431,8 +431,8 @@ export async function POST(req: NextRequest) {
             <p style="font-size: 13px; color: #666; margin: 0 0 10px;">Share your link and get bonus Tampa guides + giveaway entries:</p>
             <p style="font-size: 13px; color: #444; margin: 0 0 3px;">1 referral Tampa Neighborhoods Guide + First-Timer's Checklist (PDFs)</p>
             <p style="font-size: 13px; color: #444; margin: 0 0 3px;">5 referrals $250 Tampa Bay gift card entry</p>
-            <p style="font-size: 13px; color: #444; margin: 0 0 3px;">10 referrals Dinner for 2 at Bern's Steak House ($250)</p>
-            <p style="font-size: 13px; color: #444; margin: 0 0 14px;">25+ referrals iPad giveaway entry</p>
+            <p style="font-size: 13px; color: #444; margin: 0 0 3px;">10 referrals iPad giveaway entry</p>
+            <p style="font-size: 13px; color: #444; margin: 0 0 14px;">25 referrals Dinner for 2 at Bern's Steak House</p>
             <p style="font-size: 13px; font-weight: 600; color: #FF5A36; margin: 0;">Your link: <a href="${referralLink}" style="color: #FF5A36;">${referralLink}</a></p>
           </div>
 
