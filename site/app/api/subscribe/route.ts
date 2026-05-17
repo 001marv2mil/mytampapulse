@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
     // Insert subscriber
     const { data, error } = await supabase
       .from("subscribers")
-      .insert({ email, source: source ?? null })
+      .insert({ email })
       .select("id, unsubscribe_token")
       .single();
 
@@ -175,6 +175,11 @@ export async function POST(req: NextRequest) {
     if (error) {
       console.error("Supabase insert error:", error);
       return NextResponse.json({ error: "Failed to subscribe" }, { status: 500 });
+    }
+
+    // Track signup source — runs silently if column doesn't exist yet
+    if (source) {
+      supabase.from("subscribers").update({ source }).eq("id", data.id).then(() => {}).catch(() => {});
     }
 
     // Fire Meta CAPI Lead event server-side (bypasses iOS/ad blocker tracking)
