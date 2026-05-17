@@ -113,10 +113,10 @@ export default function SharePage() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-base">📱</span>
+              <span className="text-base">🕶️</span>
               <div>
                 <p className="text-white text-xs font-bold">10 friends sign up</p>
-                <p className="text-white/50 text-xs">Entered for an iPad giveaway</p>
+                <p className="text-white/50 text-xs">Entered for Ray-Ban Meta smart glasses giveaway</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
