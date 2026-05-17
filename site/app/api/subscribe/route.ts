@@ -179,7 +179,7 @@ export async function POST(req: NextRequest) {
 
     // Track signup source — runs silently if column doesn't exist yet
     if (source) {
-      supabase.from("subscribers").update({ source }).eq("id", data.id).then(() => {}).catch(() => {});
+      void supabase.from("subscribers").update({ source }).eq("id", data.id);
     }
 
     // Fire Meta CAPI Lead event server-side (bypasses iOS/ad blocker tracking)
