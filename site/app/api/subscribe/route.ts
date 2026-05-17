@@ -3,11 +3,21 @@ import { createClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
 import { createHash } from "crypto";
 
-async function sendMetaCAPIEvent(email: string, sourceUrl: string) {
+async function sendMetaCAPIEvent(
+  email: string,
+  sourceUrl: string,
+  eventId?: string,
+  fbp?: string,
+  fbc?: string,
+) {
   const token = process.env.META_CAPI_TOKEN;
   if (!token) return;
 
   const hashedEmail = createHash("sha256").update(email.toLowerCase().trim()).digest("hex");
+
+  const userData: Record<string, string | string[]> = { em: [hashedEmail] };
+  if (fbp) userData.fbp = fbp;
+  if (fbc) userData.fbc = fbc;
 
   try {
     await fetch("https://graph.facebook.com/v21.0/1272183185072628/events", {
@@ -19,7 +29,8 @@ async function sendMetaCAPIEvent(email: string, sourceUrl: string) {
           event_time: Math.floor(Date.now() / 1000),
           action_source: "website",
           event_source_url: sourceUrl,
-          user_data: { em: [hashedEmail] },
+          event_id: eventId,
+          user_data: userData,
         }],
         access_token: token,
       }),
@@ -44,7 +55,7 @@ const MILESTONES: Record<number, { prize: string; description: string }> = {
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, ref, source } = await req.json();
+    const { email, ref, source, event_id, fbp, fbc } = await req.json();
     if (!email || typeof email !== "string") {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
@@ -168,7 +179,7 @@ export async function POST(req: NextRequest) {
 
     // Fire Meta CAPI Lead event server-side (bypasses iOS/ad blocker tracking)
     const sourceUrl = req.headers.get("referer") || "https://mytampapulse.com";
-    sendMetaCAPIEvent(email, sourceUrl);
+    sendMetaCAPIEvent(email, sourceUrl, event_id, fbp, fbc);
 
     const unsubscribeUrl = `${siteUrl}/unsubscribe?token=${data.unsubscribe_token}`;
     const referralLink = `${siteUrl}?ref=${data.id}`;
