@@ -174,7 +174,7 @@ export async function POST(req: NextRequest) {
 
     if (error) {
       console.error("Supabase insert error:", error);
-      return NextResponse.json({ error: "Failed to subscribe" }, { status: 500 });
+      return NextResponse.json({ error: "Failed to subscribe", debug: error.message, code: error.code }, { status: 500 });
     }
 
     // Track signup source — runs silently if column doesn't exist yet
