@@ -168,7 +168,7 @@ export async function POST(req: NextRequest) {
         // Active + generic signup → silent success, no email (they're already in, no need to remind them)
       }
 
-      return NextResponse.json({ success: true });
+      return NextResponse.json({ success: true, ref: existing?.id ?? null });
     }
     // ── End duplicate handler ────────────────────────────────────────────────
 
@@ -456,7 +456,7 @@ export async function POST(req: NextRequest) {
       `,
     });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, ref: data.id });
   } catch (err) {
     console.error("Subscribe error:", err);
     return NextResponse.json({ error: "Internal error" }, { status: 500 });

@@ -38,7 +38,13 @@ export default function JoinPage() {
         (window as any).fbq("track", "Lead", {}, { eventID: eventId });
         (window as any).fbq("track", "CompleteRegistration", {}, { eventID: eventId });
       }
-      window.location.href = "/thank-you";
+      const result = await res.json();
+      const shareRef = result?.ref;
+      if (shareRef) {
+        window.location.href = `/share?ref=${shareRef}&event=${encodeURIComponent(eventName ?? "Black Mask Social")}`;
+      } else {
+        window.location.href = "/thank-you";
+      }
     } catch {
       setError("Something went wrong. Try again.");
       setLoading(false);
