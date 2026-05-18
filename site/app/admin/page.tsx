@@ -1,330 +1,171 @@
-﻿import { redirect } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
+"use client";
 
-interface AdminPageProps {
-  searchParams: Promise<{ secret?: string }>;
+import { useEffect, useState } from "react";
+
+interface Stats {
+  subscribers: { active: number; new7d: number; new30d: number; unsubscribed: number };
+  referrals: { total: number; top: { email: string; count: number }[] };
+  shares: {
+    total: number;
+    byMethod: Record<string, number>;
+    byCta: Record<string, number>;
+    byIssue: Record<string, number>;
+    recent: { share_method: string; share_cta: string; issue_number: number; created_at: string }[];
+  };
+  generatedAt: string;
 }
 
 function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-      <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">{label}</p>
-      <p className="text-3xl font-bold text-gray-900">{value}</p>
-      {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
+    <div style={{
+      background: "#111",
+      border: "1px solid #222",
+      borderRadius: 14,
+      padding: "24px 28px",
+      flex: 1,
+      minWidth: 140,
+    }}>
+      <p style={{ color: "#555", fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 10px" }}>{label}</p>
+      <p style={{ color: "#fff", fontSize: 36, fontWeight: 900, margin: "0 0 4px", lineHeight: 1 }}>{value}</p>
+      {sub && <p style={{ color: "#555", fontSize: 12, margin: 0 }}>{sub}</p>}
     </div>
   );
 }
 
-function Bar({ label, value, max, color = "#FF5A36" }: { label: string; value: number; max: number; color?: string }) {
-  const pct = max > 0 ? Math.round((value / max) * 100) : 0;
-  return (
-    <div className="flex items-center gap-3 mb-2">
-      <span className="text-xs text-gray-500 w-32 truncate shrink-0">{label}</span>
-      <div className="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
-        <div className="h-2 rounded-full" style={{ width: `${pct}%`, backgroundColor: color }} />
-      </div>
-      <span className="text-xs font-semibold text-gray-700 w-8 text-right shrink-0">{value}</span>
-    </div>
-  );
-}
+export default function AdminDashboard() {
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [error, setError] = useState("");
+  const [secret, setSecret] = useState("");
+  const [inputSecret, setInputSecret] = useState("");
+  const [loading, setLoading] = useState(false);
 
-export default async function AdminPage({ searchParams }: AdminPageProps) {
-  const { secret } = await searchParams;
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const s = params.get("secret");
+    if (s) { setSecret(s); fetchStats(s); }
+  }, []);
 
-  if (!secret || secret !== process.env.CRON_SECRET) {
-    redirect("/");
+  async function fetchStats(s: string) {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/admin/stats?secret=${s}`);
+      if (!res.ok) { setError("Wrong password."); setLoading(false); return; }
+      const data = await res.json();
+      setStats(data);
+    } catch {
+      setError("Failed to load.");
+    }
+    setLoading(false);
   }
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { auth: { persistSession: false } }
-  );
-
-  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-
-  const [
-    { count: totalActive },
-    { count: new7d },
-    { count: new30d },
-    { count: totalUnsub },
-    { data: shareEvents },
-    { count: totalReferrals },
-    { data: topReferrers },
-    { data: recentSubs },
-    { data: sends },
-    { data: sourceData },
-  ] = await Promise.all([
-    supabase.from("subscribers").select("*", { count: "exact", head: true }).eq("status", "active"),
-    supabase.from("subscribers").select("*", { count: "exact", head: true }).eq("status", "active").gte("created_at", sevenDaysAgo),
-    supabase.from("subscribers").select("*", { count: "exact", head: true }).eq("status", "active").gte("created_at", thirtyDaysAgo),
-    supabase.from("subscribers").select("*", { count: "exact", head: true }).eq("status", "unsubscribed"),
-    supabase.from("share_events").select("share_method, share_cta, issue_number, created_at, subscriber_id").order("created_at", { ascending: false }),
-    supabase.from("referrals").select("*", { count: "exact", head: true }),
-    supabase.from("subscribers").select("email, referral_count").gt("referral_count", 0).order("referral_count", { ascending: false }).limit(10),
-    supabase.from("subscribers").select("email, created_at, referral_count, source").eq("status", "active").order("created_at", { ascending: false }).limit(10),
-    supabase.from("newsletter_sends").select("issue_number").order("issue_number", { ascending: false }).limit(1),
-    supabase.from("subscribers").select("source").eq("status", "active"),
-  ]);
-
-  // Aggregate signup sources
-  const bySource: Record<string, number> = {};
-  for (const row of (sourceData ?? [])) {
-    const key = row.source ?? "organic";
-    bySource[key] = (bySource[key] ?? 0) + 1;
-  }
-  const maxSource = Math.max(1, ...Object.values(bySource));
-
-  // Aggregate shares
-  const byMethod: Record<string, number> = {};
-  const byCta: Record<string, number> = {};
-  const byIssue: Record<string, number> = {};
-
-  for (const e of (shareEvents ?? [])) {
-    byMethod[e.share_method] = (byMethod[e.share_method] ?? 0) + 1;
-    if (e.share_cta) byCta[e.share_cta] = (byCta[e.share_cta] ?? 0) + 1;
-    const key = `Issue ${e.issue_number}`;
-    byIssue[key] = (byIssue[key] ?? 0) + 1;
-  }
-
-  const totalShares = (shareEvents ?? []).length;
-  const maxMethod = Math.max(1, ...Object.values(byMethod));
-  const maxCta = Math.max(1, ...Object.values(byCta));
-  const maxIssue = Math.max(1, ...Object.values(byIssue));
-
-  const latestIssue = sends?.[0]?.issue_number ?? "N/A";
-  const retentionRate =
-    (totalActive ?? 0) + (totalUnsub ?? 0) > 0
-      ? Math.round(((totalActive ?? 0) / ((totalActive ?? 0) + (totalUnsub ?? 0))) * 100)
-      : 100;
-
-  const now = new Date();
-  const generated = now.toLocaleString("en-US", {
-    timeZone: "America/New_York",
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
-
-  return (
-    <div className="min-h-screen bg-[#F7F8FA]">
-      {/* Header */}
-      <div className="bg-gray-900 text-white px-8 py-6 flex items-center justify-between">
-        <div>
-          <span className="text-xl font-black tracking-tight">
-            tampa<span className="text-[#FF5A36]">pulse</span>
-          </span>
-          <span className="ml-3 text-gray-400 text-sm">Admin</span>
+  if (!secret) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#0a0a0a", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "system-ui, sans-serif" }}>
+        <div style={{ width: "100%", maxWidth: 360, padding: "0 20px" }}>
+          <p style={{ color: "#fff", fontSize: 22, fontWeight: 900, marginBottom: 6 }}>Tampa <span style={{ color: "#FF5A36" }}>Pulse</span></p>
+          <p style={{ color: "#555", fontSize: 13, marginBottom: 28 }}>Admin Dashboard</p>
+          <input
+            type="password"
+            placeholder="Enter password"
+            value={inputSecret}
+            onChange={e => setInputSecret(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter" && inputSecret) { setSecret(inputSecret); fetchStats(inputSecret); }}}
+            style={{ width: "100%", background: "#111", border: "1px solid #222", borderRadius: 10, padding: "14px 16px", color: "#fff", fontSize: 14, outline: "none", boxSizing: "border-box", marginBottom: 10 }}
+          />
+          <button
+            onClick={() => { if (inputSecret) { setSecret(inputSecret); fetchStats(inputSecret); }}}
+            style={{ width: "100%", background: "#FF5A36", color: "#fff", border: "none", borderRadius: 10, padding: "14px", fontWeight: 800, fontSize: 14, cursor: "pointer" }}
+          >
+            Enter
+          </button>
+          {error && <p style={{ color: "#ef4444", fontSize: 12, marginTop: 10, textAlign: "center" }}>{error}</p>}
         </div>
-        <p className="text-gray-500 text-xs">Updated {generated} EST</p>
       </div>
+    );
+  }
 
-      <div className="max-w-5xl mx-auto px-6 py-10 space-y-10">
+  if (loading) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#0a0a0a", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <p style={{ color: "#555", fontFamily: "system-ui, sans-serif" }}>Loading...</p>
+      </div>
+    );
+  }
 
-        {/* Subscriber stats */}
-        <section>
-          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">Subscribers</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <StatCard label="Total Active" value={totalActive ?? 0} />
-            <StatCard label="New This Week" value={new7d ?? 0} sub="last 7 days" />
-            <StatCard label="New This Month" value={new30d ?? 0} sub="last 30 days" />
-            <StatCard label="Retention" value={`${retentionRate}%`} sub={`${totalUnsub ?? 0} unsubs total`} />
+  if (!stats) return null;
+
+  const generatedAt = new Date(stats.generatedAt).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#0a0a0a", fontFamily: "system-ui, -apple-system, sans-serif", color: "#fff", padding: "40px 24px" }}>
+      <div style={{ maxWidth: 780, margin: "0 auto" }}>
+
+        {/* Header */}
+        <div style={{ marginBottom: 36 }}>
+          <p style={{ fontSize: 22, fontWeight: 900, margin: "0 0 4px" }}>Tampa <span style={{ color: "#FF5A36" }}>Pulse</span></p>
+          <p style={{ fontSize: 12, color: "#444", margin: 0 }}>Updated {generatedAt}</p>
+        </div>
+
+        {/* Subscriber cards */}
+        <p style={{ fontSize: 11, fontWeight: 700, color: "#444", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12 }}>Subscribers</p>
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 28 }}>
+          <StatCard label="Total Active" value={stats.subscribers.active} />
+          <StatCard label="New (7 days)" value={stats.subscribers.new7d} />
+          <StatCard label="New (30 days)" value={stats.subscribers.new30d} />
+          <StatCard label="Unsubscribed" value={stats.subscribers.unsubscribed} />
+        </div>
+
+        {/* Referral cards */}
+        <p style={{ fontSize: 11, fontWeight: 700, color: "#444", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12 }}>Referrals</p>
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: stats.referrals.top.length > 0 ? 16 : 28 }}>
+          <StatCard label="Total Referrals" value={stats.referrals.total} sub="via share links" />
+        </div>
+
+        {stats.referrals.top.length > 0 && (
+          <div style={{ background: "#111", border: "1px solid #222", borderRadius: 14, padding: "20px 24px", marginBottom: 28 }}>
+            <p style={{ fontSize: 11, fontWeight: 700, color: "#444", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 16px" }}>Top Referrers</p>
+            {stats.referrals.top.map((r, i) => (
+              <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: i < stats.referrals.top.length - 1 ? "1px solid #1a1a1a" : "none" }}>
+                <p style={{ fontSize: 13, color: "#aaa", margin: 0 }}>{r.email}</p>
+                <p style={{ fontSize: 16, fontWeight: 800, color: "#FF5A36", margin: 0 }}>{r.count} refs</p>
+              </div>
+            ))}
           </div>
-        </section>
-
-        {/* Signup sources */}
-        <section>
-          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">Signup Sources</h2>
-          <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-            {Object.keys(bySource).length === 0 ? (
-              <p className="text-gray-400 text-sm">No source data yet — will populate for new signups.</p>
-            ) : (
-              Object.entries(bySource)
-                .sort((a, b) => b[1] - a[1])
-                .map(([src, count]) => (
-                  <Bar key={src} label={src.replace(/-/g, " ")} value={count} max={maxSource} color="#6366f1" />
-                ))
-            )}
-            <p className="text-xs text-gray-400 mt-4">"organic" = signed up before source tracking was added</p>
-          </div>
-        </section>
-
-        {/* Share analytics */}
-        <section>
-          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">Sharing Activity</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-
-            {/* By method */}
-            <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-              <p className="text-xs text-gray-400 uppercase tracking-widest mb-4">By Method</p>
-              {totalShares === 0 ? (
-                <p className="text-gray-400 text-sm">No shares yet.</p>
-              ) : (
-                Object.entries(byMethod)
-                  .sort((a, b) => b[1] - a[1])
-                  .map(([method, count]) => (
-                    <Bar key={method} label={method.replace(/_/g, " ")} value={count} max={maxMethod} />
-                  ))
-              )}
-              <p className="text-xs text-gray-400 mt-4">{totalShares} total share events</p>
-            </div>
-
-            {/* By CTA */}
-            <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-              <p className="text-xs text-gray-400 uppercase tracking-widest mb-4">By CTA Location</p>
-              {Object.keys(byCta).length === 0 ? (
-                <p className="text-gray-400 text-sm">No data yet.</p>
-              ) : (
-                Object.entries(byCta)
-                  .sort((a, b) => b[1] - a[1])
-                  .map(([cta, count]) => (
-                    <Bar key={cta} label={cta.replace(/_/g, " ")} value={count} max={maxCta} color="#6366f1" />
-                  ))
-              )}
-            </div>
-
-            {/* By issue */}
-            <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-              <p className="text-xs text-gray-400 uppercase tracking-widest mb-4">By Issue</p>
-              {Object.keys(byIssue).length === 0 ? (
-                <p className="text-gray-400 text-sm">No data yet.</p>
-              ) : (
-                Object.entries(byIssue)
-                  .sort((a, b) => b[1] - a[1])
-                  .map(([issue, count]) => (
-                    <Bar key={issue} label={issue} value={count} max={maxIssue} color="#10b981" />
-                  ))
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* Referrals */}
-        <section>
-          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">Referrals</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-
-            <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-              <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">Total Referral Conversions</p>
-              <p className="text-3xl font-bold text-gray-900">{totalReferrals ?? 0}</p>
-              <p className="text-xs text-gray-400 mt-1">
-                people who subscribed via a referral link
-              </p>
-            </div>
-
-            <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-              <p className="text-xs text-gray-400 uppercase tracking-widest mb-4">Top Referrers</p>
-              {(topReferrers ?? []).length === 0 ? (
-                <p className="text-gray-400 text-sm">None yet.</p>
-              ) : (
-                <div className="space-y-2">
-                  {(topReferrers ?? []).map((r, i) => (
-                    <div key={r.email} className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600 truncate max-w-[200px]">
-                        <span className="text-gray-400 text-xs mr-2">{i + 1}.</span>
-                        {r.email}
-                      </span>
-                      <span className="text-xs font-bold text-[#FF5A36] shrink-0 ml-2">
-                        {r.referral_count} ref{r.referral_count !== 1 ? "s" : ""}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* Recent share events */}
-        {(shareEvents ?? []).length > 0 && (
-          <section>
-            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">Recent Share Events</h2>
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-gray-100 bg-gray-50">
-                    <th className="text-left py-3 px-5 text-xs font-medium text-gray-400 uppercase tracking-wide">When</th>
-                    <th className="text-left py-3 px-5 text-xs font-medium text-gray-400 uppercase tracking-wide">Method</th>
-                    <th className="text-left py-3 px-5 text-xs font-medium text-gray-400 uppercase tracking-wide">CTA</th>
-                    <th className="text-left py-3 px-5 text-xs font-medium text-gray-400 uppercase tracking-wide">Issue</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(shareEvents ?? []).slice(0, 25).map((e, i) => {
-                    const ts = new Date(e.created_at).toLocaleString("en-US", {
-                      timeZone: "America/New_York",
-                      dateStyle: "short",
-                      timeStyle: "short",
-                    });
-                    return (
-                      <tr key={i} className="border-b border-gray-50 last:border-0">
-                        <td className="py-3 px-5 text-gray-500">{ts}</td>
-                        <td className="py-3 px-5">
-                          <span className="inline-block bg-orange-50 text-[#FF5A36] text-xs font-semibold px-2 py-0.5 rounded-full">
-                            {e.share_method?.replace(/_/g, " ")}
-                          </span>
-                        </td>
-                        <td className="py-3 px-5 text-gray-400 text-xs">{e.share_cta?.replace(/_/g, " ") || ", "}</td>
-                        <td className="py-3 px-5 text-gray-500">#{e.issue_number}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </section>
         )}
 
-        {/* Recent subscribers */}
-        <section>
-          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">Recent Subscribers</h2>
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-100 bg-gray-50">
-                  <th className="text-left py-3 px-5 text-xs font-medium text-gray-400 uppercase tracking-wide">Email</th>
-                  <th className="text-left py-3 px-5 text-xs font-medium text-gray-400 uppercase tracking-wide">Source</th>
-                  <th className="text-left py-3 px-5 text-xs font-medium text-gray-400 uppercase tracking-wide">Joined</th>
-                  <th className="text-left py-3 px-5 text-xs font-medium text-gray-400 uppercase tracking-wide">Referrals</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(recentSubs ?? []).map((s, i) => {
-                  const joined = new Date(s.created_at).toLocaleDateString("en-US", {
-                    timeZone: "America/New_York",
-                    dateStyle: "medium",
-                  });
-                  return (
-                    <tr key={i} className="border-b border-gray-50 last:border-0">
-                      <td className="py-3 px-5 text-gray-700">{s.email}</td>
-                      <td className="py-3 px-5">
-                        {s.source ? (
-                          <span className="inline-block bg-indigo-50 text-indigo-600 text-xs font-semibold px-2 py-0.5 rounded-full">
-                            {s.source}
-                          </span>
-                        ) : (
-                          <span className="text-gray-300 text-xs">—</span>
-                        )}
-                      </td>
-                      <td className="py-3 px-5 text-gray-400 text-xs">{joined}</td>
-                      <td className="py-3 px-5">
-                        {(s.referral_count ?? 0) > 0 ? (
-                          <span className="text-[#FF5A36] font-semibold text-xs">{s.referral_count}</span>
-                        ) : (
-                          <span className="text-gray-300 text-xs">0</span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </section>
+        {/* Shares */}
+        <p style={{ fontSize: 11, fontWeight: 700, color: "#444", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12 }}>Shares</p>
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 16 }}>
+          <StatCard label="Total Shares" value={stats.shares.total} />
+          {Object.entries(stats.shares.byMethod).map(([method, count]) => (
+            <StatCard key={method} label={method} value={count} sub="clicks" />
+          ))}
+        </div>
 
-        <p className="text-xs text-gray-300 text-center pb-4">
-          Tampa Pulse Admin &middot; Latest issue sent: #{latestIssue}
-        </p>
+        {stats.shares.recent.length > 0 && (
+          <div style={{ background: "#111", border: "1px solid #222", borderRadius: 14, padding: "20px 24px", marginBottom: 28 }}>
+            <p style={{ fontSize: 11, fontWeight: 700, color: "#444", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 16px" }}>Recent Shares</p>
+            {stats.shares.recent.slice(0, 10).map((s, i) => (
+              <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 0", borderBottom: i < Math.min(stats.shares.recent.length, 10) - 1 ? "1px solid #1a1a1a" : "none" }}>
+                <div>
+                  <p style={{ fontSize: 13, color: "#fff", fontWeight: 600, margin: "0 0 2px" }}>{s.share_method}</p>
+                  <p style={{ fontSize: 11, color: "#555", margin: 0 }}>{s.share_cta || "—"}</p>
+                </div>
+                <p style={{ fontSize: 11, color: "#444", margin: 0 }}>{new Date(s.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {stats.shares.total === 0 && (
+          <div style={{ background: "#111", border: "1px solid #222", borderRadius: 14, padding: "28px 24px", textAlign: "center", marginBottom: 28 }}>
+            <p style={{ fontSize: 28, margin: "0 0 8px" }}>🕶️</p>
+            <p style={{ fontSize: 14, color: "#555", margin: 0 }}>No shares yet. Check back soon.</p>
+          </div>
+        )}
+
+        <p style={{ fontSize: 11, color: "#333", textAlign: "center" }}>Tampa Pulse Admin · {generatedAt}</p>
       </div>
     </div>
   );
