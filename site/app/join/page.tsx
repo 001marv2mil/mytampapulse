@@ -40,9 +40,7 @@ export default function JoinPage() {
       }
       const result = await res.json();
       const shareRef = result?.ref;
-      // Only show the share page for direct signups (no referral).
-      // Friends arriving via a referral link go to /thank-you — they don't have context yet.
-      if (shareRef && !ref) {
+      if (shareRef) {
         window.location.href = `/share?ref=${shareRef}&event=${encodeURIComponent(eventName ?? "Black Mask Social")}`;
       } else {
         window.location.href = "/thank-you";
@@ -91,7 +89,7 @@ export default function JoinPage() {
 
           {/* Sub-headline */}
           <p className="text-white/60 text-base leading-relaxed mb-6 max-w-sm">
-            Drop your email — we&apos;ll hit you when {eventName ?? "the next event"} drops.
+            Drop your email. We&apos;ll hit you when {eventName ?? "the next event"} drops.
           </p>
 
           {/* Social proof */}
@@ -126,7 +124,7 @@ export default function JoinPage() {
               disabled={loading}
               className="w-full bg-[#FF5A36] hover:bg-[#e5502f] disabled:opacity-60 text-white font-black py-4 rounded-full transition-all text-sm tracking-wide"
             >
-              {loading ? "One sec…" : "I'm In — It's Free"}
+              {loading ? "One sec…" : "I'm In. It's Free"}
             </button>
           </form>
 

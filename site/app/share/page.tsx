@@ -33,8 +33,8 @@ export default function SharePage() {
     }
   };
 
-  const whatsappText = `Just locked in my spot for ${eventName} in Tampa — it's invite-only, grab yours before it fills: ${shareUrl}`;
-  const smsText = `Yo, ${eventName} in Tampa looks lowkey fire. I'm already in — grab your spot: ${shareUrl}`;
+  const whatsappText = `Just locked in my spot for ${eventName} in Tampa. Invite-only, grab yours before it fills: ${shareUrl}`;
+  const smsText = `Yo, ${eventName} in Tampa looks lowkey fire. I'm already in. Grab your spot: ${shareUrl}`;
 
   return (
     <>
