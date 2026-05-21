@@ -4,6 +4,6 @@
   "outputDirectory": ".next",
   "crons": [{
     "path": "/api/send-newsletter",
-    "schedule": "0 13 * * 4"
+    "schedule": "0 12 * * 4"
   }]
 }
