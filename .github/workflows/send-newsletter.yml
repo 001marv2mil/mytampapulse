@@ -1,30 +1,20 @@
 name: Send Weekly Newsletter
 
-# Fires multiple times across Thursday morning UTC so that even with GitHub
-# Actions' free-tier cron delays (docs warn 1-3 hours, sometimes skipped),
-# at least one attempt lands at a reasonable time. The dedup logic in
-# /api/send-newsletter (uses newsletter_sends table with UNIQUE constraint)
-# guarantees subscribers only receive ONE email no matter how many times
-# this fires successfully.
-#
-# Target wall-clock: 8:00 AM Eastern Time.
-#   - During EDT (March-November): 8 AM ET = 12:00 UTC
-#   - During EST (November-March): 8 AM ET = 13:00 UTC
-# Schedules below blanket roughly 6 AM - 10 AM ET to catch both DST states
-# plus GitHub delay tolerance.
+# Backup safety net only — primary cron is Vercel's built-in cron service
+# (configured in site/vercel.json) which is reliable on Pro tier. This GitHub
+# Actions workflow fires once a week as a fallback in case Vercel's cron
+# ever fails. The /api/send-newsletter endpoint dedups via the
+# newsletter_sends UNIQUE constraint so duplicate fires never produce
+# duplicate emails.
 
 on:
   schedule:
-    - cron: '0 10 * * 4'   # Thu 10:00 UTC (6 AM EDT / 5 AM EST)
-    - cron: '30 10 * * 4'  # Thu 10:30 UTC
-    - cron: '0 11 * * 4'   # Thu 11:00 UTC (7 AM EDT / 6 AM EST)
-    - cron: '30 11 * * 4'  # Thu 11:30 UTC
-    - cron: '0 12 * * 4'   # Thu 12:00 UTC (8 AM EDT - DST target)
-    - cron: '30 12 * * 4'  # Thu 12:30 UTC
-    - cron: '0 13 * * 4'   # Thu 13:00 UTC (8 AM EST - standard-time target)
-    - cron: '0 14 * * 4'   # Thu 14:00 UTC (10 AM EDT - final fallback)
+    # Every Thursday at 13:00 UTC = 9 AM EDT / 8 AM EST.
+    # One hour after Vercel's primary 12:00 UTC fire, so if Vercel succeeded
+    # this run will see 0 new subscribers and exit clean.
+    - cron: '0 13 * * 4'
   workflow_dispatch:
-    # Manual trigger from GitHub Actions tab anytime
+    # Allow manual trigger from the GitHub Actions tab anytime
 
 jobs:
   send:
@@ -47,15 +37,6 @@ jobs:
           if [ "$status" != "200" ]; then
             echo "ERROR: Newsletter send failed with status $status"
             exit 1
-          fi
-
-          # Parse sent count for visibility in run logs
-          sent=$(echo "$body" | grep -oE '"sent":[0-9]+' | head -1 | grep -oE '[0-9]+')
-          if [ -n "$sent" ]; then
-            echo "Sent count: $sent"
-            if [ "$sent" = "0" ]; then
-              echo "NOTE: sent=0 likely means an earlier fire today already delivered to all subscribers (dedup working as expected)."
-            fi
           fi
 
           echo "Workflow completed successfully."
