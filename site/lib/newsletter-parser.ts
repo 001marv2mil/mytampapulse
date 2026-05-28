@@ -390,6 +390,7 @@ function getIssueTitleFromData(issueNumber: number): string {
     18: "Rock the Park is back. Here's the rest of your May 1st week",
     19: "WWE Backlash, Kid Cudi, and a taco spot making tortillas the right way",
     21: "Free crawfish, a 17,000 sqft supper club, and your Memorial Day weekend plan",
+    22: "Memorial Day's done. Now Tampa actually gets loud.",
   };
   return titles[issueNumber] || `Issue #${issueNumber}`;
 }

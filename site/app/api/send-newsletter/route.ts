@@ -26,8 +26,15 @@ function renderNewsletterHTML(
   // whatever device they open the email on — phone, iPad, laptop, anywhere.
   const fullIssueUrl = `${siteUrl}/api/auth/sub?token=${accessToken}&to=/newsletter/${issueNumber}`;
 
+  // Convert markdown inline emphasis to HTML so the email doesn't render
+  // literal `**` and `*` characters from the source markdown.
+  const renderInline = (text: string) =>
+    (text || "")
+      .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+      .replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, "<em>$1</em>");
+
   const renderBullets = (items: string[]) =>
-    items.map((item) => `<li>${item}</li>`).join("");
+    items.map((item) => `<li>${renderInline(item)}</li>`).join("");
 
   // 70% PREVIEW — show greeting, week at a glance, digest, and pro tips
   // Then CTA to read full issue on site (hidden gems, community pick, event roundup, etc.)
@@ -167,7 +174,7 @@ function renderNewsletterHTML(
     </div>
 
     <div class="section">
-      <p class="greeting">${parsed?.greeting || ""}</p>
+      <p class="greeting">${renderInline(parsed?.greeting || "")}</p>
     </div>
 
     ${
@@ -204,7 +211,7 @@ function renderNewsletterHTML(
     </div>
 
     <div class="section">
-      <p class="signoff">${parsed?.signoff || ""}</p>
+      <p class="signoff">${renderInline(parsed?.signoff || "")}</p>
     </div>
 
     <div style="background: #1a1a1a; border-radius: 12px; padding: 24px; margin: 0 24px 24px; text-align: center;">
@@ -246,6 +253,7 @@ export async function POST(req: NextRequest) {
     const url = new URL(req.url);
     const issueParam = url.searchParams.get("issue");
     const debug = url.searchParams.get("debug") === "1";
+    const testEmail = url.searchParams.get("test_email");
     const issueNumber = issueParam ? parseInt(issueParam) : getLatestIssueNumber();
 
     if (debug) {
@@ -293,6 +301,38 @@ export async function POST(req: NextRequest) {
         { error: `Issue #${issueNumber} not found` },
         { status: 404 }
       );
+    }
+
+    // Test mode: send the rendered issue to ONE address only. Does NOT touch
+    // newsletter_sends, so the subsequent real send still hits everyone.
+    // Used to preview the exact email subscribers will receive.
+    if (testEmail) {
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mytampapulse.com";
+      const fakeToken = "test-preview-token";
+      const unsubscribeUrl = `${siteUrl}/unsubscribe?token=${fakeToken}`;
+      const html = renderNewsletterHTML(parsed, unsubscribeUrl, issueNumber, fakeToken);
+      try {
+        const result = await resend.emails.send({
+          from: "Tampa Pulse <newsletter@mytampapulse.com>",
+          to: testEmail,
+          subject: `[TEST] ${parsed.title}`,
+          html,
+        });
+        return NextResponse.json({
+          success: true,
+          testMode: true,
+          sentTo: testEmail,
+          issueNumber,
+          resendId: result.data?.id,
+          recorded: false,
+        });
+      } catch (err) {
+        console.error(`Test send to ${testEmail} failed:`, err);
+        return NextResponse.json(
+          { error: `Test send failed: ${String(err)}` },
+          { status: 500 }
+        );
+      }
     }
 
     // Get the set of subscriber_ids that already received this issue.
