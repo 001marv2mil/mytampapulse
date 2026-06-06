@@ -214,7 +214,7 @@ export default function HeroSection({ latestIssue }: { latestIssue?: { number: n
           className="mt-16 pt-8 border-t border-orange-100 grid grid-cols-2 sm:grid-cols-4 gap-6">
           {[
             { stat: "1,000+", label: "Subscribers" },
-            { stat: "13", label: "Issues Published" },
+            { stat: "22+", label: "Issues Published" },
             { stat: "16+", label: "Picks Per Issue" },
             { stat: "Free", label: "Always" },
           ].map((s) => (

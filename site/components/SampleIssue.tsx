@@ -37,7 +37,7 @@ export default function SampleIssue({ latestIssueNumber }: { latestIssueNumber?:
               ))}
             </div>
 
-            <Link href="/newsletter/13">
+            <Link href="/newsletter/22">
               <button className="flex items-center gap-2 text-pulse-orange hover:text-pulse-orange-hover font-bold text-sm border border-orange-200 hover:border-pulse-orange/60 bg-white hover:bg-orange-50 px-5 py-3 rounded-full transition-all duration-200">
                 Read the full issue →
               </button>
