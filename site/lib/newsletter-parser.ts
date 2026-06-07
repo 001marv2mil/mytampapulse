@@ -411,21 +411,32 @@ export function getAllIssueNumbers(): number[] {
 // so new issues show up automatically without editing data.ts.
 
 const TAMPA_IMAGES = [
-  "https://images.unsplash.com/photo-1605723517503-3cadb5818a0c?w=800&q=80",
-  "https://images.unsplash.com/photo-1564357645071-9726b526a8f2?w=800&q=80",
-  "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=800&q=80",
-  "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&q=80",
-  "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80",
-  "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80",
-  "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&q=80",
-  "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=800&q=80",
-  "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=800&q=80",
-  "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&q=80",
-  "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&q=80",
-  "https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=800&q=80",
-  "https://images.unsplash.com/photo-1598520106830-8c45c2035460?w=800&q=80",
-  "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=800&q=80",
-  "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=800&q=80",
+  "https://images.unsplash.com/photo-1605723517503-3cadb5818a0c?w=800&q=80",  // Tampa waterfront
+  "https://images.unsplash.com/photo-1564357645071-9726b526a8f2?w=800&q=80",  // Tampa bay
+  "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=800&q=80",  // concert crowd
+  "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&q=80",     // food festival
+  "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&q=80",  // stadium lights
+  "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&q=80",  // live music
+  "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&q=80",     // basketball arena
+  "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=800&q=80",  // beach
+  "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=800&q=80",  // concert outdoor
+  "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&q=80",  // festival crowd
+  "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&q=80",  // live band
+  "https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=800&q=80",  // night city
+  "https://images.unsplash.com/photo-1598520106830-8c45c2035460?w=800&q=80",  // Tampa skyline
+  "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=800&q=80",  // restaurant
+  "https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=800&q=80",  // stadium crowd
+  "https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&q=80",  // outdoor event
+  "https://images.unsplash.com/photo-1471967183320-ee018f6e114a?w=800&q=80",  // waterfront night
+  "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=800&q=80",  // sports arena
+  "https://images.unsplash.com/photo-1551135049-8a33b5883817?w=800&q=80",     // rooftop bar
+  "https://images.unsplash.com/photo-1526478806334-5fd488fcaabc?w=800&q=80",  // cityscape
+  "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=800&q=80",  // music festival
+  "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&q=80",     // neon city
+  "https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?w=800&q=80",  // sunset waterfront
+  "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=800&q=80",  // sports stadium
+  "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",     // social scene
+  "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80",  // beach morning
 ];
 
 export interface ArchiveIssue {
