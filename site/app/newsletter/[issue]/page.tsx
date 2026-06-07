@@ -103,9 +103,10 @@ export default async function NewsletterIssuePage({ params, searchParams }: Page
     subscriberId = data?.id;
   }
 
-  // Older issues: show title + blurred content + subscribe wall
-  // Subscribers arriving via email link skip the gate entirely
-  if (!isLatest && !isSubscriber) {
+  // Non-subscribers: show title + partial blurred preview + subscribe wall
+  // This applies to ALL issues — latest and archived alike.
+  // Subscribers arriving via email magic link skip this gate entirely (sp_token cookie).
+  if (!isSubscriber) {
     return (
       <div className="min-h-screen bg-[#FFFBF7] pt-24 pb-20">
         <article className="max-w-2xl mx-auto px-6">
@@ -157,9 +158,9 @@ export default async function NewsletterIssuePage({ params, searchParams }: Page
                   <path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3A5.25 5.25 0 0012 1.5zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clipRule="evenodd" />
                 </svg>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-3">This issue is for subscribers</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-3">Want the full issue?</h2>
               <p className="text-gray-500 text-sm leading-relaxed mb-2 max-w-sm mx-auto">
-                Subscribe free and get every issue of Tampa Pulse delivered to your inbox every Thursday.
+                Subscribe free and get every Tampa Pulse issue delivered to your inbox every Thursday.
               </p>
               <p className="text-gray-400 text-xs mb-8">Takes 10 seconds. No spam, ever.</p>
               <Link href="/" className="inline-block bg-pulse-orange hover:bg-pulse-orange/90 text-white font-semibold px-10 py-3.5 rounded-xl transition-colors">
