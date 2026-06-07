@@ -482,11 +482,14 @@ function generateTitle(issueNumber: number): string {
 export function getArchiveIssues(): ArchiveIssue[] {
   const files = getNewsletterFiles();
   const issues: ArchiveIssue[] = [];
+  const seen = new Set<number>(); // deduplicate by issue number
 
   for (const f of files) {
     const m = f.match(/^issue-(\d+)-/);
     if (!m) continue;
     const num = parseInt(m[1], 10);
+    if (seen.has(num)) continue; // skip duplicate issue numbers
+    seen.add(num);
 
     issues.push({
       id: `i-${num}`,
