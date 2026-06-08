@@ -22,12 +22,11 @@ import {
 const SCRIPT = { fontFamily: "var(--font-script)" } as const;
 const DISPLAY = { fontFamily: "var(--font-display)" } as const;
 
-// Aerial/hybrid map (keyless), pinned to the venue coords with a labeled marker
-// so people instantly see it's right there.
-const MAP_LABEL = `Social Club · ${EVENT.address}`;
-const MAP_SRC = `https://maps.google.com/maps?q=${EVENT.lat},${EVENT.lng}(${encodeURIComponent(
-  MAP_LABEL
-)})&t=h&z=19&output=embed`;
+// OpenStreetMap embed — no API key required, always works.
+// Bounding box centers on Social Club with ~1 city-block radius visible.
+const OSM_BBOX = `${EVENT.lng - 0.002},${EVENT.lat - 0.0015},${EVENT.lng + 0.002},${EVENT.lat + 0.0015}`;
+const MAP_SRC = `https://www.openstreetmap.org/export/embed.html?bbox=${OSM_BBOX}&layer=mapnik&marker=${EVENT.lat},${EVENT.lng}`;
+
 // Correct EXTERIOR Street View via the Street View Static API. `source=outdoor`
 // forces the street-level photo (not the indoor business 360). Needs a free
 // Google Maps key in NEXT_PUBLIC_GOOGLE_MAPS_API_KEY; falls back to map-only.
