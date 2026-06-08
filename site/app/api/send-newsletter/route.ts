@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
 import { parseNewsletter, getLatestIssueNumber } from "@/lib/newsletter-parser";
 import { getMarvSignoff } from "@/lib/marv-signoffs";
+import { isValidEmail } from "@/lib/security";
 
 // Server-side route — must use the service role key so RLS doesn't block
 // reads of the subscribers and newsletter_sends tables. Falls back to the
@@ -305,7 +306,11 @@ export async function POST(req: NextRequest) {
 
     // Test mode: send the rendered issue to ONE address only. Does NOT touch
     // newsletter_sends, so the subsequent real send still hits everyone.
-    // Used to preview the exact email subscribers will receive.
+    // Validate the test_email — must be a real email format to prevent abuse.
+    if (testEmail && !isValidEmail(testEmail)) {
+      return NextResponse.json({ error: "Invalid test_email address" }, { status: 400 });
+    }
+
     if (testEmail) {
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mytampapulse.com";
       const fakeToken = "test-preview-token";

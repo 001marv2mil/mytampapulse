@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { Resend } from "resend";
 import { createHash } from "crypto";
+import { isValidEmail, rateLimit } from "@/lib/security";
 
 async function sendMetaCAPIEvent(
   email: string,
@@ -54,10 +55,16 @@ const MILESTONES: Record<number, { prize: string; description: string }> = {
 };
 
 export async function POST(req: NextRequest) {
+  // Rate limit: 5 subscription attempts per 15 min per IP
+  const limited = await rateLimit(req, "auth");
+  if (limited) return limited;
+
   try {
     const { email, ref, source, event_id, fbp, fbc } = await req.json();
-    if (!email || typeof email !== "string") {
-      return NextResponse.json({ error: "Email is required" }, { status: 400 });
+
+    // Validate email properly — not just truthy check
+    if (!isValidEmail(email)) {
+      return NextResponse.json({ error: "A valid email address is required" }, { status: 400 });
     }
 
     // Derive these early so they're available in the duplicate handler too

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { rateLimit } from "@/lib/security";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -7,34 +8,47 @@ const supabase = createClient(
   { auth: { persistSession: false } }
 );
 
+const ALLOWED_METHODS = ["copy_link", "twitter", "sms", "native", "email"] as const;
+const ALLOWED_CTAS    = ["referral_section", "header", "email_cta"] as const;
+
 // POST /api/track-share
 // Body: { subscriberId?, issueNumber, method, cta?, referralUrl? }
-// Logs every share action so Marv can see what's driving referrals.
-//
-// method values: copy_link | twitter | sms | native | email
-// cta values:    referral_section | header | email_cta
 export async function POST(req: NextRequest) {
+  // Rate limit: 20 per minute per IP (standard)
+  const limited = await rateLimit(req, "standard");
+  if (limited) return limited;
+
   try {
     const body = await req.json();
     const { subscriberId, issueNumber, method, cta, referralUrl } = body;
 
-    if (!issueNumber || !method) {
-      return NextResponse.json(
-        { error: "issueNumber and method are required" },
-        { status: 400 }
-      );
+    // Validate issueNumber — must be a positive integer
+    const issueNum = Number(issueNumber);
+    if (!Number.isInteger(issueNum) || issueNum < 1 || issueNum > 9999) {
+      return NextResponse.json({ error: "Invalid issueNumber" }, { status: 400 });
     }
 
+    // Validate method — must be from the allowed list
+    if (!method || !ALLOWED_METHODS.includes(method)) {
+      return NextResponse.json({ error: "Invalid share method" }, { status: 400 });
+    }
+
+    // Validate optional fields
+    const safeCta = cta && ALLOWED_CTAS.includes(cta) ? cta : null;
+    const safeReferralUrl =
+      referralUrl && typeof referralUrl === "string" && referralUrl.length <= 500
+        ? referralUrl
+        : null;
+
     const { error } = await supabase.from("share_events").insert({
-      subscriber_id: subscriberId || null,
-      issue_number: Number(issueNumber),
-      share_method: String(method),
-      share_cta: cta ? String(cta) : null,
-      referral_url: referralUrl ? String(referralUrl) : null,
+      subscriber_id: subscriberId && typeof subscriberId === "string" ? subscriberId : null,
+      issue_number:  issueNum,
+      share_method:  method,
+      share_cta:     safeCta,
+      referral_url:  safeReferralUrl,
     });
 
     if (error) {
-      // Log but don't fail the share action
       console.error("track-share insert error:", error);
     }
 
