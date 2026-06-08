@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
-import { Inter, Montserrat } from "next/font/google";
+import { Inter, Montserrat, Playfair_Display, Kaushan_Script } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
-import FloatingNav from "@/components/FloatingNav";
-import FooterWrapper from "@/components/FooterWrapper";
+import SiteChrome from "@/components/SiteChrome";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-body", display: "swap" });
 const montserrat = Montserrat({ subsets: ["latin"], variable: "--font-heading", weight: ["700", "800", "900"], display: "swap" });
+// All White R&B Night — flyer display fonts (elegant serif + gold brush script)
+const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-display", weight: ["700", "800", "900"], display: "swap" });
+const kaushan = Kaushan_Script({ subsets: ["latin"], variable: "--font-script", weight: "400", display: "swap" });
 
 export const metadata: Metadata = {
   title: "mytampapulse — Tampa's Weekly Insider Guide",
@@ -22,7 +24,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${montserrat.variable}`}>
+    <html lang="en" className={`${inter.variable} ${montserrat.variable} ${playfair.variable} ${kaushan.variable}`}>
       <head>
         <Script id="fb-pixel" strategy="afterInteractive">
           {`
@@ -48,9 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </noscript>
       </head>
       <body className="antialiased bg-[#FFFBF7]">
-        <FloatingNav />
-        <main>{children}</main>
-        <FooterWrapper />
+        <SiteChrome>{children}</SiteChrome>
       </body>
     </html>
   );

@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /all-white-party
 
 Sitemap: https://www.mytampapulse.com/sitemap.xml

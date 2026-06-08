@@ -1,6 +1,10 @@
 @import "tailwindcss";
 
 @theme {
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-script: "Kaushan Script", cursive;
+  --color-awp-gold: #D4AF37;
+  --color-awp-gold-soft: #F0D488;
   --color-pulse-purple: #FF5A36;
   --color-pulse-purple-hover: #E84E2B;
   --color-pulse-orange: #FF5A36;
@@ -17,6 +21,49 @@
 
   --font-heading: "Montserrat", sans-serif;
   --font-body: "Inter", sans-serif;
+}
+
+/* Gold "reflector" — metallic gold text with a sweeping shine (used on VIP) */
+@keyframes awp-gold-shine {
+  0% { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+.gold-reflector {
+  background: linear-gradient(
+    110deg,
+    #a9781e 0%,
+    #f3d98a 18%,
+    #fff7da 33%,
+    #f3d98a 48%,
+    #d4af37 63%,
+    #a9781e 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: awp-gold-shine 3.5s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gold-reflector { animation: none; }
+}
+
+/* Now-playing equalizer bars */
+@keyframes awp-eq {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+}
+.awp-eq-bar {
+  width: 3px;
+  height: 14px;
+  background: #1a1208;
+  border-radius: 2px;
+  transform-origin: bottom;
+  animation: awp-eq 0.9s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .awp-eq-bar { animation: none; }
 }
 
 /* Base styles */
