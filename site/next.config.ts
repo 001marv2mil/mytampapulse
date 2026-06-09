@@ -21,6 +21,8 @@ const securityHeaders = [
       "img-src 'self' data: https://images.unsplash.com https://plus.unsplash.com",
       "font-src 'self'",
       "connect-src 'self' https://*.supabase.co https://api.resend.com https://graph.facebook.com",
+      // Allow OSM map embed + YouTube audio player on ticket page
+      "frame-src https://www.openstreetmap.org https://www.youtube.com https://www.youtube-nocookie.com",
       "frame-ancestors 'none'",
     ].join("; "),
   },
