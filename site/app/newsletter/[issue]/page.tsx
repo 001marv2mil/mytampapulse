@@ -353,7 +353,7 @@ export default async function NewsletterIssuePage({ params, searchParams }: Page
           {/* Community Pick */}
           {newsletter.communityPickBody.length > 0 && (
             <section className="mb-12">
-              <h2 className="font-heading text-2xl font-bold text-gray-900 mb-1">Community Pick</h2>
+              <h2 className="font-heading text-2xl font-bold text-gray-900 mb-1">⭐ Community Pick</h2>
               {newsletter.communityPickTitle && (
                 <p className="text-gray-400 text-sm mb-6">{stripEmDashes(newsletter.communityPickTitle)}</p>
               )}
