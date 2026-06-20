@@ -22,10 +22,9 @@ import {
 const SCRIPT = { fontFamily: "var(--font-script)" } as const;
 const DISPLAY = { fontFamily: "var(--font-display)" } as const;
 
-// OpenStreetMap embed — no API key required, always works.
-// Bounding box centers on Social Club with ~1 city-block radius visible.
-const OSM_BBOX = `${EVENT.lng - 0.002},${EVENT.lat - 0.0015},${EVENT.lng + 0.002},${EVENT.lat + 0.0015}`;
-const MAP_SRC = `https://www.openstreetmap.org/export/embed.html?bbox=${OSM_BBOX}&layer=mapnik&marker=${EVENT.lat},${EVENT.lng}`;
+// Self-hosted Leaflet + Esri satellite tiles (public/venue-map.html).
+// Same-origin iframe — no API key, no CSP friction, real aerial imagery.
+const MAP_SRC = "/venue-map.html";
 
 // Correct EXTERIOR Street View via the Street View Static API. `source=outdoor`
 // forces the street-level photo (not the indoor business 360). Needs a free

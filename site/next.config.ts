@@ -16,13 +16,13 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // Next.js requires unsafe-inline for hydration
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: https://images.unsplash.com https://plus.unsplash.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com", // Next.js requires unsafe-inline; unpkg for Leaflet in venue-map.html
+      "style-src 'self' 'unsafe-inline' https://unpkg.com",
+      "img-src 'self' data: https://images.unsplash.com https://plus.unsplash.com https://server.arcgisonline.com",
       "font-src 'self'",
       "connect-src 'self' https://*.supabase.co https://api.resend.com https://graph.facebook.com",
-      // Allow OSM map embed + YouTube audio player on ticket page
-      "frame-src https://www.openstreetmap.org https://www.youtube.com https://www.youtube-nocookie.com",
+      // 'self' for venue-map.html (satellite map), YouTube for audio player on ticket page
+      "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
       "frame-ancestors 'none'",
     ].join("; "),
   },
