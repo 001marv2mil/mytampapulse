@@ -29,7 +29,7 @@ function readKey() {
   return key;
 }
 
-const EVENT = "Sat Jul 11, 2026 · 5 PM to 9 PM · Social Club, 512 N Franklin St, Tampa FL";
+const EVENT = "Sat Jul 25, 2026 · 5 PM to 9 PM · Social Club, 512 N Franklin St, Tampa FL";
 
 const TIERS = [
   { id: "early-bird", name: "All White R&B Night · Early Bird", amount: 3500, desc: `General admission · ${EVENT}` },

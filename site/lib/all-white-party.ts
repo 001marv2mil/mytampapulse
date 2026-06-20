@@ -29,7 +29,7 @@ export const EVENT = {
   kicker: "Good people · Good vibes · Good times",
   tagline:
     "Tampa's premier R&B experience. Music by Tampa's top R&B DJ. Classics, slow jams, and new flavor all night.",
-  dateLabel: "Saturday, July 11, 2026",
+  dateLabel: "Saturday, July 25, 2026",
   timeLabel: "5 PM to 9 PM",
   // Drop the flyer into mytampapulse/site/public/ and set its filename here
   // (e.g. "/all-white-rnb-flyer.jpg") to use it as the cover image, Posh-style.
