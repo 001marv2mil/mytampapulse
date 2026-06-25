@@ -394,6 +394,7 @@ function getIssueTitleFromData(issueNumber: number): string {
     23: "England at Raymond James. Cliff divers in St. Pete. Tampa's June is not playing around.",
     24: "Juneteenth in Tampa. A food truck worth chasing and a restaurant everyone's about to discover.",
     25: "The Tampa you haven't found yet. Summer Solstice edition.",
+    26: "14 Tampa chefs in one room tonight. Here's the rest of your week.",
   };
   return titles[issueNumber] || `Issue #${issueNumber}`;
 }
