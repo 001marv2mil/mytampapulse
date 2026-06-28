@@ -54,9 +54,9 @@ export default function Hero() {
                 style={{
                   backgroundImage: `url(${
                     [
-                      "https://randomuser.me/api/portraits/women/17.jpg",
+                      "https://randomuser.me/api/portraits/women/9.jpg",
                       "https://randomuser.me/api/portraits/women/63.jpg",
-                      "https://randomuser.me/api/portraits/men/11.jpg",
+                      "https://randomuser.me/api/portraits/men/36.jpg",
                       "https://randomuser.me/api/portraits/men/48.jpg",
                     ][i - 1]
                   })`,
