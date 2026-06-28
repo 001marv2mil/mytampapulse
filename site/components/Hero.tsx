@@ -54,10 +54,10 @@ export default function Hero() {
                 style={{
                   backgroundImage: `url(https://images.unsplash.com/photo-${
                     [
-                      "1494790108377-be9c29b29330",
-                      "1507003211169-0a1dd7228f2d",
-                      "1438761681033-6461ffad8d80",
-                      "1472099645785-5658abf4ff4e",
+                      "1531123897727-8f129e1688ce",
+                      "1524504388940-b1c1722653e1",
+                      "1568602471122-7832951cc4c5",
+                      "1590086782957-93c06ef21604",
                     ][i - 1]
                   }?w=64&q=80)`,
                   backgroundSize: "cover",
