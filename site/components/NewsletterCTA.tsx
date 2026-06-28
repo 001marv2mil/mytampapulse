@@ -47,7 +47,7 @@ export default function NewsletterCTA() {
           </h2>
 
           <p className="text-white/75 text-base mb-10 max-w-md mx-auto">
-            1,000+ Tampa locals get the best picks every Thursday. Join them — it takes 10 seconds.
+            2,317 Tampa locals get the best picks every Thursday. Join them — it takes 10 seconds.
           </p>
 
           {submitted ? (

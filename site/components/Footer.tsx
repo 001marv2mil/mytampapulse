@@ -38,7 +38,7 @@ export default function Footer() {
           {/* Revenue callout */}
           <div>
             <p className="text-gray-900 text-xs font-bold uppercase tracking-wider mb-3">Partner With Us</p>
-            <p className="text-gray-400 text-xs leading-relaxed mb-3">Reach 1,000+ engaged Tampa locals. Sponsorships from $299/issue.</p>
+            <p className="text-gray-400 text-xs leading-relaxed mb-3">Reach 2,317 engaged Tampa locals. Sponsorships from $299/issue.</p>
             <Link href="/advertise"
               className="inline-flex items-center gap-1.5 bg-pulse-orange text-white text-xs font-bold px-4 py-2 rounded-full hover:bg-pulse-orange-hover transition-colors">
               See Packages →

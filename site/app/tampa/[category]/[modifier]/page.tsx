@@ -248,7 +248,7 @@ export default async function TwoLevelPage({ params }: { params: Promise<Params>
               Tampa&apos;s insider guide. Free, every Thursday.
             </h2>
             <p className="text-gray-400 text-base mb-8">
-              1,000+ Tampa locals get the best picks delivered weekly. No spam. No fluff.
+              2,317 Tampa locals get the best picks delivered weekly. No spam. No fluff.
             </p>
             <Link href="/#subscribe"
               className="inline-block bg-pulse-orange text-white font-black px-8 py-4 rounded-xl text-sm hover:opacity-90 transition-all hover:scale-[1.02] shadow-lg">

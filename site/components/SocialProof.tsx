@@ -1,6 +1,6 @@
 export default function SocialProof() {
   const stats = [
-    { value: "1,000+", label: "Subscribers" },
+    { value: "2,317", label: "Subscribers" },
     { value: "52", label: "Issues Sent" },
     { value: "16+", label: "Events Weekly" },
   ];

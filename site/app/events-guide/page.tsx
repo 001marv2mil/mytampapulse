@@ -120,7 +120,7 @@ export default function EventsGuidePage() {
 
           {/* Social proof */}
           <p className="text-white/25 text-xs mt-3 text-center">
-            1,000+ Tampa locals already subscribed
+            2,317 Tampa locals already subscribed
           </p>
         </div>
       </div>

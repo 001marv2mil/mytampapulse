@@ -35,7 +35,7 @@ export default function NewsletterGrid({ issues }: { issues: Issue[] }) {
               </div>
             </div>
             <div className="shrink-0 text-right">
-              <div className="text-pulse-orange font-heading font-bold text-2xl leading-none">1,000</div>
+              <div className="text-pulse-orange font-heading font-bold text-2xl leading-none">2,317</div>
               <div className="text-white/30 text-xs">of 5,000 subscribers</div>
               <div className="mt-2 h-1.5 w-32 bg-white/10 rounded-full overflow-hidden">
                 <div className="h-full bg-pulse-orange rounded-full" style={{ width: "20%" }} />

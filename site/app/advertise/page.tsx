@@ -14,7 +14,7 @@ const PACKAGES = [
       "1 mention in the weekly newsletter",
       "Your name, location, and one-liner",
       "Link to your website or Instagram",
-      "Sent to 1,000+ Tampa subscribers",
+      "Sent to 2,317 Tampa subscribers",
     ],
     cta: "Book a Shoutout",
     highlight: false,
@@ -29,7 +29,7 @@ const PACKAGES = [
       "Written in Pulse editorial voice",
       "Photo + full description",
       "Link + CTA button",
-      "Promoted to 1,000+ engaged locals",
+      "Promoted to 2,317 engaged locals",
     ],
     cta: "Book a Feature",
     highlight: true,
@@ -54,7 +54,7 @@ const PACKAGES = [
 ];
 
 const STATS = [
-  { value: "1,000+", label: "Subscribers" },
+  { value: "2,317", label: "Subscribers" },
   { value: "47%", label: "Avg Open Rate" },
   { value: "Tampa Bay", label: "Hyper-local audience" },
   { value: "Every Thursday", label: "Consistent delivery" },
@@ -100,7 +100,7 @@ export default function AdvertisePage() {
             </h1>
 
             <p className="text-gray-500 text-lg max-w-xl leading-relaxed mb-10">
-              mytampapulse reaches 1,000+ Tampa Bay locals who actively seek out the best events, restaurants, bars, and experiences. These aren&apos;t passive followers they read every issue and actually go out.
+              mytampapulse reaches 2,317 Tampa Bay locals who actively seek out the best events, restaurants, bars, and experiences. These aren&apos;t passive followers they read every issue and actually go out.
             </p>
 
             <a href="#packages"

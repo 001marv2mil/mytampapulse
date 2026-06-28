@@ -14,7 +14,7 @@ function CountUp({ to, suffix = "" }: { to: number; suffix?: string }) {
 }
 
 const stats = [
-  { value: 1000, suffix: "+", label: "Subscribers", icon: "👥" },
+  { value: 2317, suffix: "", label: "Subscribers", icon: "👥" },
   { value: 52, suffix: "", label: "Issues Sent", icon: "📬" },
   { value: 16, suffix: "+", label: "Events Per Issue", icon: "🎉" },
   { value: 52, suffix: "x/yr", label: "Every Thursday", icon: "📅" },

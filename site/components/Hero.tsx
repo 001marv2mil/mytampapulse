@@ -66,7 +66,7 @@ export default function Hero() {
             ))}
           </div>
           <span className="text-white/40 text-sm">
-            Join <span className="text-white/70 font-medium">1,000+</span> Tampa locals
+            Join <span className="text-white/70 font-medium">2,317</span> Tampa locals
           </span>
         </div>
       </div>

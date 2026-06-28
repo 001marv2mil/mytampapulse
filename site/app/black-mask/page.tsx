@@ -114,7 +114,7 @@ export default function BlackMaskPage() {
                   <img key={i} src={src} alt="" width={32} height={32} className="w-8 h-8 rounded-full border-2 border-black object-cover" />
                 ))}
               </div>
-              <p className="text-white/50 text-xs">1,000+ locals already in</p>
+              <p className="text-white/50 text-xs">2,317 locals already in</p>
             </div>
           </div>
 

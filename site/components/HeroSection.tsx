@@ -112,7 +112,7 @@ export default function HeroSection({ latestIssue }: { latestIssue?: { number: n
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
               className="flex items-center gap-3 mt-7">
               <div className="flex -space-x-2.5">
-                {["1494790108377-be9c29b29330","1507003211169-0a1dd7228f2d","1438761681033-6461ffad8d80","1472099645785-5658abf4ff4e","1544005313-94ddf0286df2"].map((id, i) => (
+                {["1531123897727-8f129e1688ce","1524504388940-b1c1722653e1","1438761681033-6461ffad8d80","1568602471122-7832951cc4c5","1590086782957-93c06ef21604","1507003211169-0a1dd7228f2d"].map((id, i) => (
                   <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-cover bg-center shadow-sm"
                     style={{ backgroundImage: `url(https://images.unsplash.com/photo-${id}?w=64&q=80)` }} />
                 ))}
@@ -125,7 +125,7 @@ export default function HeroSection({ latestIssue }: { latestIssue?: { number: n
                     </svg>
                   ))}
                 </div>
-                <p className="text-gray-500 text-xs mt-0.5"><span className="text-gray-700 font-semibold">1,000+</span> Tampa locals already in</p>
+                <p className="text-gray-500 text-xs mt-0.5"><span className="text-gray-700 font-semibold">2,317</span> Tampa locals already in</p>
               </div>
             </motion.div>
 
@@ -213,8 +213,8 @@ export default function HeroSection({ latestIssue }: { latestIssue?: { number: n
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}
           className="mt-16 pt-8 border-t border-orange-100 grid grid-cols-2 sm:grid-cols-4 gap-6">
           {[
-            { stat: "1,000+", label: "Subscribers" },
-            { stat: "22+", label: "Issues Published" },
+            { stat: "2,317", label: "Subscribers" },
+            { stat: "26+", label: "Issues Published" },
             { stat: "16+", label: "Picks Per Issue" },
             { stat: "Free", label: "Always" },
           ].map((s) => (

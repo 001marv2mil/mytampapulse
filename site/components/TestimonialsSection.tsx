@@ -100,7 +100,7 @@ export default function TestimonialsSection() {
         <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
           transition={{ delay: 0.4 }}
           className="text-center text-gray-400 text-xs mt-10">
-          Names and neighborhoods shared with permission. Join 1,000+ Tampa locals →
+          Names and neighborhoods shared with permission. Join 2,317 Tampa locals →
         </motion.p>
       </div>
     </section>

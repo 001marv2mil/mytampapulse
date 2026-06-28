@@ -23,7 +23,7 @@ const PACKAGES = [
 ];
 
 const STATS = [
-  { value: "1,000+", label: "Subscribers" },
+  { value: "2,317", label: "Subscribers" },
   { value: "47%", label: "Open Rate" },
   { value: "Tampa Bay", label: "Hyper-local" },
   { value: "Every Thursday", label: "Consistent" },
@@ -46,7 +46,7 @@ export default function SponsorTeaser() {
               <span className="text-pulse-orange">Tampa&apos;s most engaged locals.</span>
             </h2>
             <p className="text-gray-400 text-base leading-relaxed">
-              1,000+ Tampa Bay locals who actively seek out the best restaurants, bars, and experiences. They read every issue and actually go out.
+              2,317 Tampa Bay locals who actively seek out the best restaurants, bars, and experiences. They read every issue and actually go out.
             </p>
           </motion.div>
 
