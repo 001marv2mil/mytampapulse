@@ -113,10 +113,10 @@ export default function HeroSection({ latestIssue }: { latestIssue?: { number: n
               className="flex items-center gap-3 mt-7">
               <div className="flex -space-x-2.5">
                 {[
-                  "https://randomuser.me/api/portraits/women/9.jpg",
+                  "https://randomuser.me/api/portraits/women/35.jpg",
                   "https://randomuser.me/api/portraits/women/63.jpg",
                   "https://randomuser.me/api/portraits/women/81.jpg",
-                  "https://randomuser.me/api/portraits/men/36.jpg",
+                  "https://randomuser.me/api/portraits/men/27.jpg",
                   "https://randomuser.me/api/portraits/men/48.jpg",
                   "https://randomuser.me/api/portraits/men/93.jpg",
                 ].map((url, i) => (
