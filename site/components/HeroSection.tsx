@@ -113,12 +113,12 @@ export default function HeroSection({ latestIssue }: { latestIssue?: { number: n
               className="flex items-center gap-3 mt-7">
               <div className="flex -space-x-2.5">
                 {[
-                  "https://randomuser.me/api/portraits/women/44.jpg",
-                  "https://randomuser.me/api/portraits/women/68.jpg",
-                  "https://randomuser.me/api/portraits/women/90.jpg",
-                  "https://randomuser.me/api/portraits/men/32.jpg",
-                  "https://randomuser.me/api/portraits/men/55.jpg",
-                  "https://randomuser.me/api/portraits/men/76.jpg",
+                  "https://randomuser.me/api/portraits/women/17.jpg",
+                  "https://randomuser.me/api/portraits/women/63.jpg",
+                  "https://randomuser.me/api/portraits/women/81.jpg",
+                  "https://randomuser.me/api/portraits/men/11.jpg",
+                  "https://randomuser.me/api/portraits/men/48.jpg",
+                  "https://randomuser.me/api/portraits/men/93.jpg",
                 ].map((url, i) => (
                   <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-cover bg-center shadow-sm"
                     style={{ backgroundImage: `url(${url})` }} />

@@ -54,10 +54,10 @@ export default function Hero() {
                 style={{
                   backgroundImage: `url(${
                     [
-                      "https://randomuser.me/api/portraits/women/44.jpg",
-                      "https://randomuser.me/api/portraits/women/68.jpg",
-                      "https://randomuser.me/api/portraits/men/32.jpg",
-                      "https://randomuser.me/api/portraits/men/55.jpg",
+                      "https://randomuser.me/api/portraits/women/17.jpg",
+                      "https://randomuser.me/api/portraits/women/63.jpg",
+                      "https://randomuser.me/api/portraits/men/11.jpg",
+                      "https://randomuser.me/api/portraits/men/48.jpg",
                     ][i - 1]
                   })`,
                   backgroundSize: "cover",
