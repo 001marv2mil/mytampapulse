@@ -18,7 +18,7 @@ const securityHeaders = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com", // Next.js requires unsafe-inline; unpkg for Leaflet in venue-map.html
       "style-src 'self' 'unsafe-inline' https://unpkg.com",
-      "img-src 'self' data: https://images.unsplash.com https://plus.unsplash.com https://server.arcgisonline.com",
+      "img-src 'self' data: https://images.unsplash.com https://plus.unsplash.com https://server.arcgisonline.com https://randomuser.me",
       "font-src 'self'",
       "connect-src 'self' https://*.supabase.co https://api.resend.com https://graph.facebook.com",
       // 'self' for venue-map.html (satellite map), YouTube for audio player on ticket page
