@@ -112,9 +112,16 @@ export default function HeroSection({ latestIssue }: { latestIssue?: { number: n
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
               className="flex items-center gap-3 mt-7">
               <div className="flex -space-x-2.5">
-                {["1531123897727-8f129e1688ce","1524504388940-b1c1722653e1","1438761681033-6461ffad8d80","1568602471122-7832951cc4c5","1590086782957-93c06ef21604","1507003211169-0a1dd7228f2d"].map((id, i) => (
+                {[
+                  "https://randomuser.me/api/portraits/women/44.jpg",
+                  "https://randomuser.me/api/portraits/women/68.jpg",
+                  "https://randomuser.me/api/portraits/women/90.jpg",
+                  "https://randomuser.me/api/portraits/men/32.jpg",
+                  "https://randomuser.me/api/portraits/men/55.jpg",
+                  "https://randomuser.me/api/portraits/men/76.jpg",
+                ].map((url, i) => (
                   <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-cover bg-center shadow-sm"
-                    style={{ backgroundImage: `url(https://images.unsplash.com/photo-${id}?w=64&q=80)` }} />
+                    style={{ backgroundImage: `url(${url})` }} />
                 ))}
               </div>
               <div>

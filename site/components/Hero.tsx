@@ -52,14 +52,14 @@ export default function Hero() {
                 key={i}
                 className="w-8 h-8 rounded-full border-2 border-dark-bg bg-gradient-to-br from-white/20 to-white/5"
                 style={{
-                  backgroundImage: `url(https://images.unsplash.com/photo-${
+                  backgroundImage: `url(${
                     [
-                      "1531123897727-8f129e1688ce",
-                      "1524504388940-b1c1722653e1",
-                      "1568602471122-7832951cc4c5",
-                      "1590086782957-93c06ef21604",
+                      "https://randomuser.me/api/portraits/women/44.jpg",
+                      "https://randomuser.me/api/portraits/women/68.jpg",
+                      "https://randomuser.me/api/portraits/men/32.jpg",
+                      "https://randomuser.me/api/portraits/men/55.jpg",
                     ][i - 1]
-                  }?w=64&q=80)`,
+                  })`,
                   backgroundSize: "cover",
                 }}
               />
