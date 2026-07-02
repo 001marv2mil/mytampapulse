@@ -24,7 +24,7 @@
 <body>
 <div id="map"></div>
 <script>
-  const lat = 27.9487872, lng = -82.4585752;
+  const lat = 27.9474, lng = -82.4588;
   const map = L.map('map', { zoomControl: true }).setView([lat, lng], 18);
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
     maxZoom: 19,
@@ -32,7 +32,7 @@
   }).addTo(map);
   L.marker([lat, lng])
     .addTo(map)
-    .bindPopup('<strong style="color:#F0D488;font-size:14px">Social Club</strong><br><span style="color:#ccc">512 N Franklin St, Tampa</span>')
+    .bindPopup('<strong style="color:#F0D488;font-size:14px">Hyatt Place Downtown Tampa</strong><br><span style="color:#ccc">325 N Florida Ave, Tampa</span>')
     .openPopup();
 </script>
 </body>
