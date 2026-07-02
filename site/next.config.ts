@@ -16,7 +16,7 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com", // Next.js requires unsafe-inline; unpkg for Leaflet in venue-map.html
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://www.youtube.com https://s.ytimg.com", // unpkg=Leaflet; youtube+ytimg=IFrame API player
       "style-src 'self' 'unsafe-inline' https://unpkg.com",
       "img-src 'self' data: https://images.unsplash.com https://plus.unsplash.com https://server.arcgisonline.com https://randomuser.me",
       "font-src 'self'",
