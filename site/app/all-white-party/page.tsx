@@ -400,7 +400,7 @@ function AllWhitePartyCheckout() {
       {playing && (
         <div aria-hidden="true" className="fixed top-0 -left-[9999px] w-80 h-44 opacity-0 pointer-events-none">
           <iframe
-            src="https://www.youtube.com/embed/LDY_XyxBu8A?autoplay=1&rel=0"
+            src="https://www.youtube.com/embed/muPO1c6pxXg?start=44&autoplay=1&rel=0"
             title="SZA - Snooze (audio)"
             allow="autoplay; encrypted-media"
             className="w-full h-full"
