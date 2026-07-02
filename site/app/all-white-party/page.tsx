@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
@@ -53,6 +53,40 @@ function AllWhitePartyCheckout() {
   const [cartOpen, setCartOpen] = useState(false);
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [playing, setPlaying] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const ytPlayer = useRef<any>(null);
+
+  // Load YouTube IFrame API once; initialize a tiny hidden player
+  useEffect(() => {
+    const existing = document.getElementById("yt-api-script");
+    const init = () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ytPlayer.current = new (window as any).YT.Player("yt-audio-player", {
+        videoId: "muPO1c6pxXg",
+        playerVars: { start: 44, autoplay: 0, controls: 0, rel: 0, playsinline: 1 },
+      });
+    };
+    if (!existing) {
+      const tag = document.createElement("script");
+      tag.id = "yt-api-script";
+      tag.src = "https://www.youtube.com/iframe_api";
+      document.head.appendChild(tag);
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).onYouTubeIframeAPIReady = init;
+    // If API already loaded (e.g. HMR), init immediately
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((window as any).YT?.Player) init();
+  }, []);
+
+  const handlePlay = () => {
+    setPlaying(true);
+    ytPlayer.current?.playVideo?.();
+  };
+  const handleStop = () => {
+    setPlaying(false);
+    ytPlayer.current?.stopVideo?.();
+  };
 
   // Lock background scroll while the ticket modal is open
   useEffect(() => {
@@ -205,7 +239,7 @@ function AllWhitePartyCheckout() {
                   <span className="text-white/85 text-sm font-semibold tracking-wide">Now playing</span>
                   <button
                     type="button"
-                    onClick={() => setPlaying(false)}
+                    onClick={handleStop}
                     aria-label="Stop the music"
                     className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/80"
                   >
@@ -217,7 +251,7 @@ function AllWhitePartyCheckout() {
               ) : (
                 <button
                   type="button"
-                  onClick={() => setPlaying(true)}
+                  onClick={handlePlay}
                   className="group inline-flex items-center gap-3 bg-white/[0.06] hover:bg-white/[0.1] border border-[#D4AF37]/40 rounded-full pl-2 pr-5 py-2 transition-colors"
                 >
                   <span className="w-9 h-9 rounded-full bg-gradient-to-r from-[#F0D488] to-[#D4AF37] flex items-center justify-center text-[#1a1208] transition-transform group-hover:scale-105">
@@ -395,18 +429,13 @@ function AllWhitePartyCheckout() {
         </Link>
       </div>
 
-      {/* Hidden audio-only player — kept off-screen at full size so YouTube keeps
-          playing the sound; the visible UI is the "Now playing" bar in the hero. */}
-      {playing && (
-        <div aria-hidden="true" className="fixed top-0 -left-[9999px] w-80 h-44 opacity-0 pointer-events-none">
-          <iframe
-            src="https://www.youtube.com/embed/muPO1c6pxXg?start=44&autoplay=1&rel=0"
-            title="SZA - Snooze (audio)"
-            allow="autoplay; encrypted-media"
-            className="w-full h-full"
-          />
-        </div>
-      )}
+      {/* YouTube IFrame API target — 1×1 px, in-viewport so autoplay is permitted */}
+      <div
+        aria-hidden="true"
+        style={{ position: "fixed", bottom: 0, right: 0, width: 1, height: 1, overflow: "hidden", pointerEvents: "none" }}
+      >
+        <div id="yt-audio-player" style={{ width: 1, height: 1 }} />
+      </div>
 
       {/* ===== STICKY GET-TICKETS BAR (mobile) ===== */}
       <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-[#0c0a08]/95 backdrop-blur border-t border-[#D4AF37]/20 px-4 py-3">
