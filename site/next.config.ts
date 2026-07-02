@@ -1,8 +1,8 @@
 import type { NextConfig } from "next";
 
 const securityHeaders = [
-  // Prevent clickjacking
-  { key: "X-Frame-Options", value: "DENY" },
+  // Prevent clickjacking (SAMEORIGIN so our own pages can iframe /venue-map.html)
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
   // Stop MIME type sniffing
   { key: "X-Content-Type-Options", value: "nosniff" },
   // Force HTTPS for 1 year
@@ -17,13 +17,13 @@ const securityHeaders = [
     value: [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://www.youtube.com https://s.ytimg.com", // unpkg=Leaflet; youtube+ytimg=IFrame API player
-      "style-src 'self' 'unsafe-inline' https://unpkg.com",
+      "style-src 'self' 'unsafe-inline' https://unpkg.com https://fonts.googleapis.com",
       "img-src 'self' data: https://images.unsplash.com https://plus.unsplash.com https://server.arcgisonline.com https://randomuser.me",
-      "font-src 'self'",
+      "font-src 'self' https://fonts.gstatic.com",
       "connect-src 'self' https://*.supabase.co https://api.resend.com https://graph.facebook.com",
-      // 'self' for venue-map.html (satellite map), YouTube for audio player on ticket page
-      "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
-      "frame-ancestors 'none'",
+      // 'self' for venue-map.html, YouTube for audio player, Google for the ticket-page map embed
+      "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://www.google.com",
+      "frame-ancestors 'self'",
     ].join("; "),
   },
 ];
@@ -47,6 +47,12 @@ const nextConfig: NextConfig = {
         source: "/(.*)",
         headers: securityHeaders,
       },
+    ];
+  },
+  async rewrites() {
+    return [
+      // Ticket page is the static site cloned from cyphr10/all-white-rnb
+      { source: "/all-white-party", destination: "/all-white-rnb/index.html" },
     ];
   },
 };

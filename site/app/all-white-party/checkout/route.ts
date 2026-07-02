@@ -130,9 +130,10 @@ export async function POST(req: NextRequest) {
       line_items,
       allow_promotion_codes: true,
       success_url: `https://mytampapulse.com/all-white-party/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: ALLOWED_ORIGINS.includes(origin ?? "")
-        ? `${origin}/all-white-rnb/`
-        : `https://mytampapulse.com/all-white-party?canceled=1`,
+      cancel_url:
+        origin === "https://cyphr10.github.io"
+          ? `${origin}/all-white-rnb/`
+          : `https://mytampapulse.com/all-white-party`,
       phone_number_collection: { enabled: true },
       billing_address_collection: "auto",
       custom_text: { submit: { message: EVENT.dressCode } },
