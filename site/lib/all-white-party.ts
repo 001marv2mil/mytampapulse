@@ -33,8 +33,8 @@ export const EVENT = {
   flyerImage: "" as string,
   venue: "Hyatt Place Downtown Tampa",
   address: "325 N Florida Ave, Tampa, FL 33602",
-  lat: 27.9474,
-  lng: -82.4588,
+  lat: 27.9478092,
+  lng: -82.4565328,
   mapsUrl:
     "https://www.google.com/maps/search/?api=1&query=Hyatt+Place+Downtown+Tampa+325+N+Florida+Ave+Tampa+FL+33602",
   dressCode: "All-white linen attire required for entry.",
