@@ -610,90 +610,15 @@ hr.divider {
 .vip-title {
   font-family: var(--serif);
   font-weight: 800;
-  font-size: 30px;
-  margin: 10px 0 28px;
+  font-size: 28px;
+  margin: 10px 0 20px;
   color: var(--ink);
-}
-.vip-gold-word {
-  background: linear-gradient(100deg, var(--gold-hi) 10%, var(--gold) 45%, var(--gold-deep) 85%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  font-style: italic;
 }
 .vip-card {
-  position: relative;
-  border: 1.5px solid transparent;
-  background:
-    linear-gradient(180deg, #241a0c, #17100a 70%) padding-box,
-    linear-gradient(120deg, var(--gold-hi), var(--gold-deep) 45%, var(--gold) 80%, var(--gold-hi)) border-box;
+  border: 1px solid var(--orange-border);
+  background: var(--orange-soft);
   border-radius: var(--radius-lg);
-  padding: 34px 22px 28px;
-  box-shadow: 0 0 44px rgba(224, 178, 86, 0.16), inset 0 1px 0 rgba(247, 223, 160, 0.12);
-}
-.vip-ribbon {
-  position: absolute;
-  top: -14px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
-  background: linear-gradient(100deg, var(--gold-hi), var(--gold) 55%, var(--gold-deep));
-  color: #1a1208;
-  font-weight: 800;
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  padding: 7px 16px;
-  border-radius: var(--radius-pill);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
-}
-.vip-price { margin: 6px 0 18px; }
-.vip-amount {
-  display: block;
-  font-family: var(--serif);
-  font-weight: 900;
-  font-size: 52px;
-  line-height: 1;
-  background: linear-gradient(100deg, var(--gold-hi) 10%, var(--gold) 50%, var(--gold-deep) 90%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-.vip-flat {
-  display: block;
-  margin-top: 6px;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-dim);
-}
-.vip-perks {
-  list-style: none;
-  margin: 0 auto 18px;
-  padding: 0;
-  max-width: 340px;
-  text-align: left;
-}
-.vip-perks li {
-  position: relative;
-  padding: 7px 0 7px 30px;
-  font-size: 14.5px;
-  line-height: 1.5;
-  color: var(--ink);
-  border-bottom: 1px solid rgba(224, 178, 86, 0.14);
-}
-.vip-perks li:last-child { border-bottom: none; }
-.vip-perks li::before {
-  content: "✓";
-  position: absolute;
-  left: 4px;
-  top: 7px;
-  color: var(--gold);
-  font-weight: 800;
+  padding: 26px 22px;
 }
 .vip-desc { margin: 0 0 12px; color: var(--ink); font-size: 14.5px; line-height: 1.6; }
 .vip-scarcity { margin: 0; font-size: 12.5px; color: var(--ink-dim); }
@@ -722,17 +647,6 @@ hr.divider {
 }
 .contact-btn:hover { background: rgba(251, 105, 4, 0.24); transform: translateY(-1px); }
 .contact-btn.small { padding: 9px 16px; font-size: 12.5px; }
-.contact-btn.vip-cta {
-  border: none;
-  background: linear-gradient(100deg, var(--gold-hi) 10%, var(--gold) 45%, var(--gold-deep) 85%);
-  color: #1a1208;
-  box-shadow: 0 6px 22px rgba(224, 178, 86, 0.28);
-}
-.contact-btn.vip-cta:hover {
-  background: linear-gradient(100deg, var(--gold-hi) 20%, var(--gold) 55%, var(--gold-deep) 95%);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 28px rgba(224, 178, 86, 0.38);
-}
 
 .qty-row {
   display: flex;
