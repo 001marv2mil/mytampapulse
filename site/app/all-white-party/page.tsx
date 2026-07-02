@@ -46,7 +46,7 @@ function AllWhitePartyCheckout() {
   const searchParams = useSearchParams();
   const canceled = searchParams.get("canceled") === "1";
 
-  const [qty, setQty] = useState<Record<TierId, number>>({ "early-bird": 0, ga: 0, vip: 0 });
+  const [qty, setQty] = useState<Record<TierId, number>>({ earlybird: 0, ga: 0, vip: 0, founder: 0 });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [faqOpen, setFaqOpen] = useState<number | null>(null);
@@ -286,7 +286,7 @@ function AllWhitePartyCheckout() {
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-8">
             <p className="text-[#D4AF37] text-xs font-bold tracking-[0.3em] uppercase mb-3">Location</p>
-            <h2 style={DISPLAY} className="text-3xl sm:text-4xl font-black">Social Club</h2>
+            <h2 style={DISPLAY} className="text-3xl sm:text-4xl font-black">{EVENT.venue}</h2>
             <p className="text-white/55 text-sm mt-2">{EVENT.address}</p>
             <a
               href={EVENT.mapsUrl}
@@ -316,7 +316,7 @@ function AllWhitePartyCheckout() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={STREETVIEW_IMG}
-                    alt="Street view of Social Club, Downtown Tampa"
+                    alt={`Street view of ${EVENT.venue}`}
                     className="w-full h-72 object-cover block"
                   />
                 </a>
@@ -330,7 +330,7 @@ function AllWhitePartyCheckout() {
               )}
               <div className="rounded-2xl overflow-hidden border border-[#D4AF37]/25 shadow-xl shadow-black/40">
                 <iframe
-                  title="Map to Social Club, Downtown Tampa"
+                  title={`Map to ${EVENT.venue}`}
                   src={MAP_SRC}
                   className={`w-full block ${STREETVIEW_IMG ? "h-72" : "h-80"}`}
                   style={{ border: 0, filter: "saturate(1.1)" }}
