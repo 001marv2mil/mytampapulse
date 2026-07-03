@@ -165,6 +165,12 @@ export default function DoorList() {
         >
           {loading ? "…" : "↻"}
         </button>
+        <a
+          href="/all-white-party/door/print"
+          className="bg-white/[0.06] border border-white/15 rounded-xl px-4 flex items-center text-white/70 text-sm font-semibold"
+        >
+          🖨
+        </a>
       </div>
 
       <input

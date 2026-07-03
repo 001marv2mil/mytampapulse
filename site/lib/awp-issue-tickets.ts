@@ -104,6 +104,12 @@ export async function issueTicketsForSession(sessionId: string): Promise<IssueRe
   );
   if (ticketError) return { issued: 0, error: `Ticket insert failed: ${ticketError.message}` };
 
+  // Every buyer joins the Tampa Pulse newsletter list. Best-effort: duplicates
+  // error out harmlessly, so prior unsubscribes stay unsubscribed.
+  if (email) {
+    await supabaseAdmin.from("subscribers").insert({ email, source: "all-white-party" });
+  }
+
   if (email && process.env.RESEND_API_KEY) {
     const resend = new Resend(process.env.RESEND_API_KEY);
     try {
