@@ -26,15 +26,20 @@ export default function CheckInPanel({
 }) {
   const [status, setStatus] = useState<"valid" | "used">(initialStatus);
   const [usedAt, setUsedAt] = useState<string | null>(initialUsedAt);
+  // Staff-only: check-in controls render ONLY on devices that have already
+  // unlocked the door list (/all-white-party/door) with the door PIN.
+  // Customers viewing their own ticket see nothing but the ticket.
+  const [isStaff, setIsStaff] = useState(false);
   const [pin, setPin] = useState("");
-  const [askPin, setAskPin] = useState(false);
-  const [staffMode, setStaffMode] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem(PIN_STORAGE_KEY);
-    if (saved) setPin(saved);
+    if (saved) {
+      setPin(saved);
+      setIsStaff(true);
+    }
   }, []);
 
   const checkIn = async (pinToUse: string) => {
@@ -48,9 +53,10 @@ export default function CheckInPanel({
       });
       const data = await res.json();
       if (res.status === 401) {
+        // Stored PIN is stale (rotated). Hide controls; staff re-unlocks via the door list.
         localStorage.removeItem(PIN_STORAGE_KEY);
-        setAskPin(true);
-        setError("Wrong PIN — try again.");
+        setIsStaff(false);
+        setError("PIN changed — open the door list to sign in again.");
         return;
       }
       if (res.status === 409) {
@@ -63,23 +69,12 @@ export default function CheckInPanel({
         setError(data.error || "Something went wrong.");
         return;
       }
-      localStorage.setItem(PIN_STORAGE_KEY, pinToUse);
       setStatus("used");
       setUsedAt(data.used_at ?? new Date().toISOString());
-      setAskPin(false);
     } catch {
       setError("Network error — try again.");
     } finally {
       setBusy(false);
-    }
-  };
-
-  const handleCheckInTap = () => {
-    const saved = localStorage.getItem(PIN_STORAGE_KEY);
-    if (saved) {
-      void checkIn(saved);
-    } else {
-      setAskPin(true);
     }
   };
 
@@ -119,46 +114,16 @@ export default function CheckInPanel({
       <p className="text-white/70 font-mono text-sm tracking-[0.25em] mt-4">{code}</p>
       {buyerEmail && <p className="text-white/40 text-xs mt-1">{buyerEmail}</p>}
 
-      {status === "valid" && (
+      {status === "valid" && isStaff && (
         <div className="mt-7">
-          {!staffMode ? (
-            <button
-              type="button"
-              onClick={() => setStaffMode(true)}
-              className="text-white/35 hover:text-white/60 text-xs underline underline-offset-2"
-            >
-              Door staff? Tap here to check in
-            </button>
-          ) : !askPin ? (
-            <button
-              type="button"
-              onClick={handleCheckInTap}
-              disabled={busy}
-              className="w-full bg-emerald-400 disabled:opacity-50 text-[#0c0a08] font-black py-4 rounded-xl text-base"
-            >
-              {busy ? "Checking in…" : "Confirm Check-In"}
-            </button>
-          ) : (
-            <div className="space-y-3">
-              <input
-                type="password"
-                inputMode="numeric"
-                autoComplete="off"
-                placeholder="Door PIN"
-                value={pin}
-                onChange={(e) => setPin(e.target.value)}
-                className="w-full bg-black/40 border border-white/20 rounded-xl px-4 py-3 text-center text-lg tracking-[0.3em] text-white placeholder:text-white/30 placeholder:tracking-normal"
-              />
-              <button
-                type="button"
-                onClick={() => void checkIn(pin)}
-                disabled={busy || pin.length === 0}
-                className="w-full bg-emerald-400 disabled:opacity-50 text-[#0c0a08] font-black py-4 rounded-xl text-base"
-              >
-                {busy ? "Checking in…" : "Confirm Check-In"}
-              </button>
-            </div>
-          )}
+          <button
+            type="button"
+            onClick={() => void checkIn(pin)}
+            disabled={busy}
+            className="w-full bg-emerald-400 disabled:opacity-50 text-[#0c0a08] font-black py-4 rounded-xl text-base"
+          >
+            {busy ? "Checking in…" : "Check In (staff)"}
+          </button>
         </div>
       )}
 
