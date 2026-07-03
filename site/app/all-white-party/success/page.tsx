@@ -50,19 +50,33 @@ export default async function SuccessPage({
         <h1 style={{ fontFamily: "var(--font-display)" }} className="text-3xl font-black mb-3">
           You&apos;re in! 🤍
         </h1>
-        <p className="text-white/60 text-sm leading-relaxed mb-6">
+        <p className="text-white/60 text-sm leading-relaxed mb-4">
           Your spot at the <span className="text-white font-semibold">{EVENT.name}</span> is locked
           in.
           {email ? (
             <>
               {" "}
-              A confirmation and your tickets are on the way to{" "}
-              <span className="text-white font-semibold">{email}</span>.
+              Your QR-code e-ticket{" "}
+              <span className="text-white font-semibold">is being emailed to {email}</span> right
+              now.
             </>
           ) : (
-            " A confirmation email with your tickets is on the way."
+            " Your QR-code e-ticket is being emailed to you right now."
           )}
         </p>
+
+        <div className="bg-[#F0D488]/10 border border-[#D4AF37]/40 rounded-xl px-4 py-3 mb-6 text-left">
+          <p className="text-[#F0D488] text-xs font-bold uppercase tracking-wider mb-1">
+            📬 Don&apos;t see the email?
+          </p>
+          <p className="text-white/70 text-xs leading-relaxed">
+            Check your <span className="text-white font-semibold">Promotions</span> tab (Gmail) or{" "}
+            <span className="text-white font-semibold">Spam / Junk</span> folder — it sometimes
+            lands there. Look for{" "}
+            <span className="text-white font-semibold">&quot;Your ticket — All White R&amp;B Rooftop&quot;</span>{" "}
+            from Tampa Pulse. Save it — the QR code inside is your entry at the door.
+          </p>
+        </div>
 
         {amountTotal !== null && (
           <div className="flex justify-between items-baseline border-y border-white/10 py-4 mb-6 text-sm">
