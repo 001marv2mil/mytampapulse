@@ -6,26 +6,8 @@ import {
   MAX_PER_TIER,
   computeFeeCents,
   getTier,
-  isSoldOut,
-  tierRemaining,
 } from "@/lib/all-white-party";
-
-// Origins allowed to call this endpoint (includes the developer's GitHub Pages site)
-const ALLOWED_ORIGINS = [
-  "https://mytampapulse.com",
-  "https://www.mytampapulse.com",
-  "https://cyphr10.github.io",
-  "http://localhost:3000",
-];
-
-function corsHeaders(origin: string | null): Record<string, string> {
-  const allowed = ALLOWED_ORIGINS.includes(origin ?? "") ? (origin as string) : ALLOWED_ORIGINS[0];
-  return {
-    "Access-Control-Allow-Origin": allowed,
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
-  };
-}
+import { corsHeaders, getAvailability } from "@/lib/awp-ticketing";
 
 // Handle CORS preflight
 export async function OPTIONS(req: NextRequest) {
@@ -59,7 +41,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Please select at least one ticket." }, { status: 400, headers });
   }
 
+  // Live counts from the database — real inventory, not the static config.
+  let availability: Awaited<ReturnType<typeof getAvailability>> | null = null;
+  try {
+    availability = await getAvailability();
+  } catch {
+    // DB unreachable: fall through with no capacity enforcement rather than
+    // blocking all sales. Capacities are re-checked on the next purchase.
+  }
+
   const line_items: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
+  const metadataItems: { id: string; qty: number }[] = [];
   let subtotalCents = 0;
   let ticketCount = 0;
 
@@ -67,9 +59,6 @@ export async function POST(req: NextRequest) {
     const tier = getTier(String(item?.id));
     if (!tier) {
       return NextResponse.json({ error: `Unknown ticket type: ${item?.id}` }, { status: 400, headers });
-    }
-    if (isSoldOut(tier)) {
-      return NextResponse.json({ error: `${tier.name} is sold out.` }, { status: 400, headers });
     }
 
     const qty = Math.floor(Number(item?.qty));
@@ -80,7 +69,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const remaining = tierRemaining(tier);
+    const remaining = availability?.[tier.id]?.remaining ?? null;
+    if (remaining !== null && remaining <= 0) {
+      return NextResponse.json({ error: `${tier.name} is sold out.` }, { status: 409, headers });
+    }
     if (remaining !== null && qty > remaining) {
       return NextResponse.json(
         { error: `Only ${remaining} ${tier.name} ticket${remaining === 1 ? "" : "s"} left.` },
@@ -88,6 +80,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    metadataItems.push({ id: tier.id, qty });
     subtotalCents += tier.priceCents * qty;
     ticketCount += qty;
 
@@ -137,7 +130,8 @@ export async function POST(req: NextRequest) {
       phone_number_collection: { enabled: true },
       billing_address_collection: "auto",
       custom_text: { submit: { message: EVENT.dressCode } },
-      metadata: { event: EVENT.name },
+      // items JSON is read by the webhook to mint one e-ticket per seat
+      metadata: { event: EVENT.name, items: JSON.stringify(metadataItems) },
     });
 
     return NextResponse.json({ url: session.url }, { headers });

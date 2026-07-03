@@ -11,6 +11,38 @@
   var FEE_RATE = 0.10;
   var FEE_FLAT = 0.99;
 
+  /* ---------- Live availability (real ticket counts from the server) ---------- */
+  function applyAvailability(tiers) {
+    if (!tiers) return;
+    Object.keys(tiers).forEach(function (id) {
+      var info = tiers[id];
+      if (!info || info.remaining === null || info.remaining === undefined) return;
+      var input = document.querySelector('input[name="tier"][value="' + id + '"]');
+      if (!input) return;
+      var option = input.closest(".tier-option");
+      var tag = option.querySelector(".tier-tag");
+      if (info.remaining <= 0) {
+        input.disabled = true;
+        option.classList.add("soldout");
+        if (tag) tag.textContent = "Sold out";
+        if (input.checked) {
+          var next = document.querySelector('input[name="tier"]:not(:disabled)');
+          if (next) {
+            next.checked = true;
+            next.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+        }
+      } else if (tag) {
+        tag.textContent = "🔥 Only " + info.remaining + " left";
+      }
+    });
+  }
+
+  fetch("/all-white-party/availability")
+    .then(function (res) { return res.json(); })
+    .then(function (data) { applyAvailability(data.tiers); })
+    .catch(function () { /* counts are a nice-to-have; never block the page */ });
+
   /* ---------- Sticky ticket bar ---------- */
   var stickyCta = document.getElementById("stickyCta");
   var revealAfter = document.querySelector(".details");

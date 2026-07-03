@@ -564,6 +564,11 @@ hr.divider {
   cursor: pointer;
   transition: border-color 0.2s ease, background 0.2s ease;
 }
+.tier-option.soldout {
+  opacity: 0.4;
+  pointer-events: none;
+  filter: grayscale(0.6);
+}
 .tier-option:has(input:checked), .tier-option.selected {
   border-color: var(--orange-border);
   background: var(--orange-soft);
