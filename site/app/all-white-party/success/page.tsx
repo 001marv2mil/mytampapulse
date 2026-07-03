@@ -1,9 +1,15 @@
 import Link from "next/link";
 import Stripe from "stripe";
 import { EVENT, formatPrice } from "@/lib/all-white-party";
+import { issueTicketsForSession } from "@/lib/awp-issue-tickets";
+
+export const dynamic = "force-dynamic";
 
 // Stripe redirects here after a successful payment with ?session_id=...
-// We retrieve the session server-side to show a real confirmation.
+// We retrieve the session server-side to show a real confirmation — and run
+// the ticket-issuing pipeline as a BACKUP to the webhook. Issuance is
+// idempotent, so whichever of the two fires second is a no-op. Between them,
+// a paying buyer always gets their e-tickets.
 export default async function SuccessPage({
   searchParams,
 }: {
@@ -16,6 +22,11 @@ export default async function SuccessPage({
 
   const secretKey = process.env.STRIPE_SECRET_KEY;
   if (secretKey && session_id) {
+    try {
+      await issueTicketsForSession(session_id);
+    } catch {
+      // Never block the confirmation page on issuance; webhook still covers it.
+    }
     try {
       const stripe = new Stripe(secretKey);
       const session = await stripe.checkout.sessions.retrieve(session_id);
