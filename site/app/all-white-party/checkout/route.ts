@@ -41,6 +41,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Please select at least one ticket." }, { status: 400, headers });
   }
 
+  // Email typed on the ticket sheet — pre-fills Stripe's checkout page so the
+  // buyer doesn't enter it twice. Stripe still validates/collects it.
+  const rawEmail = (body as { email?: string })?.email;
+  const customerEmail =
+    typeof rawEmail === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawEmail.trim())
+      ? rawEmail.trim()
+      : undefined;
+
   // Live counts from the database — real inventory, not the static config.
   let availability: Awaited<ReturnType<typeof getAvailability>> | null = null;
   try {
@@ -127,6 +135,7 @@ export async function POST(req: NextRequest) {
         origin === "https://cyphr10.github.io"
           ? `${origin}/all-white-rnb/`
           : `https://mytampapulse.com/all-white-party`,
+      customer_email: customerEmail,
       phone_number_collection: { enabled: true },
       billing_address_collection: "auto",
       custom_text: { submit: { message: EVENT.dressCode } },

@@ -199,7 +199,7 @@
     fetch("/all-white-party/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items: [{ id: tierId, qty: qty }] })
+      body: JSON.stringify({ items: [{ id: tierId, qty: qty }], email: email })
     })
       .then(function (res) { return res.json(); })
       .then(function (data) {
