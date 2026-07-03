@@ -22,7 +22,7 @@ function readKey() {
 const EVENT = "Sat Jul 25, 2026 · 5 PM to 9 PM · Hyatt Place Downtown Tampa, 325 N Florida Ave, Tampa FL";
 
 const TIERS = [
-  { id: "earlybird", name: "All White R&B Rooftop · Early Bird GA",  amount: 2500,  desc: `First in · only 12 available · ${EVENT}` },
+  { id: "earlybird", name: "All White R&B Rooftop · Early Bird GA",  amount: 2500,  desc: `First in · only 15 available · ${EVENT}` },
   { id: "ga",        name: "All White R&B Rooftop · General Admission", amount: 4000, desc: `The Pulse Experience · ${EVENT}` },
   { id: "vip",       name: "All White R&B Rooftop · VIP Lounge",     amount: 7500,  desc: `Priority entry + welcome drink · ${EVENT}` },
   { id: "founder",   name: "All White R&B Rooftop · Founder's Seat", amount: 15000, desc: `Only 5 available · seat at the DJ table · ${EVENT}` },

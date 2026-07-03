@@ -62,10 +62,10 @@ export const TIERS: Tier[] = [
     id: "earlybird",
     name: "Early Bird GA",
     priceCents: 2500, // $25.00
-    blurb: "First in · only 12 available. Same great night, lowest price.",
+    blurb: "First in · only 15 available. Same great night, lowest price.",
     perks: ["General admission entry", "Lowest price guaranteed", "Access to main floor & bar"],
     badge: "Limited",
-    capacity: 12,
+    capacity: 15,
     sold: 0,
   },
   {
