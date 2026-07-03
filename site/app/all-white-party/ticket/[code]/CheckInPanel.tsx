@@ -28,6 +28,7 @@ export default function CheckInPanel({
   const [usedAt, setUsedAt] = useState<string | null>(initialUsedAt);
   const [pin, setPin] = useState("");
   const [askPin, setAskPin] = useState(false);
+  const [staffMode, setStaffMode] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -97,9 +98,10 @@ export default function CheckInPanel({
       {status === "valid" ? (
         <>
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-emerald-400 flex items-center justify-center text-3xl text-[#0c0a08] font-black">
-            ✓
+            🎟
           </div>
-          <h2 className="text-3xl font-black text-emerald-300 mb-1">VALID</h2>
+          <h2 className="text-3xl font-black text-emerald-300 mb-1">TICKET VALID</h2>
+          <p className="text-white/60 text-sm">Not checked in yet — show this at the door</p>
         </>
       ) : (
         <>
@@ -119,14 +121,22 @@ export default function CheckInPanel({
 
       {status === "valid" && (
         <div className="mt-7">
-          {!askPin ? (
+          {!staffMode ? (
+            <button
+              type="button"
+              onClick={() => setStaffMode(true)}
+              className="text-white/35 hover:text-white/60 text-xs underline underline-offset-2"
+            >
+              Door staff? Tap here to check in
+            </button>
+          ) : !askPin ? (
             <button
               type="button"
               onClick={handleCheckInTap}
               disabled={busy}
               className="w-full bg-emerald-400 disabled:opacity-50 text-[#0c0a08] font-black py-4 rounded-xl text-base"
             >
-              {busy ? "Checking in…" : "Check In (staff)"}
+              {busy ? "Checking in…" : "Confirm Check-In"}
             </button>
           ) : (
             <div className="space-y-3">
