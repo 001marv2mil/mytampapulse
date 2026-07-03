@@ -30,7 +30,8 @@ export async function POST(req: NextRequest) {
   }
 
   const session = event.data.object as Stripe.Checkout.Session;
-  if (session.payment_status !== "paid") {
+  // "no_payment_required" covers $0 totals (100%-off promo codes)
+  if (session.payment_status !== "paid" && session.payment_status !== "no_payment_required") {
     return NextResponse.json({ received: true, skipped: "not paid" });
   }
 
