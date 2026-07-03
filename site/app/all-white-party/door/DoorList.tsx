@@ -10,6 +10,7 @@ interface TicketRow {
   tierName: string;
   status: "valid" | "used";
   used_at: string | null;
+  guestName: string | null;
 }
 
 interface Guest {
@@ -69,6 +70,18 @@ export default function DoorList() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Auto-refresh every 20s so check-ins made on other phones (or via QR scan)
+  // show up without tapping the refresh button.
+  useEffect(() => {
+    if (!unlocked) return;
+    const t = setInterval(() => {
+      const saved = localStorage.getItem(PIN_STORAGE_KEY);
+      if (saved) void loadList(saved);
+    }, 20000);
+    return () => clearInterval(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unlocked]);
+
   const checkIn = async (code: string) => {
     setBusyCode(code);
     try {
@@ -125,7 +138,11 @@ export default function DoorList() {
         (g) =>
           (g.name ?? "").toLowerCase().includes(q) ||
           (g.email ?? "").toLowerCase().includes(q) ||
-          g.tickets.some((t) => t.code.toLowerCase().includes(q))
+          g.tickets.some(
+            (t) =>
+              t.code.toLowerCase().includes(q) ||
+              (t.guestName ?? "").toLowerCase().includes(q)
+          )
       )
     : guests;
 
@@ -167,7 +184,7 @@ export default function DoorList() {
       <div className="space-y-3">
         {filtered.map((g, i) => (
           <div key={i} className="bg-white/[0.04] border border-white/10 rounded-2xl p-4">
-            <p className="font-bold text-white">{g.name || "No name"}</p>
+            <p className="font-bold text-white">{g.name || g.email?.split("@")[0] || "No name"}</p>
             <p className="text-white/45 text-xs mb-3">{g.email}</p>
             <div className="space-y-2">
               {g.tickets.map((t) => (
@@ -176,6 +193,9 @@ export default function DoorList() {
                   className="flex items-center justify-between gap-3 bg-black/25 rounded-xl px-3 py-2.5"
                 >
                   <div className="min-w-0">
+                    {t.guestName && (
+                      <p className="text-white text-sm font-bold">{t.guestName}</p>
+                    )}
                     <p className="text-[#f7dfa0] text-sm font-semibold">{t.tierName}</p>
                     <p className="text-white/40 font-mono text-[11px] tracking-[0.15em]">{t.code}</p>
                   </div>

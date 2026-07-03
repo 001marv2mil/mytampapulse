@@ -131,6 +131,31 @@
     return TIERS[checked ? checked.value : "earlybird"];
   }
 
+  /* Guest name inputs — one per extra ticket, so tickets bought for friends
+     carry the friend's name on the door list. */
+  var guestNamesWrap = document.getElementById("guestNames");
+
+  function renderGuestInputs() {
+    var existing = guestNamesWrap.querySelectorAll("input");
+    var values = [];
+    existing.forEach(function (inp) { values.push(inp.value); });
+    guestNamesWrap.innerHTML = "";
+    for (var i = 2; i <= qty; i++) {
+      var label = document.createElement("label");
+      label.className = "field";
+      var span = document.createElement("span");
+      span.textContent = "Guest " + i + " name (optional)";
+      var input = document.createElement("input");
+      input.type = "text";
+      input.placeholder = "Friend's name for ticket " + i;
+      input.autocomplete = "off";
+      input.value = values[i - 2] || "";
+      label.appendChild(span);
+      label.appendChild(input);
+      guestNamesWrap.appendChild(label);
+    }
+  }
+
   function updateSummary() {
     var price = selectedTier().price;
     var subtotal = price * qty;
@@ -143,6 +168,7 @@
     submitLabel.textContent = "Pay " + money(total);
     qtyMinus.disabled = qty <= 1;
     qtyPlus.disabled = qty >= MAX_QTY;
+    renderGuestInputs();
   }
 
   qtyMinus.addEventListener("click", function () {
@@ -188,18 +214,33 @@
   });
 
   document.getElementById("checkoutSubmit").addEventListener("click", function () {
+    var nameInput = document.getElementById("buyerName");
+    var buyerName = nameInput.value.trim();
+    if (!buyerName) {
+      nameInput.focus();
+      return;
+    }
     var email = sheet.querySelector('input[type="email"]').value.trim();
     if (!email) {
       sheet.querySelector('input[type="email"]').focus();
       return;
     }
+    var guestNames = [];
+    guestNamesWrap.querySelectorAll("input").forEach(function (inp) {
+      guestNames.push(inp.value.trim());
+    });
     var checked = document.querySelector('input[name="tier"]:checked');
     var tierId = checked ? checked.value : "earlybird";
     submitLabel.textContent = "Redirecting to secure checkout…";
     fetch("/all-white-party/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items: [{ id: tierId, qty: qty }], email: email })
+      body: JSON.stringify({
+        items: [{ id: tierId, qty: qty }],
+        email: email,
+        name: buyerName,
+        guestNames: guestNames
+      })
     })
       .then(function (res) { return res.json(); })
       .then(function (data) {

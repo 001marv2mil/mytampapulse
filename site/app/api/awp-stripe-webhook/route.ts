@@ -64,8 +64,18 @@ export async function POST(req: NextRequest) {
   }
 
   const email = session.customer_details?.email ?? null;
-  const name = session.customer_details?.name ?? null;
+  // Prefer the name typed on the ticket sheet; card name is the fallback
+  // ($0 promo checkouts skip the card form entirely, so it can be missing).
+  const buyerName = session.metadata?.buyerName?.trim() || session.customer_details?.name || null;
   const phone = session.customer_details?.phone ?? null;
+
+  let guestNames: string[] = [];
+  try {
+    const parsed = JSON.parse(session.metadata?.guestNames ?? "[]");
+    if (Array.isArray(parsed)) guestNames = parsed.map((g) => String(g).trim());
+  } catch {
+    /* optional */
+  }
 
   // Idempotency: a webhook can be delivered more than once. The order row's
   // primary key is the session id, so a second delivery fails the insert and
@@ -73,7 +83,7 @@ export async function POST(req: NextRequest) {
   const { error: orderError } = await supabaseAdmin.from("awp_orders").insert({
     session_id: session.id,
     email,
-    name,
+    name: buyerName,
     phone,
     amount_total: session.amount_total,
   });
@@ -84,13 +94,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `Order insert failed: ${orderError.message}` }, { status: 500 });
   }
 
-  const tickets: { code: string; tier: TierId; tierName: string }[] = [];
+  // Ticket 1 carries the buyer's name; extra tickets take the guest names the
+  // buyer typed (in order), blank where they skipped one.
+  const tickets: { code: string; tier: TierId; tierName: string; guestName: string | null }[] = [];
+  let seat = 0;
   for (const item of items) {
     const tier = getTier(String(item.id));
     if (!tier) continue;
     const qty = Math.max(1, Math.min(20, Math.floor(Number(item.qty)) || 1));
     for (let i = 0; i < qty; i++) {
-      tickets.push({ code: generateTicketCode(), tier: tier.id, tierName: tier.name });
+      const guestName = seat === 0 ? buyerName : guestNames[seat - 1] || null;
+      tickets.push({ code: generateTicketCode(), tier: tier.id, tierName: tier.name, guestName });
+      seat++;
     }
   }
 
@@ -100,6 +115,7 @@ export async function POST(req: NextRequest) {
       session_id: session.id,
       tier: t.tier,
       buyer_email: email,
+      guest_name: t.guestName,
     }))
   );
   if (ticketError) {
@@ -113,7 +129,7 @@ export async function POST(req: NextRequest) {
         from: "Tampa Pulse <newsletter@mytampapulse.com>",
         to: email,
         subject: `Your ticket${tickets.length > 1 ? "s" : ""} — ${EVENT.name} 🎟️`,
-        html: ticketEmailHtml(name, tickets),
+        html: ticketEmailHtml(buyerName, tickets),
       });
     } catch {
       // Tickets are already issued; the buyer can still be looked up at the
@@ -126,7 +142,7 @@ export async function POST(req: NextRequest) {
 
 function ticketEmailHtml(
   name: string | null,
-  tickets: { code: string; tier: TierId; tierName: string }[]
+  tickets: { code: string; tier: TierId; tierName: string; guestName: string | null }[]
 ): string {
   const gold = "#e0b256";
   const goldHi = "#f7dfa0";
@@ -135,7 +151,8 @@ function ticketEmailHtml(
       (t, i) => `
       <div style="background:#17100a;border:1px solid rgba(224,178,86,0.45);border-radius:16px;padding:24px;margin:0 0 16px;text-align:center;">
         <p style="margin:0 0 4px;color:${gold};font-size:11px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;">Ticket ${i + 1} of ${tickets.length}</p>
-        <p style="margin:0 0 16px;color:${goldHi};font-size:20px;font-weight:bold;">${t.tierName}</p>
+        <p style="margin:0 0 ${t.guestName ? "4" : "16"}px;color:${goldHi};font-size:20px;font-weight:bold;">${t.tierName}</p>
+        ${t.guestName ? `<p style="margin:0 0 16px;color:#f6efe2;font-size:14px;">Admit: <strong>${t.guestName}</strong></p>` : ""}
         <img src="${ticketQrUrl(t.code)}" width="220" height="220" alt="QR code for ticket ${t.code}" style="display:block;margin:0 auto 12px;border-radius:12px;background:#ffffff;padding:8px;" />
         <p style="margin:0 0 6px;color:#9c948a;font-size:12px;">Ticket code</p>
         <p style="margin:0 0 14px;color:#f6efe2;font-size:18px;font-weight:bold;letter-spacing:3px;">${t.code}</p>

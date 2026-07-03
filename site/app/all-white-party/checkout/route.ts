@@ -49,6 +49,15 @@ export async function POST(req: NextRequest) {
       ? rawEmail.trim()
       : undefined;
 
+  // Buyer + optional guest names from the ticket sheet, carried to the webhook
+  // via session metadata so each ticket can be issued under a name.
+  const rawName = (body as { name?: string })?.name;
+  const buyerName = typeof rawName === "string" ? rawName.trim().slice(0, 80) : "";
+  const rawGuests = (body as { guestNames?: unknown })?.guestNames;
+  const guestNames = Array.isArray(rawGuests)
+    ? rawGuests.map((g) => (typeof g === "string" ? g.trim().slice(0, 80) : "")).slice(0, 20)
+    : [];
+
   // Live counts from the database — real inventory, not the static config.
   let availability: Awaited<ReturnType<typeof getAvailability>> | null = null;
   try {
@@ -139,8 +148,14 @@ export async function POST(req: NextRequest) {
       phone_number_collection: { enabled: true },
       billing_address_collection: "auto",
       custom_text: { submit: { message: EVENT.dressCode } },
-      // items JSON is read by the webhook to mint one e-ticket per seat
-      metadata: { event: EVENT.name, items: JSON.stringify(metadataItems) },
+      // items JSON is read by the webhook to mint one e-ticket per seat;
+      // buyerName/guestNames put a name on each ticket for the door list
+      metadata: {
+        event: EVENT.name,
+        items: JSON.stringify(metadataItems),
+        buyerName,
+        guestNames: JSON.stringify(guestNames).slice(0, 490),
+      },
     });
 
     return NextResponse.json({ url: session.url }, { headers });

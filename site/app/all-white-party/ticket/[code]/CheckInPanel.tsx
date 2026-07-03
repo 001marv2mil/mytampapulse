@@ -10,6 +10,7 @@ const PIN_STORAGE_KEY = "awp-door-pin";
 export default function CheckInPanel({
   code,
   tierName,
+  guestName,
   initialStatus,
   initialUsedAt,
   buyerEmail,
@@ -17,6 +18,7 @@ export default function CheckInPanel({
 }: {
   code: string;
   tierName: string;
+  guestName: string | null;
   initialStatus: "valid" | "used";
   initialUsedAt: string | null;
   buyerEmail: string | null;
@@ -109,7 +111,8 @@ export default function CheckInPanel({
         </>
       )}
 
-      <p className="text-[#f7dfa0] font-bold text-lg mt-3">{tierName}</p>
+      {guestName && <p className="text-white font-black text-xl mt-3">{guestName}</p>}
+      <p className={`text-[#f7dfa0] font-bold text-lg ${guestName ? "mt-0.5" : "mt-3"}`}>{tierName}</p>
       <p className="text-white/50 text-xs mt-1">{eventDate}</p>
       <p className="text-white/70 font-mono text-sm tracking-[0.25em] mt-4">{code}</p>
       {buyerEmail && <p className="text-white/40 text-xs mt-1">{buyerEmail}</p>}

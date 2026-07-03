@@ -16,7 +16,7 @@ export default async function TicketPage({
 
   const { data: ticket } = await supabaseAdmin
     .from("awp_tickets")
-    .select("code, tier, status, used_at, buyer_email")
+    .select("code, tier, status, used_at, buyer_email, guest_name")
     .eq("code", cleanCode)
     .maybeSingle();
 
@@ -48,6 +48,7 @@ export default async function TicketPage({
           <CheckInPanel
             code={ticket.code}
             tierName={tierName ?? ""}
+            guestName={ticket.guest_name}
             initialStatus={ticket.status as "valid" | "used"}
             initialUsedAt={ticket.used_at}
             buyerEmail={ticket.buyer_email}

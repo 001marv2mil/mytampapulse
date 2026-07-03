@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
       supabaseAdmin.from("awp_orders").select("session_id, email, name, phone, created_at"),
       supabaseAdmin
         .from("awp_tickets")
-        .select("code, session_id, tier, status, used_at")
+        .select("code, session_id, tier, status, used_at, guest_name")
         .order("created_at", { ascending: true }),
     ]);
 
@@ -50,6 +50,7 @@ export async function POST(req: NextRequest) {
       tierName: getTier(t.tier)?.name ?? t.tier,
       status: t.status,
       used_at: t.used_at,
+      guestName: t.guest_name ?? null,
     };
     if (order) order.tickets.push(entry);
   }
