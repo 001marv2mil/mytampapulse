@@ -6,6 +6,34 @@ import Stripe from "stripe";
 // that can't be pulled locally). Guarded by CRON_SECRET.
 const WEBHOOK_URL = "https://mytampapulse.com/api/awp-stripe-webhook";
 
+// Diagnostic: recent completed-checkout events (id, payment status, email) so a
+// missed webhook delivery can be found and replayed.
+export async function GET(req: NextRequest) {
+  const cronSecret = process.env.CRON_SECRET;
+  if (!cronSecret || req.headers.get("authorization") !== `Bearer ${cronSecret}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) {
+    return NextResponse.json({ error: "STRIPE_SECRET_KEY is not set." }, { status: 500 });
+  }
+  const stripe = new Stripe(key);
+  const events = await stripe.events.list({ type: "checkout.session.completed", limit: 10 });
+  return NextResponse.json({
+    sessions: events.data.map((e) => {
+      const s = e.data.object as Stripe.Checkout.Session;
+      return {
+        sessionId: s.id,
+        created: new Date(e.created * 1000).toISOString(),
+        paymentStatus: s.payment_status,
+        amountTotal: s.amount_total,
+        email: s.customer_details?.email ?? null,
+        items: s.metadata?.items ?? null,
+      };
+    }),
+  });
+}
+
 export async function POST(req: NextRequest) {
   const cronSecret = process.env.CRON_SECRET;
   const auth = req.headers.get("authorization");

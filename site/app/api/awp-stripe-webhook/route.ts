@@ -7,29 +7,47 @@ import { generateTicketCode, ticketQrUrl, ticketUrl } from "@/lib/awp-ticketing"
 
 // Stripe calls this after every checkout. On a completed payment we record the
 // order, mint one ticket per seat, and email the buyer their QR e-tickets.
+//
+// Verification is fetch-based: we take only the session ID from the payload and
+// retrieve the authoritative session straight from Stripe's API. A forged POST
+// can't invent a paid session, and idempotency stops replays — so we don't
+// depend on STRIPE_WEBHOOK_SECRET (which proved impossible to verify on this
+// project's write-only env vars).
 export async function POST(req: NextRequest) {
   const secretKey = process.env.STRIPE_SECRET_KEY;
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-  if (!secretKey || !webhookSecret) {
+  if (!secretKey) {
     return NextResponse.json({ error: "Webhook not configured." }, { status: 500 });
   }
 
   const stripe = new Stripe(secretKey);
-  const signature = req.headers.get("stripe-signature");
-  const rawBody = await req.text();
 
-  let event: Stripe.Event;
+  let payload: { type?: string; data?: { object?: { id?: string } } };
   try {
-    event = stripe.webhooks.constructEvent(rawBody, signature ?? "", webhookSecret);
+    payload = JSON.parse(await req.text());
   } catch {
-    return NextResponse.json({ error: "Invalid signature." }, { status: 400 });
+    return NextResponse.json({ error: "Invalid payload." }, { status: 400 });
   }
 
-  if (event.type !== "checkout.session.completed") {
+  if (payload.type !== "checkout.session.completed") {
     return NextResponse.json({ received: true });
   }
 
-  const session = event.data.object as Stripe.Checkout.Session;
+  const sessionId = payload.data?.object?.id;
+  if (typeof sessionId !== "string" || !sessionId.startsWith("cs_")) {
+    return NextResponse.json({ error: "Missing session id." }, { status: 400 });
+  }
+
+  // Authoritative copy from Stripe — ignore everything else in the payload.
+  let session: Stripe.Checkout.Session;
+  try {
+    session = await stripe.checkout.sessions.retrieve(sessionId);
+  } catch {
+    return NextResponse.json({ error: "Unknown session." }, { status: 400 });
+  }
+
+  if (session.status !== "complete") {
+    return NextResponse.json({ received: true, skipped: "session not complete" });
+  }
   // "no_payment_required" covers $0 totals (100%-off promo codes)
   if (session.payment_status !== "paid" && session.payment_status !== "no_payment_required") {
     return NextResponse.json({ received: true, skipped: "not paid" });
