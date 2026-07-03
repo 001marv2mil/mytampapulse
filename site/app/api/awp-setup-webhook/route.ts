@@ -4,7 +4,9 @@ import Stripe from "stripe";
 // One-time admin endpoint: registers the Stripe webhook for e-ticket issuing.
 // Runs in production where STRIPE_SECRET_KEY lives (it's a sensitive env var
 // that can't be pulled locally). Guarded by CRON_SECRET.
-const WEBHOOK_URL = "https://mytampapulse.com/api/awp-stripe-webhook";
+// Must be the www host: the apex domain 307-redirects to www and Stripe does
+// NOT follow redirects on webhook deliveries — it just marks them failed.
+const WEBHOOK_URL = "https://www.mytampapulse.com/api/awp-stripe-webhook";
 
 // Diagnostic: recent completed-checkout events (id, payment status, email) so a
 // missed webhook delivery can be found and replayed.
@@ -53,7 +55,8 @@ export async function POST(req: NextRequest) {
   const removed: string[] = [];
   const existing = await stripe.webhookEndpoints.list({ limit: 100 });
   for (const ep of existing.data) {
-    if (ep.url === WEBHOOK_URL) {
+    // Match any host variant (www / apex) of this endpoint path
+    if (ep.url.includes("/api/awp-stripe-webhook")) {
       await stripe.webhookEndpoints.del(ep.id);
       removed.push(ep.id);
     }
