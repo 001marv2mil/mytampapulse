@@ -2,6 +2,7 @@ import Link from "next/link";
 import Stripe from "stripe";
 import { EVENT, formatPrice } from "@/lib/all-white-party";
 import { issueTicketsForSession } from "@/lib/awp-issue-tickets";
+import PurchasePixel from "./PurchasePixel";
 
 export const dynamic = "force-dynamic";
 
@@ -45,6 +46,7 @@ export default async function SuccessPage({
           "radial-gradient(120% 80% at 50% 0%, #2a2016 0%, #140f0a 55%, #0c0a08 100%)",
       }}
     >
+      {session_id && <PurchasePixel sessionId={session_id} amountCents={amountTotal} />}
       <div className="max-w-md w-full bg-[#15100b]/80 border border-[#D4AF37]/25 rounded-3xl p-10 text-center">
         <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-br from-[#F0D488] to-[#D4AF37] flex items-center justify-center">
           <svg

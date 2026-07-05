@@ -16,11 +16,11 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://www.youtube.com https://s.ytimg.com", // unpkg=Leaflet; youtube+ytimg=IFrame API player
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://www.youtube.com https://s.ytimg.com https://connect.facebook.net", // unpkg=Leaflet; youtube+ytimg=IFrame API; facebook=pixel
       "style-src 'self' 'unsafe-inline' https://unpkg.com https://fonts.googleapis.com",
-      "img-src 'self' data: https://images.unsplash.com https://plus.unsplash.com https://server.arcgisonline.com https://randomuser.me",
+      "img-src 'self' data: https://images.unsplash.com https://plus.unsplash.com https://server.arcgisonline.com https://randomuser.me https://www.facebook.com https://unpkg.com",
       "font-src 'self' https://fonts.gstatic.com",
-      "connect-src 'self' https://*.supabase.co https://api.resend.com https://graph.facebook.com",
+      "connect-src 'self' https://*.supabase.co https://api.resend.com https://graph.facebook.com https://www.facebook.com https://connect.facebook.net",
       // 'self' for venue-map.html, YouTube for audio player, Google for the ticket-page map embed
       "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://www.google.com",
       "frame-ancestors 'self'",

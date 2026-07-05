@@ -188,6 +188,7 @@
   function openSheet() {
     overlay.classList.add("open");
     document.body.style.overflow = "hidden";
+    if (window.fbq) window.fbq("track", "InitiateCheckout");
   }
   function closeSheet() {
     overlay.classList.remove("open");
@@ -231,6 +232,14 @@
     });
     var checked = document.querySelector('input[name="tier"]:checked');
     var tierId = checked ? checked.value : "earlybird";
+    if (window.fbq) {
+      var p = selectedTier().price;
+      window.fbq("track", "AddPaymentInfo", {
+        value: (p * qty * (1 + FEE_RATE) + FEE_FLAT * qty).toFixed(2),
+        currency: "USD",
+        num_items: qty
+      });
+    }
     submitLabel.textContent = "Redirecting to secure checkout…";
     fetch("/all-white-party/checkout", {
       method: "POST",
