@@ -51,9 +51,8 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      // No-hyphen and short aliases for the guest-list-lobby group chat link
+      // No-hyphen alias for the guest-list-lobby group chat link
       { source: "/guestlistlobby", destination: "/guestlist-lobby", permanent: false },
-      { source: "/lobby", destination: "/guestlist-lobby", permanent: false },
     ];
   },
   async rewrites() {
