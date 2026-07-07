@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-const GROUP_CHAT_URL = "https://ig.me/j/AbY7yg6ulsCVDyXx/";
+const GROUP_CHAT_URL = "https://ig.me/j/AbYq1Guedjfz9EmG/";
 
 // A server-side redirect never runs JS, so the Meta Pixel would never fire for
 // ad clicks landing here. This renders briefly, fires the Lead event, then redirects.
