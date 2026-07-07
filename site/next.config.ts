@@ -49,6 +49,13 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      // No-hyphen and short aliases for the guest-list-lobby group chat link
+      { source: "/guestlistlobby", destination: "/guestlist-lobby", permanent: false },
+      { source: "/lobby", destination: "/guestlist-lobby", permanent: false },
+    ];
+  },
   async rewrites() {
     return [
       // Ticket page is the static site cloned from cyphr10/all-white-rnb
