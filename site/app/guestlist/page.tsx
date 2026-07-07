@@ -2,16 +2,16 @@
 
 import { useEffect } from "react";
 
-const GROUP_CHAT_URL = "https://ig.me/j/Abb7l0avEQLpfF0m/";
+const GROUP_CHAT_URL = "https://ig.me/j/AbY7yg6ulsCVDyXx/";
 
 // A server-side redirect never runs JS, so the Meta Pixel would never fire for
 // ad clicks landing here. This renders briefly, fires the Lead event, then redirects.
-export default function ChatRedirectPage() {
+export default function GuestListRedirectPage() {
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const fbq = (window as any).fbq;
     if (typeof fbq === "function") {
-      fbq("track", "Lead", { content_name: "All White Party Group Chat" });
+      fbq("track", "Lead", { content_name: "All White Party Guest List Chat" });
     }
     const timer = setTimeout(() => {
       window.location.replace(GROUP_CHAT_URL);
@@ -31,7 +31,7 @@ export default function ChatRedirectPage() {
         fontFamily: "sans-serif",
       }}
     >
-      Redirecting you to the group chat…
+      Adding you to The Guest List…
     </div>
   );
 }
