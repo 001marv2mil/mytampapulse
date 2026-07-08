@@ -20,6 +20,7 @@ interface Stats {
   checkedIn: number;
   tiers: TierStat[];
   recent: { name: string | null; email: string | null; amountCents: number | null; at: string }[];
+  abandoned: { name: string | null; email: string; at: string }[];
 }
 
 function money(cents: number): string {
@@ -175,6 +176,31 @@ export default function StatsBoard() {
           </div>
         )}
       </div>
+
+      {/* Abandoned checkouts — follow-up leads */}
+      {(stats.abandoned?.length ?? 0) > 0 && (
+        <div className="bg-white/[0.04] border border-amber-500/25 rounded-2xl p-4">
+          <p className="text-amber-300/80 text-[11px] uppercase tracking-wider mb-1">
+            Almost bought — follow up 💬
+          </p>
+          <p className="text-white/35 text-[11px] mb-3">
+            Tapped Pay but never finished. A friendly text or email can win them back.
+          </p>
+          <div className="space-y-2">
+            {stats.abandoned.map((a, i) => (
+              <div key={i} className="flex items-center justify-between gap-3 text-sm">
+                <div className="min-w-0 truncate">
+                  <span className="text-white font-semibold">{a.name || "—"}</span>
+                  <span className="text-white/45 text-xs ml-2">{a.email}</span>
+                </div>
+                <span className="text-white/35 text-xs shrink-0">
+                  {new Date(a.at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <p className="text-center text-white/30 text-[11px]">Updates automatically every 30 seconds</p>
     </div>

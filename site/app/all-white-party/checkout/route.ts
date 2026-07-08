@@ -8,6 +8,7 @@ import {
   getTier,
 } from "@/lib/all-white-party";
 import { corsHeaders, getAvailability } from "@/lib/awp-ticketing";
+import { supabaseAdmin } from "@/lib/supabase";
 
 // Handle CORS preflight
 export async function OPTIONS(req: NextRequest) {
@@ -135,6 +136,18 @@ export async function POST(req: NextRequest) {
         },
       },
     });
+  }
+
+  // Abandoned-checkout capture: log who tapped Pay before the Stripe redirect,
+  // so no-shows can be followed up with. Best-effort — never blocks checkout.
+  try {
+    await supabaseAdmin.from("awp_checkout_intents").insert({
+      email: customerEmail ?? null,
+      name: buyerName || null,
+      items: JSON.stringify(metadataItems),
+    });
+  } catch {
+    /* optional */
   }
 
   try {

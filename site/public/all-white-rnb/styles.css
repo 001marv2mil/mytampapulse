@@ -569,6 +569,34 @@ hr.divider {
   pointer-events: none;
   filter: grayscale(0.6);
 }
+
+/* Live purchase pop-up (bottom-left) */
+.sale-toast {
+  position: fixed;
+  left: 14px;
+  bottom: 14px;
+  z-index: 60;
+  max-width: 290px;
+  padding: 11px 16px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(224, 178, 86, 0.55);
+  background: rgba(18, 12, 7, 0.96);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 12.5px;
+  line-height: 1.4;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.sale-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+.sale-toast .st-name { color: var(--gold-hi); font-weight: 800; }
+.sale-toast .st-time { color: var(--ink-dimmer); font-size: 11px; margin-left: 6px; }
 .tier-option:has(input:checked), .tier-option.selected {
   border-color: var(--orange-border);
   background: var(--orange-soft);
@@ -748,6 +776,26 @@ hr.divider {
 }
 .field input:focus { outline: none; border-color: var(--orange); }
 .field input::placeholder { color: var(--ink-dimmer); }
+
+.checkbox-field {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin-bottom: 18px;
+  cursor: pointer;
+}
+.checkbox-field input {
+  margin-top: 2px;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  accent-color: var(--orange);
+}
+.checkbox-field span {
+  font-size: 12.5px;
+  color: var(--ink-dim);
+  line-height: 1.4;
+}
 
 .pay-options {
   display: grid;

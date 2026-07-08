@@ -20,15 +20,33 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Wrong PIN." }, { status: 401 });
   }
 
-  const [{ data: orders, error: e1 }, { data: tickets, error: e2 }] = await Promise.all([
-    supabaseAdmin
-      .from("awp_orders")
-      .select("session_id, name, email, amount_total, created_at")
-      .order("created_at", { ascending: false }),
-    supabaseAdmin.from("awp_tickets").select("tier, status"),
-  ]);
+  const [{ data: orders, error: e1 }, { data: tickets, error: e2 }, { data: intents }] =
+    await Promise.all([
+      supabaseAdmin
+        .from("awp_orders")
+        .select("session_id, name, email, amount_total, created_at")
+        .order("created_at", { ascending: false }),
+      supabaseAdmin.from("awp_tickets").select("tier, status"),
+      supabaseAdmin
+        .from("awp_checkout_intents")
+        .select("email, name, items, created_at")
+        .order("created_at", { ascending: false })
+        .limit(100),
+    ]);
   if (e1 || e2) {
     return NextResponse.json({ error: (e1 ?? e2)?.message ?? "Database error." }, { status: 500 });
+  }
+
+  // Abandoned = tapped Pay but never completed (email not among paid orders).
+  const buyerEmails = new Set((orders ?? []).map((o) => (o.email ?? "").toLowerCase()));
+  const seenIntent = new Set<string>();
+  const abandoned: { name: string | null; email: string; at: string }[] = [];
+  for (const i of intents ?? []) {
+    const em = (i.email ?? "").toLowerCase();
+    if (!em || buyerEmails.has(em) || seenIntent.has(em)) continue;
+    seenIntent.add(em);
+    abandoned.push({ name: i.name, email: i.email as string, at: i.created_at });
+    if (abandoned.length >= 20) break;
   }
 
   const totalCollectedCents = (orders ?? []).reduce((s, o) => s + (o.amount_total ?? 0), 0);
@@ -58,5 +76,6 @@ export async function POST(req: NextRequest) {
       amountCents: o.amount_total,
       at: o.created_at,
     })),
+    abandoned,
   });
 }
