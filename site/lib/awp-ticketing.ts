@@ -39,7 +39,8 @@ export interface TierAvailability {
   remaining: number | null; // null = unlimited
 }
 
-/** Live availability per tier (capacity comes from TIERS config). */
+/** Live availability per tier (capacity comes from TIERS config).
+ *  A manual `soldOut: true` on a tier forces remaining to 0. */
 export async function getAvailability(): Promise<Record<TierId, TierAvailability>> {
   const sold = await getSoldCounts();
   const out = {} as Record<TierId, TierAvailability>;
@@ -48,7 +49,7 @@ export async function getAvailability(): Promise<Record<TierId, TierAvailability
     out[tier.id] = {
       capacity,
       sold: sold[tier.id],
-      remaining: capacity === null ? null : Math.max(0, capacity - sold[tier.id]),
+      remaining: tier.soldOut ? 0 : capacity === null ? null : Math.max(0, capacity - sold[tier.id]),
     };
   }
   return out;

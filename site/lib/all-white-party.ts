@@ -67,6 +67,7 @@ export const TIERS: Tier[] = [
     badge: "Limited",
     capacity: 15,
     sold: 0,
+    soldOut: true, // tier closed manually 2026-07-05 — remaining Early Birds held back
   },
   {
     id: "ga",

@@ -58,6 +58,10 @@ export async function POST(req: NextRequest) {
     ? rawGuests.map((g) => (typeof g === "string" ? g.trim().slice(0, 80) : "")).slice(0, 20)
     : [];
 
+  // Newsletter opt-in checkbox on the ticket sheet — defaults to true if the
+  // caller omits it (e.g. an older cached page), false only on explicit uncheck.
+  const newsletterOptIn = (body as { newsletterOptIn?: unknown })?.newsletterOptIn !== false;
+
   // Live counts from the database — real inventory, not the static config.
   let availability: Awaited<ReturnType<typeof getAvailability>> | null = null;
   try {
@@ -155,6 +159,7 @@ export async function POST(req: NextRequest) {
         items: JSON.stringify(metadataItems),
         buyerName,
         guestNames: JSON.stringify(guestNames).slice(0, 490),
+        newsletterOptIn: String(newsletterOptIn),
       },
     });
 

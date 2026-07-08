@@ -21,6 +21,7 @@
       if (!input) return;
       var option = input.closest(".tier-option");
       var tag = option.querySelector(".tier-tag");
+      // Per-tier remaining counts are intentionally NOT shown — only sold-out state.
       if (info.remaining <= 0) {
         input.disabled = true;
         option.classList.add("soldout");
@@ -32,8 +33,6 @@
             next.dispatchEvent(new Event("change", { bubbles: true }));
           }
         }
-      } else if (tag) {
-        tag.textContent = "🔥 Only " + info.remaining + " left";
       }
     });
   }
@@ -128,7 +127,7 @@
 
   function selectedTier() {
     var checked = document.querySelector('input[name="tier"]:checked');
-    return TIERS[checked ? checked.value : "earlybird"];
+    return TIERS[checked ? checked.value : "ga"];
   }
 
   /* Guest name inputs — one per extra ticket, so tickets bought for friends
@@ -231,7 +230,8 @@
       guestNames.push(inp.value.trim());
     });
     var checked = document.querySelector('input[name="tier"]:checked');
-    var tierId = checked ? checked.value : "earlybird";
+    var tierId = checked ? checked.value : "ga";
+    var newsletterOptIn = document.getElementById("newsletterOptIn").checked;
     if (window.fbq) {
       var p = selectedTier().price;
       window.fbq("track", "AddPaymentInfo", {
@@ -248,7 +248,8 @@
         items: [{ id: tierId, qty: qty }],
         email: email,
         name: buyerName,
-        guestNames: guestNames
+        guestNames: guestNames,
+        newsletterOptIn: newsletterOptIn
       })
     })
       .then(function (res) { return res.json(); })
