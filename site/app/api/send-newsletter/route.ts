@@ -174,6 +174,21 @@ function renderNewsletterHTML(
       <div class="header-sub">Issue #${parsed?.issueNumber} · ${parsed?.dateRange || new Date().toLocaleDateString()}</div>
     </div>
 
+    ${
+      parsed?.bannerImage
+        ? `
+    <div style="padding: 0 24px 8px;">
+      <a href="${parsed.bannerImage.href}" style="display: block;">
+        <img src="${parsed.bannerImage.src.startsWith("/") ? siteUrl + parsed.bannerImage.src : parsed.bannerImage.src}" alt="${parsed.bannerImage.alt}" style="width: 100%; border-radius: 12px; display: block;" />
+      </a>
+      <p style="text-align: center; margin: 14px 0 0;">
+        <a href="${parsed.bannerImage.href}" style="display: inline-block; background: #FF5A36; color: white; font-weight: 700; font-size: 14px; padding: 12px 28px; border-radius: 8px; text-decoration: none;">🎟️ Get Your Tickets →</a>
+      </p>
+    </div>
+    `
+        : ""
+    }
+
     <div class="section">
       <p class="greeting">${renderInline(parsed?.greeting || "")}</p>
     </div>
@@ -214,6 +229,16 @@ function renderNewsletterHTML(
     <div class="section">
       <p class="signoff">${renderInline(parsed?.signoff || "")}</p>
     </div>
+
+    ${
+      parsed?.bannerImage
+        ? `
+    <div style="padding: 0 24px 24px; text-align: center;">
+      <a href="${parsed.bannerImage.href}" style="display: inline-block; background: #FF5A36; color: white; font-weight: 700; font-size: 14px; padding: 12px 28px; border-radius: 8px; text-decoration: none;">🎟️ Get Your Tickets →</a>
+    </div>
+    `
+        : ""
+    }
 
     <div style="background: #1a1a1a; border-radius: 12px; padding: 24px; margin: 0 24px 24px; text-align: center;">
       <p style="font-size: 14px; font-weight: 700; color: #fff; margin: 0 0 6px;">Can't wait until next Thursday?</p>

@@ -130,6 +130,11 @@ export default async function NewsletterIssuePage({ params, searchParams }: Page
               <a href={newsletter.bannerImage.href} target="_blank" rel="noopener noreferrer" className="block rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                 <img src={newsletter.bannerImage.src} alt={newsletter.bannerImage.alt} className="w-full object-cover" />
               </a>
+              <p className="text-center mt-4">
+                <a href={newsletter.bannerImage.href} target="_blank" rel="noopener noreferrer" className="inline-block bg-pulse-orange hover:bg-pulse-orange/90 text-white font-semibold px-8 py-3 rounded-xl transition-colors">
+                  🎟️ Get Your Tickets →
+                </a>
+              </p>
             </div>
           )}
 
@@ -214,6 +219,11 @@ export default async function NewsletterIssuePage({ params, searchParams }: Page
             <a href={newsletter.bannerImage.href} target="_blank" rel="noopener noreferrer" className="block rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
               <img src={newsletter.bannerImage.src} alt={newsletter.bannerImage.alt} className="w-full object-cover" />
             </a>
+            <p className="text-center mt-4">
+              <a href={newsletter.bannerImage.href} target="_blank" rel="noopener noreferrer" className="inline-block bg-pulse-orange hover:bg-pulse-orange/90 text-white font-semibold px-8 py-3 rounded-xl transition-colors">
+                🎟️ Get Your Tickets →
+              </a>
+            </p>
           </div>
         )}
 
@@ -472,6 +482,15 @@ export default async function NewsletterIssuePage({ params, searchParams }: Page
                 if (clean.toLowerCase().includes("see you") || clean.toLowerCase().includes("next thursday") || clean.toLowerCase().includes("next week")) return <p key={i} className="text-gray-500 text-sm mb-2">{clean}</p>;
                 return <p key={i} className="text-gray-500 text-sm leading-relaxed mb-4">{clean}</p>;
               })}
+            </section>
+          )}
+
+          {/* Closing ticket CTA — mirrors the banner promo at the top */}
+          {newsletter.bannerImage && (
+            <section className="mb-12 text-center">
+              <a href={newsletter.bannerImage.href} target="_blank" rel="noopener noreferrer" className="inline-block bg-pulse-orange hover:bg-pulse-orange/90 text-white font-semibold px-10 py-3.5 rounded-xl transition-colors">
+                🎟️ Get Your Tickets →
+              </a>
             </section>
           )}
 
