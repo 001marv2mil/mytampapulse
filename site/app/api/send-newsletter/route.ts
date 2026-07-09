@@ -262,6 +262,12 @@ function renderNewsletterHTML(
   `.trim();
 }
 
+// Vercel Cron Jobs invoke the configured path with a GET request, not POST.
+// Without this, the cron in vercel.json 405s silently and no email ever sends.
+export async function GET(req: NextRequest) {
+  return POST(req);
+}
+
 export async function POST(req: NextRequest) {
   // Verify this is a cron request (from Vercel or manual trigger with auth)
   const authHeader = req.headers.get("authorization");
