@@ -42,23 +42,10 @@
     .then(function (data) { applyAvailability(data.tiers); })
     .catch(function () { /* counts are a nice-to-have; never block the page */ });
 
-  /* ---------- Social proof: claimed count + live purchase pop-ups ---------- */
-  function timeAgo(iso) {
-    var mins = Math.max(1, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
-    if (mins < 60) return mins + "m ago";
-    var hrs = Math.round(mins / 60);
-    if (hrs < 24) return hrs + "h ago";
-    return Math.round(hrs / 24) + "d ago";
-  }
-
+  /* ---------- Social proof: live purchase pop-ups (no timestamps) ---------- */
   fetch("/all-white-party/social")
     .then(function (res) { return res.json(); })
     .then(function (data) {
-      if (data.totalSold >= 3) {
-        var line = document.getElementById("socialProofLine");
-        line.textContent = "🎟 " + data.totalSold + " tickets already claimed";
-        line.style.display = "";
-      }
       var toast = document.getElementById("saleToast");
       var recent = data.recent || [];
       if (!toast || recent.length === 0) return;
@@ -66,10 +53,8 @@
       function showNext() {
         var r = recent[idx % recent.length];
         idx++;
-        toast.innerHTML =
-          '🎟 <span class="st-name"></span> grabbed a ticket<span class="st-time"></span>';
+        toast.innerHTML = '🎟 <span class="st-name"></span> grabbed a ticket 🤍';
         toast.querySelector(".st-name").textContent = r.name;
-        toast.querySelector(".st-time").textContent = timeAgo(r.at);
         toast.classList.add("show");
         setTimeout(function () { toast.classList.remove("show"); }, 5000);
       }
