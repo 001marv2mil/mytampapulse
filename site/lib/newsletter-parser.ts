@@ -22,6 +22,7 @@ export interface ParsedNewsletter {
   weatherTable: WeatherRow[];
   proTips: { text: string; bold: string }[];
   images: { src: string; alt: string }[];
+  bannerImage?: { src: string; alt: string; href: string };
   digest: string[];
   hiddenGems: string[];
   communityPickTitle: string;
@@ -205,11 +206,21 @@ export function parseNewsletter(issueNumber: number): ParsedNewsletter | null {
       continue;
     }
 
+    // Linked banner image: [![alt](src)](href)
+    if (firstLine.startsWith("[!")) {
+      const m = firstLine.match(/^\[!\[([^\]]*)\]\(([^)]*)\)\]\(([^)]*)\)$/);
+      if (m) {
+        result.bannerImage = { alt: m[1], src: m[2], href: m[3] };
+        continue;
+      }
+    }
+
     // Greeting paragraph (no heading, just text)
     if (
       !firstLine.startsWith("#") &&
       !firstLine.startsWith(">") &&
       !firstLine.startsWith("!") &&
+      !firstLine.startsWith("[") &&
       !firstLine.startsWith("|") &&
       !firstLine.startsWith("-") &&
       !firstLine.startsWith("*Tampa Pulse") &&
@@ -395,7 +406,7 @@ function getIssueTitleFromData(issueNumber: number): string {
     24: "Juneteenth in Tampa. A food truck worth chasing and a restaurant everyone's about to discover.",
     25: "The Tampa you haven't found yet. Summer Solstice edition.",
     26: "14 Tampa chefs in one room tonight. Here's the rest of your week.",
-    27: "250 drones over the Hillsborough tonight. Plus everything else happening this week.",
+    27: "All White R&B Rooftop tickets are live. July 25 at the Hyatt. Here's your week.",
   };
   return titles[issueNumber] || `Issue #${issueNumber}`;
 }

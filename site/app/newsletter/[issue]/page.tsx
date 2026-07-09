@@ -124,6 +124,15 @@ export default async function NewsletterIssuePage({ params, searchParams }: Page
 
           <hr className="border-gray-200 mb-10" />
 
+          {/* Banner image — visible to non-subscribers too */}
+          {newsletter.bannerImage && (
+            <div className="mb-10">
+              <a href={newsletter.bannerImage.href} target="_blank" rel="noopener noreferrer" className="block rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                <img src={newsletter.bannerImage.src} alt={newsletter.bannerImage.alt} className="w-full object-cover" />
+              </a>
+            </div>
+          )}
+
           {/* Blurred content preview */}
           <div className="relative">
             <div className="blur-sm pointer-events-none select-none space-y-6" aria-hidden="true">
@@ -198,6 +207,15 @@ export default async function NewsletterIssuePage({ params, searchParams }: Page
         </header>
 
         <hr className="border-gray-200 mb-10" />
+
+        {/* Banner image — linked promo image above the greeting */}
+        {newsletter.bannerImage && (
+          <div className="mb-10">
+            <a href={newsletter.bannerImage.href} target="_blank" rel="noopener noreferrer" className="block rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+              <img src={newsletter.bannerImage.src} alt={newsletter.bannerImage.alt} className="w-full object-cover" />
+            </a>
+          </div>
+        )}
 
         {/* ScrollGate wraps all content fades and gates on scroll.
             Subscribers arriving via email token link bypass the gate entirely. */}
