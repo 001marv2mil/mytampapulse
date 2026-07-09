@@ -395,6 +395,7 @@ function getIssueTitleFromData(issueNumber: number): string {
     24: "Juneteenth in Tampa. A food truck worth chasing and a restaurant everyone's about to discover.",
     25: "The Tampa you haven't found yet. Summer Solstice edition.",
     26: "14 Tampa chefs in one room tonight. Here's the rest of your week.",
+    27: "250 drones over the Hillsborough tonight. Plus everything else happening this week.",
   };
   return titles[issueNumber] || `Issue #${issueNumber}`;
 }
