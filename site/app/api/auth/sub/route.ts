@@ -43,6 +43,20 @@ export async function GET(req: NextRequest) {
       maxAge: 60 * 60 * 24 * 30, // 30 days
       path: "/",
     });
+
+    // First-party engagement log. Never let a logging failure break the
+    // redirect — the subscriber's click-through always wins.
+    try {
+      const issueMatch = redirectPath.match(/^\/newsletter\/(\d+)/);
+      const { error: clickErr } = await supabase.from("newsletter_clicks").insert({
+        subscriber_id: data.id,
+        issue_number: issueMatch ? parseInt(issueMatch[1], 10) : null,
+        path: redirectPath,
+      });
+      if (clickErr) console.error("newsletter_clicks insert failed:", clickErr);
+    } catch (err) {
+      console.error("newsletter_clicks insert failed:", err);
+    }
   }
 
   return response;
