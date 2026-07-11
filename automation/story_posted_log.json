@@ -1,20 +1,5 @@
 [
   {
-    "topic": "story:Tampa Bay leads Florida job growth as unemployment rises",
-    "timestamp": "2026-04-08T22:24:55.808297",
-    "ig_id": "18076506947238451"
-  },
-  {
-    "topic": "story:Trulieve to open Lutz dispensary, expand footprint",
-    "timestamp": "2026-04-11T17:35:30.389556",
-    "ig_id": "18520767040075078"
-  },
-  {
-    "topic": "story:Inflation jumps as gas prices hit Tampa businesses",
-    "timestamp": "2026-04-12T17:38:30.495176",
-    "ig_id": "18147367021468211"
-  },
-  {
     "topic": "story:116-acre East Tampa site sold for industrial project",
     "timestamp": "2026-04-17T17:52:28.812156",
     "ig_id": "18063783539694065"
@@ -83,5 +68,10 @@
     "topic": "story:Top StoryRays stadium plan survives narrow Tampa council vot",
     "timestamp": "2026-05-24T18:00:24.013045",
     "ig_id": "17938033071052495"
+  },
+  {
+    "topic": "story:Top StoryCarrollwood Village Shoppes sold for about $120 mil",
+    "timestamp": "2026-07-11T17:56:07.381159",
+    "ig_id": "18096809912460166"
   }
 ]
