@@ -408,6 +408,7 @@ function getIssueTitleFromData(issueNumber: number): string {
     26: "14 Tampa chefs in one room tonight. Here's the rest of your week.",
     27: "All White R&B Rooftop tickets are live. July 25 at the Hyatt. Here's your week.",
     28: "All White R&B Rooftop takes over downtown Tampa July 25. Here's your week.",
+    29: "The World Cup Final comes to Tampa this Sunday. Here's your week.",
   };
   return titles[issueNumber] || `Issue #${issueNumber}`;
 }
