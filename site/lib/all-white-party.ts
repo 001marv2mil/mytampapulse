@@ -79,7 +79,6 @@ export const TIERS: Tier[] = [
     badge: "Most Popular",
     capacity: 50,
     sold: 0,
-    soldOut: true, // event canceled 2026-07-09 — weather
   },
   {
     id: "vip",
@@ -89,26 +88,16 @@ export const TIERS: Tier[] = [
     perks: ["Priority express entry", "Access to VIP lounge area", "1 complimentary welcome drink"],
     capacity: 25,
     sold: 0,
-    soldOut: true, // event canceled 2026-07-09 — weather
   },
   {
     id: "founder",
     name: "Founder's Seat",
     priceCents: 15000, // $150.00
-    blurb:
-      "Only 5 available. Priority entrance, 2 welcome drinks, reserved seat in the DJ & owner section, unlimited GA + VIP Lounge access, photo & video coverage, and direct access to the Tampa Pulse team.",
-    perks: [
-      "Priority entrance",
-      "2 complimentary welcome drinks",
-      "Reserved seat in the DJ & owner section",
-      "Unlimited GA & VIP Lounge access",
-      "Photo & video coverage",
-      "Direct access to the Tampa Pulse team",
-    ],
+    blurb: "Only 5 available · seat at the DJ table.",
+    perks: ["Seat at the DJ table", "Priority entry", "2 complimentary drinks", "Meet DJ Tev"],
     badge: "Exclusive",
     capacity: 5,
     sold: 0,
-    soldOut: true, // event canceled 2026-07-09 — weather
   },
 ];
 
