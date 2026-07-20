@@ -11,6 +11,16 @@
   var FEE_RATE = 0.10;
   var FEE_FLAT = 0.99;
 
+  /* ---------- Promoter attribution (?ref=CODE from promoter share links) ---------- */
+  var REF_KEY = "awp-ref";
+  try {
+    var refParam = new URLSearchParams(window.location.search).get("ref");
+    if (refParam) localStorage.setItem(REF_KEY, refParam.slice(0, 64));
+  } catch (e) { /* attribution is best-effort, never block the page */ }
+  function getRef() {
+    try { return localStorage.getItem(REF_KEY) || undefined; } catch (e) { return undefined; }
+  }
+
   /* ---------- Live availability (real ticket counts from the server) ---------- */
   function applyAvailability(tiers) {
     if (!tiers) return;
@@ -42,26 +52,7 @@
     .then(function (data) { applyAvailability(data.tiers); })
     .catch(function () { /* counts are a nice-to-have; never block the page */ });
 
-  /* ---------- Social proof: live purchase pop-ups (no timestamps) ---------- */
-  fetch("/all-white-party/social")
-    .then(function (res) { return res.json(); })
-    .then(function (data) {
-      var toast = document.getElementById("saleToast");
-      var recent = data.recent || [];
-      if (!toast || recent.length === 0) return;
-      var idx = 0;
-      function showNext() {
-        var r = recent[idx % recent.length];
-        idx++;
-        toast.innerHTML = '🎟 <span class="st-name"></span> grabbed a ticket 🤍';
-        toast.querySelector(".st-name").textContent = r.name;
-        toast.classList.add("show");
-        setTimeout(function () { toast.classList.remove("show"); }, 5000);
-      }
-      setTimeout(showNext, 4000);
-      setInterval(showNext, 14000);
-    })
-    .catch(function () { /* social proof is optional */ });
+  /* ---------- Social proof pop-ups: disabled — event is canceled ---------- */
 
   /* ---------- Sticky ticket bar ---------- */
   var stickyCta = document.getElementById("stickyCta");
@@ -270,7 +261,8 @@
         email: email,
         name: buyerName,
         guestNames: guestNames,
-        newsletterOptIn: newsletterOptIn
+        newsletterOptIn: newsletterOptIn,
+        ref: getRef()
       })
     })
       .then(function (res) { return res.json(); })
