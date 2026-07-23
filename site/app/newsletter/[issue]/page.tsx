@@ -230,6 +230,31 @@ export default async function NewsletterIssuePage({ params, searchParams }: Page
         {/* ScrollGate wraps all content fades and gates on scroll.
             Subscribers arriving via email token link bypass the gate entirely. */}
         <ScrollGate isSubscriber={isSubscriber}>
+          {/* In Today's Pulse — teaser above the greeting. Falls back to the
+              first three Week at a Glance items so every issue shows one. */}
+          {(() => {
+            const teaser =
+              newsletter.inTodaysPulse.length > 0
+                ? newsletter.inTodaysPulse
+                : newsletter.weekAtAGlance.slice(0, 3);
+            if (teaser.length === 0) return null;
+            return (
+              <section className="mb-10 bg-orange-50 rounded-2xl p-6">
+                <span className="text-pulse-orange text-xs font-semibold tracking-[0.18em] uppercase mb-3 block">
+                  In Today&apos;s Pulse
+                </span>
+                <ul className="space-y-2">
+                  {teaser.map((item, i) => (
+                    <li key={i} className="flex gap-2.5 items-start">
+                      <span className="text-pulse-orange mt-1.5 shrink-0 text-xs">&bull;</span>
+                      <span className="text-gray-700 text-sm leading-relaxed">{stripEmDashes(item)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            );
+          })()}
+
           {/* Greeting */}
           {newsletter.greeting && (
             <section className="mb-10">
@@ -263,6 +288,7 @@ export default async function NewsletterIssuePage({ params, searchParams }: Page
           {/* This Week at a Glance */}
           {newsletter.weekAtAGlance.length > 0 && (
             <section className="mb-12">
+              <span className="text-gray-400 text-[11px] font-semibold tracking-[0.18em] uppercase mb-1 block">The Lineup</span>
               <h2 className="font-heading text-2xl font-bold text-gray-900 mb-6">This Week at a Glance</h2>
               <ol className="space-y-3">
                 {newsletter.weekAtAGlance.map((item, i) => (
@@ -311,11 +337,31 @@ export default async function NewsletterIssuePage({ params, searchParams }: Page
             </section>
           )}
 
+          {/* On the Water — hyper-local bay/Gulf data strip */}
+          {newsletter.onTheWater.length > 0 && (
+            <section className="mb-12">
+              <div className="rounded-2xl border border-gray-200 p-5">
+                <span className="text-pulse-orange text-xs font-semibold tracking-[0.18em] uppercase mb-3 block">
+                  🌊 On the Water
+                </span>
+                <ul className="space-y-1.5">
+                  {newsletter.onTheWater.map((item, i) => (
+                    <li key={i} className="flex gap-2.5 items-start">
+                      <span className="text-gray-300 mt-1.5 shrink-0 text-xs">&bull;</span>
+                      <span className="text-gray-600 text-sm leading-relaxed">{renderMarkdownInline(item)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </section>
+          )}
+
           <hr className="border-gray-200 mb-10" />
 
           {/* Marv's Pro Tips */}
           {newsletter.proTips.length > 0 && (
             <section className="mb-12">
+              <span className="text-gray-400 text-[11px] font-semibold tracking-[0.18em] uppercase mb-1 block">Marv’s Playbook</span>
               <h2 className="font-heading text-2xl font-bold text-gray-900 mb-6">Marv&apos;s Tampa Pro Tips</h2>
               <ul className="space-y-4">
                 {newsletter.proTips.map((tip, i) => (
@@ -341,6 +387,7 @@ export default async function NewsletterIssuePage({ params, searchParams }: Page
           {/* Digest */}
           {newsletter.digest.length > 0 && (
             <section className="mb-12">
+              <span className="text-gray-400 text-[11px] font-semibold tracking-[0.18em] uppercase mb-1 block">The Rundown</span>
               <h2 className="font-heading text-2xl font-bold text-gray-900 mb-6">Digest</h2>
               <div className="space-y-3">
                 {newsletter.digest.map((item, i) => (
@@ -357,6 +404,7 @@ export default async function NewsletterIssuePage({ params, searchParams }: Page
           {/* Hidden Gems */}
           {newsletter.hiddenGems.length > 0 && (
             <section className="mb-12">
+              <span className="text-gray-400 text-[11px] font-semibold tracking-[0.18em] uppercase mb-1 block">Off the Beaten Path</span>
               <h2 className="font-heading text-2xl font-bold text-gray-900 mb-6">Hidden Gems</h2>
               <div className="space-y-5">
                 {newsletter.hiddenGems.map((gem, i) => (
@@ -454,6 +502,7 @@ export default async function NewsletterIssuePage({ params, searchParams }: Page
           {/* Event Roundup */}
           {newsletter.eventRoundup.length > 0 && (
             <section className="mb-12">
+              <span className="text-gray-400 text-[11px] font-semibold tracking-[0.18em] uppercase mb-1 block">On the Calendar</span>
               <h2 className="font-heading text-2xl font-bold text-gray-900 mb-6">What&apos;s Happenin&apos;. Event Roundup</h2>
               <div className="space-y-3">
                 {newsletter.eventRoundup.map((item, i) => (

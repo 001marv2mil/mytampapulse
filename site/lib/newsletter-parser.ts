@@ -23,6 +23,11 @@ export interface ParsedNewsletter {
   proTips: { text: string; bold: string }[];
   images: { src: string; alt: string }[];
   bannerImage?: { src: string; alt: string; href: string };
+  // Curiosity-gap teaser shown at the very top ("In Today's Pulse"). Falls back
+  // to the first few Week at a Glance items when an issue doesn't define one.
+  inTodaysPulse: string[];
+  // Hyper-local Tampa Bay data strip (water temp, red tide, tides, UV).
+  onTheWater: string[];
   digest: string[];
   hiddenGems: string[];
   communityPickTitle: string;
@@ -178,6 +183,8 @@ export function parseNewsletter(issueNumber: number): ParsedNewsletter | null {
     weatherTable: [],
     proTips: [],
     images: [],
+    inTodaysPulse: [],
+    onTheWater: [],
     digest: [],
     hiddenGems: [],
     communityPickTitle: "",
@@ -287,6 +294,18 @@ export function parseNewsletter(issueNumber: number): ParsedNewsletter | null {
     if (firstLine.startsWith("![")) {
       const img = parseImage(section);
       if (img) result.images.push(img);
+      continue;
+    }
+
+    // In Today's Pulse — teaser list rendered above the greeting
+    if (firstLine.includes("In Today's Pulse") || firstLine.includes("In Todays Pulse")) {
+      result.inTodaysPulse = parseBulletList(section);
+      continue;
+    }
+
+    // On the Water — hyper-local bay/Gulf data strip
+    if (firstLine.includes("On the Water") && firstLine.startsWith("###")) {
+      result.onTheWater = parseBulletList(section);
       continue;
     }
 
@@ -409,6 +428,7 @@ function getIssueTitleFromData(issueNumber: number): string {
     27: "All White R&B Rooftop tickets are live. July 25 at the Hyatt. Here's your week.",
     28: "All White R&B Rooftop takes over downtown Tampa July 25. Here's your week.",
     29: "The World Cup Final comes to Tampa this Sunday. Here's your week.",
+    30: "Daniel Caesar tonight, three Rays hat giveaways, and free ice cream Sunday.",
   };
   return titles[issueNumber] || `Issue #${issueNumber}`;
 }

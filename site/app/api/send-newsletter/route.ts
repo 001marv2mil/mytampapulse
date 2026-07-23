@@ -16,11 +16,21 @@ const supabase = createClient(
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// Referral reward tiers. Kept intentionally zero-cost to honor: a shoutout and
+// priority on our own events. Edit here to change the ladder.
+const REFERRAL_TIERS: { count: number; reward: string }[] = [
+  { count: 3, reward: "a shoutout in the Pulse" },
+  { count: 5, reward: "a priority seat at Tampa Pulse Dinner Club" },
+  { count: 10, reward: "a free seat at our next Tampa Pulse event" },
+];
+
 function renderNewsletterHTML(
   parsed: ReturnType<typeof parseNewsletter>,
   unsubscribeUrl: string,
   issueNumber: number,
-  accessToken: string
+  accessToken: string,
+  subscriberId?: string,
+  referralCount: number = 0
 ): string {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://mytampapulse.com";
   // Route through /api/auth/sub so clicking the link sets the 30-day cookie on
@@ -36,6 +46,20 @@ function renderNewsletterHTML(
 
   const renderBullets = (items: string[]) =>
     items.map((item) => `<li>${renderInline(item)}</li>`).join("");
+
+  // Teaser: use the issue's own "In Today's Pulse" if it defines one, otherwise
+  // derive one from the first three Week at a Glance items so every issue has it.
+  const teaser =
+    parsed?.inTodaysPulse && parsed.inTodaysPulse.length > 0
+      ? parsed.inTodaysPulse
+      : (parsed?.weekAtAGlance || []).slice(0, 3);
+
+  // Referral: personalized link + progress toward the next reward tier.
+  const referralUrl = subscriberId ? `${siteUrl}?ref=${subscriberId}` : siteUrl;
+  const nextTier = REFERRAL_TIERS.find((t) => referralCount < t.count);
+  const referralProgress = nextTier
+    ? `You have <strong>${referralCount}</strong> referral${referralCount === 1 ? "" : "s"} — only <strong>${nextTier.count - referralCount}</strong> away from ${nextTier.reward}.`
+    : `You have <strong>${referralCount}</strong> referrals. You've unlocked everything — you're a legend.`;
 
   // 70% PREVIEW — show greeting, week at a glance, digest, and pro tips
   // Then CTA to read full issue on site (hidden gems, community pick, event roundup, etc.)
@@ -91,6 +115,32 @@ function renderNewsletterHTML(
       font-weight: 700;
       letter-spacing: 0.5px;
     }
+    .kicker {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #9aa0a6;
+      margin-bottom: 4px;
+    }
+    .teaser {
+      background: #FFF3EE;
+      border-radius: 12px;
+      padding: 18px 22px;
+      margin: 0 24px 8px;
+    }
+    .teaser .kicker { color: #FF5A36; margin-bottom: 8px; }
+    .teaser ul { margin: 0; padding-left: 20px; }
+    .teaser li { font-size: 14px; margin-bottom: 6px; color: #333; }
+    .water {
+      border: 1px solid #e9dfd7;
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin: 0 24px 24px;
+    }
+    .water .kicker { color: #FF5A36; }
+    .water ul { margin: 0; padding-left: 18px; }
+    .water li { font-size: 13.5px; margin-bottom: 4px; color: #454b54; }
     ul {
       list-style: none;
       padding: 0;
@@ -189,6 +239,19 @@ function renderNewsletterHTML(
         : ""
     }
 
+    ${
+      teaser.length > 0
+        ? `
+    <div class="teaser">
+      <div class="kicker">In Today's Pulse</div>
+      <ul>
+        ${renderBullets(teaser)}
+      </ul>
+    </div>
+    `
+        : ""
+    }
+
     <div class="section">
       <p class="greeting">${renderInline(parsed?.greeting || "")}</p>
     </div>
@@ -197,6 +260,7 @@ function renderNewsletterHTML(
       parsed?.weekAtAGlance && parsed.weekAtAGlance.length > 0
         ? `
     <div class="section">
+      <div class="kicker">The Lineup</div>
       <div class="section-title">This Week at a Glance</div>
       <ul>
         ${renderBullets(parsed.weekAtAGlance)}
@@ -207,9 +271,23 @@ function renderNewsletterHTML(
     }
 
     ${
+      parsed?.onTheWater && parsed.onTheWater.length > 0
+        ? `
+    <div class="water">
+      <div class="kicker">🌊 On the Water</div>
+      <ul>
+        ${renderBullets(parsed.onTheWater)}
+      </ul>
+    </div>
+    `
+        : ""
+    }
+
+    ${
       parsed?.digest && parsed.digest.length > 0
         ? `
     <div class="section">
+      <div class="kicker">The Rundown</div>
       <div class="section-title">Digest</div>
       <ul>
         ${renderBullets(parsed.digest)}
@@ -239,6 +317,25 @@ function renderNewsletterHTML(
     `
         : ""
     }
+
+    <div style="border: 1px solid #e9dfd7; border-radius: 12px; padding: 18px 22px; margin: 0 24px 24px;">
+      <p style="font-size: 11px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: #FF5A36; margin: 0 0 10px;">Keep These Handy</p>
+      <p style="font-size: 13.5px; line-height: 2; margin: 0; color: #454b54;">
+        🍽️ <a href="${siteUrl}/dinner-club" style="color: #FF5A36; text-decoration: none;">Tampa Pulse Dinner Club</a><br />
+        ☀️ <a href="${siteUrl}/guides/tampa-summer-bucket-list" style="color: #FF5A36; text-decoration: none;">Tampa Summer Bucket List</a><br />
+        🏈 <a href="${siteUrl}/guides/bucs-game-day-guide" style="color: #FF5A36; text-decoration: none;">Bucs Game Day Guide</a><br />
+        🐶 <a href="${siteUrl}/guides/dog-friendly-tampa" style="color: #FF5A36; text-decoration: none;">Dog Friendly Tampa</a><br />
+        📚 <a href="${siteUrl}/guides" style="color: #FF5A36; text-decoration: none;">All Tampa Bay guides</a>
+      </p>
+    </div>
+
+    <div style="background: #FFF3EE; border: 1px solid #ffd9cc; border-radius: 12px; padding: 24px; margin: 0 24px 24px; text-align: center;">
+      <p style="font-size: 11px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: #FF5A36; margin: 0 0 8px;">Share the Pulse</p>
+      <p style="font-size: 15px; font-weight: 700; color: #1a1a1a; margin: 0 0 6px;">Know someone who should be reading this?</p>
+      <p style="font-size: 13.5px; color: #555; margin: 0 0 14px; line-height: 1.5;">${referralProgress}</p>
+      <a href="${referralUrl}" style="display: inline-block; background: #FF5A36; color: white; font-weight: 700; font-size: 14px; padding: 11px 26px; border-radius: 8px; text-decoration: none;">Share your link →</a>
+      <p style="font-size: 12px; color: #888; margin: 12px 0 0; word-break: break-all;">${referralUrl}</p>
+    </div>
 
     <div style="background: #1a1a1a; border-radius: 12px; padding: 24px; margin: 0 24px 24px; text-align: center;">
       <p style="font-size: 14px; font-weight: 700; color: #fff; margin: 0 0 6px;">Can't wait until next Thursday?</p>
@@ -285,6 +382,7 @@ export async function POST(req: NextRequest) {
     const url = new URL(req.url);
     const issueParam = url.searchParams.get("issue");
     const debug = url.searchParams.get("debug") === "1";
+    const previewHtml = url.searchParams.get("preview_html") === "1";
     const testEmail = url.searchParams.get("test_email");
     const issueNumber = issueParam ? parseInt(issueParam) : getLatestIssueNumber();
 
@@ -333,6 +431,15 @@ export async function POST(req: NextRequest) {
         { error: `Issue #${issueNumber} not found` },
         { status: 404 }
       );
+    }
+
+    // Preview mode: return the rendered email HTML with sample referral data.
+    // NEVER sends and NEVER touches newsletter_sends. Auth-gated (same as debug)
+    // so it isn't a public endpoint. Used to review the email before a send.
+    if (previewHtml) {
+      const base = process.env.NEXT_PUBLIC_SITE_URL || "https://mytampapulse.com";
+      const html = renderNewsletterHTML(parsed, `${base}/unsubscribe?token=preview`, issueNumber, "preview-token", "sample-subscriber-id", 2);
+      return new NextResponse(html, { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } });
     }
 
     // Test mode: send the rendered issue to ONE address only. Does NOT touch
@@ -393,7 +500,7 @@ export async function POST(req: NextRequest) {
 
     const { data: allActive, error: fetchError } = await supabase
       .from("subscribers")
-      .select("id, email, unsubscribe_token")
+      .select("id, email, unsubscribe_token, referral_count")
       .eq("status", "active");
 
     if (fetchError) {
@@ -422,7 +529,7 @@ export async function POST(req: NextRequest) {
     for (const subscriber of subscribers) {
       try {
         const unsubscribeUrl = `${siteUrl}/unsubscribe?token=${subscriber.unsubscribe_token}`;
-        const html = renderNewsletterHTML(parsed, unsubscribeUrl, issueNumber, subscriber.unsubscribe_token);
+        const html = renderNewsletterHTML(parsed, unsubscribeUrl, issueNumber, subscriber.unsubscribe_token, subscriber.id, subscriber.referral_count ?? 0);
 
         await resend.emails.send({
           from: "Tampa Pulse <newsletter@mytampapulse.com>",
